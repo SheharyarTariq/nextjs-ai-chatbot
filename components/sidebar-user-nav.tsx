@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronUp } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import Image from "next/image";
 import type { User } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
@@ -47,16 +47,16 @@ export function SidebarUserNav({ user }: { user: User }) {
                 data-testid="user-nav-button"
               >
                 <Image
-                  alt={user.email ?? "User Avatar"}
+                  alt={user?.email || "User Avatar"}
                   className="rounded-full"
                   height={24}
-                  src={`https://avatar.vercel.sh/${user.email}`}
+                  src={`https://avatar.vercel.sh/${user?.email}`}
                   width={24}
                 />
                 <span className="truncate" data-testid="user-email">
-                  {user?.email ?? "User"}
+                  {user?.email || "User"}
                 </span>
-                <ChevronUp className="ml-auto" />
+                <ChevronDown className="ml-auto" />
               </SidebarMenuButton>
             )}
           </DropdownMenuTrigger>

@@ -9,15 +9,19 @@ import { Button } from "@/components/ui/button";
 import { PlusIcon, VercelIcon } from "./icons";
 import { useSidebar } from "./ui/sidebar";
 import { VisibilitySelector, type VisibilityType } from "./visibility-selector";
+import { SidebarUserNav } from "./sidebar-user-nav";
+import { Session } from "next-auth";
 
 function PureChatHeader({
   chatId,
   selectedVisibilityType,
   isReadonly,
+  user,
 }: {
   chatId: string;
   selectedVisibilityType: VisibilityType;
   isReadonly: boolean;
+  user: Session["user"];
 }) {
   const router = useRouter();
   const { open } = useSidebar();
@@ -26,9 +30,9 @@ function PureChatHeader({
 
   return (
     <header className="sticky top-0 flex items-center gap-2 bg-background px-2 py-1.5 md:px-2">
-      <SidebarToggle />
-
-      {(!open || windowWidth < 768) && (
+      {/* <SidebarToggle /> */}
+      <SidebarUserNav user={user} />      
+      {/* {(!open || windowWidth < 768) && (
         <Button
           className="order-2 ml-auto h-8 px-2 md:order-1 md:ml-0 md:h-fit md:px-2"
           onClick={() => {
@@ -40,15 +44,15 @@ function PureChatHeader({
           <PlusIcon />
           <span className="md:sr-only">New Chat</span>
         </Button>
-      )}
+      )} */}
 
-      {!isReadonly && (
+      {/* {!isReadonly && (
         <VisibilitySelector
           chatId={chatId}
           className="order-1 md:order-2"
           selectedVisibilityType={selectedVisibilityType}
         />
-      )}
+      )} */}
 
     </header>
   );

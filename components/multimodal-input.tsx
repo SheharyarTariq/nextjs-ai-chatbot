@@ -367,8 +367,8 @@ function PureMultimodalInput({
           />{" "}
           {/* <Context {...contextProps} /> */}
         </div>
-        <PromptInputToolbar className="!border-top-0 border-t-0! p-0 shadow-none dark:border-0 dark:border-transparent!">
-          <PromptInputTools className="gap-0 sm:gap-0.5">
+        <PromptInputToolbar className="!border-top-0 border-t-0! p-0 shadow-none flex justify-end dark:border-0 dark:border-transparent!">
+          {/* <PromptInputTools className="gap-0 sm:gap-0.5">
             <AttachmentsButton
               fileInputRef={fileInputRef}
               selectedModelId={selectedModelId}
@@ -378,7 +378,7 @@ function PureMultimodalInput({
               onModelChange={onModelChange}
               selectedModelId={selectedModelId}
             />
-          </PromptInputTools>
+          </PromptInputTools> */}
 
           {status === "submitted" ? (
             <StopButton setMessages={setMessages} stop={stop} />
@@ -387,7 +387,7 @@ function PureMultimodalInput({
               className="size-8 rounded-full bg-primary text-primary-foreground transition-colors duration-200 hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground"
               disabled={!input.trim() || uploadQueue.length > 0}
               status={status}
-	      data-testid="send-button"
+	            data-testid="send-button"
             >
               <ArrowUpIcon size={14} />
             </PromptInputSubmit>

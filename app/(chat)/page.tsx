@@ -23,6 +23,7 @@ export default async function Page() {
       <>
         <Chat
           autoResume={false}
+          user={session.user}
           id={id}
           initialChatModel={DEFAULT_CHAT_MODEL}
           initialMessages={[]}
@@ -38,6 +39,7 @@ export default async function Page() {
   return (
     <>
       <Chat
+        user={session.user}
         autoResume={false}
         id={id}
         initialChatModel={modelIdFromCookie.value}

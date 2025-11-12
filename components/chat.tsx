@@ -32,8 +32,10 @@ import { MultimodalInput } from "./multimodal-input";
 import { getChatHistoryPaginationKey } from "./sidebar-history";
 import { toast } from "./toast";
 import type { VisibilityType } from "./visibility-selector";
+import type { Session } from "next-auth";
 
 export function Chat({
+  user,
   id,
   initialMessages,
   initialChatModel,
@@ -42,6 +44,7 @@ export function Chat({
   autoResume,
   initialLastContext,
 }: {
+  user: Session["user"];
   id: string;
   initialMessages: ChatMessage[];
   initialChatModel: string;
@@ -159,6 +162,7 @@ export function Chat({
       <div className="overscroll-behavior-contain flex h-dvh min-w-0 touch-pan-y flex-col bg-background">
         <ChatHeader
           chatId={id}
+          user={user}
           isReadonly={isReadonly}
           selectedVisibilityType={initialVisibilityType}
         />

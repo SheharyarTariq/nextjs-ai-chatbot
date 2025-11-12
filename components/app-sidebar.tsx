@@ -57,7 +57,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
   return (
     <>
       <Sidebar className="group-data-[side=left]:border-r-0">
-        <SidebarHeader>
+        {/* <SidebarHeader>
           <SidebarMenu>
             <div className="flex flex-row items-center justify-between">
               <Link
@@ -111,10 +111,10 @@ export function AppSidebar({ user }: { user: User | undefined }) {
               </div>
             </div>
           </SidebarMenu>
-        </SidebarHeader>
-        <SidebarContent>
+        </SidebarHeader> */}
+        {/* <SidebarContent>
           <SidebarHistory user={user} />
-        </SidebarContent>
+        </SidebarContent> */}
         <SidebarFooter>{user && <SidebarUserNav user={user} />}</SidebarFooter>
       </Sidebar>
 
