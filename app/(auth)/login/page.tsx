@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 
 import { AuthForm } from "@/components/auth-form";
@@ -12,18 +11,14 @@ import { type LoginActionState, login } from "../actions";
 
 export default function Page() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [email, setEmail] = useState("");
   const [isSuccessful, setIsSuccessful] = useState(false);
 
-  const [state, formAction] = useActionState<LoginActionState, FormData>(
-    login,
-    {
-      status: "idle",
-    }
-  );
-
-  const { update: updateSession } = useSession();
+  const [state, formAction] = useActionState<LoginActionState, FormData>(login, {
+    status: "idle",
+  });
 
   useEffect(() => {
     if (state.status === "failed") {
@@ -38,11 +33,23 @@ export default function Page() {
       });
     } else if (state.status === "success") {
       setIsSuccessful(true);
-      updateSession();
+      const redirectUrl = searchParams.get("redirectUrl");
+      if (redirectUrl) {
+        try {
+          const decodedUrl = decodeURIComponent(redirectUrl);
+          const url = new URL(decodedUrl, window.location.origin);
+          router.push(url.pathname + url.search + url.hash);
+          router.refresh();
+          return;
+        } catch (_error) {
+          // fallback to default navigation
+        }
+      }
+      router.push("/");
       router.refresh();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.status]);
+  }, [router, searchParams, state.status]);
 
   const handleSubmit = (formData: FormData) => {
     setEmail(formData.get("email") as string);
