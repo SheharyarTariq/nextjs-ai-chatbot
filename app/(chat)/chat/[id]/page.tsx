@@ -46,6 +46,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     return (
       <>
         <Chat
+          user={session.user}
           autoResume={true}
           id={chat.id}
           initialChatModel={DEFAULT_CHAT_MODEL}
@@ -62,6 +63,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   return (
     <>
       <Chat
+        user={session.user}
         autoResume={true}
         id={chat.id}
         initialChatModel={chatModelFromCookie.value}
