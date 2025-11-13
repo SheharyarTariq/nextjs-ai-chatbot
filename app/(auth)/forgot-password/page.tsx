@@ -32,29 +32,40 @@ export default function Page() {
     status: "idle",
   });
 
-  useEffect(() => {
-    if (state.status === "user_not_found") {
-      toast({
-        type: "error",
-        description: "No account found with this email address!",
-      });
-    } else if (state.status === "failed") {
-      toast({
-        type: "error",
-        description: "Failed to send reset email!",
-      });
-    } else if (state.status === "invalid_data") {
-      toast({
-        type: "error",
-        description: "Failed validating your submission!",
-      });
-    } else if (state.status === "success") {
-      toast({
-        type: "success",
-        description: "Password reset link sent to your email!",
-      });
-      setIsSuccessful(false);
+  const handleStateChange = (status: ForgotPasswordActionState["status"]) => {
+    console.log("state.status", status);
+
+    switch (status) {
+      case "user_not_found":
+        toast({
+          type: "error",
+          description: "No account found with this email address!",
+        });
+        break;
+      case "failed":
+        toast({
+          type: "error",
+          description: "Failed to send reset email!",
+        });
+        break;
+      case "invalid_data":
+        toast({
+          type: "error",
+          description: "Failed validating your submission!",
+        });
+        break;
+      case "success":
+        toast({
+          type: "success",
+          description: "Password reset link sent to your email!",
+        });
+        setIsSuccessful(false);
+        break;
     }
+  };
+
+  useEffect(() => {
+    handleStateChange(state.status);
   }, [state.status]);
 
   const handleSubmit = async (formData: FormData) => {
