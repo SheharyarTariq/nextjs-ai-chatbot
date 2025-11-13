@@ -1,7 +1,5 @@
 import "server-only";
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import nodemailer from "nodemailer";
 
 export async function sendPasswordResetEmail(
   email: string,
@@ -11,8 +9,20 @@ export async function sendPasswordResetEmail(
   const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
 
   try {
-    await resend.emails.send({
-      from: process.env.EMAIL_FROM || "onboarding@resend.dev",
+    // Create transporter
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || "587", 10),
+      secure: parseInt(process.env.SMTP_PORT || "587", 10) === 465,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+    // Send email
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM || "noreply@brandfitcoach.com",
       to: email,
       subject: "Reset Your Password - Brandfit Coach",
       html: `
@@ -93,6 +103,23 @@ export async function sendPasswordResetEmail(
             </div>
           </body>
         </html>
+      `,
+      text: `
+Reset Your Password
+
+Hi ${userName},
+
+We received a request to reset the password for your account associated with this email address.
+
+To reset your password, visit this link:
+${resetUrl}
+
+⚠️ Important: This link will expire in 24 hours for security reasons.
+
+If you didn't request a password reset, please ignore this email. Your password will remain unchanged.
+
+Best regards,
+Brandfit Coach Team
       `,
     });
 
