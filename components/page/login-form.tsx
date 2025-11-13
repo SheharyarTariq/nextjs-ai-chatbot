@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useState, useTransition } from "react";
 
 import { AuthForm } from "@/components/auth-form";
 import { SubmitButton } from "@/components/submit-button";
 import { toast } from "@/components/toast";
-import { type LoginActionState, login } from "../actions";
+import { loginSchema } from "@/lib/validations/auth";
+import { type LoginActionState, login } from "../../app/(auth)/actions";
 
 export function LoginForm() {
   const router = useRouter();
@@ -15,6 +16,8 @@ export function LoginForm() {
 
   const [email, setEmail] = useState("");
   const [isSuccessful, setIsSuccessful] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [isPending, startTransition] = useTransition();
 
   const [state, formAction] = useActionState<LoginActionState, FormData>(login, {
     status: "idle",
@@ -32,6 +35,10 @@ export function LoginForm() {
         description: "Failed validating your submission!",
       });
     } else if (state.status === "success") {
+      toast({
+        type: "success",
+        description: "Login Successful",
+      });
       setIsSuccessful(true);
       const redirectUrl = searchParams.get("redirectUrl");
       if (redirectUrl) {
@@ -51,9 +58,32 @@ export function LoginForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, searchParams, state.status]);
 
-  const handleSubmit = (formData: FormData) => {
-    setEmail(formData.get("email") as string);
-    formAction(formData);
+  const handleSubmit = async (formData: FormData) => {
+    const data = {
+      email: formData.get("email") as string,
+      password: formData.get("password") as string,
+    };
+
+    try {
+      await loginSchema.validate(data, { abortEarly: false });
+      setValidationErrors({});
+      setEmail(data.email);
+      startTransition(() => {
+        formAction(formData);
+      });
+    } catch (error: any) {
+      const errors: Record<string, string> = {};
+      error.inner?.forEach((err: any) => {
+        if (err.path) {
+          errors[err.path] = err.message;
+        }
+      });
+      setValidationErrors(errors);
+      toast({
+        type: "error",
+        description: "Please fix the validation errors",
+      });
+    }
   };
 
   return (
@@ -65,7 +95,12 @@ export function LoginForm() {
             Use your email and password to sign in
           </p>
         </div>
-        <AuthForm action={handleSubmit} defaultEmail={email} type="login">
+        <AuthForm
+          action={handleSubmit}
+          defaultEmail={email}
+          type="login"
+          errors={validationErrors}
+        >
           <SubmitButton isSuccessful={isSuccessful}>Sign in</SubmitButton>
           <p className="mt-4 text-center text-gray-600 text-sm dark:text-zinc-400">
             {"Don't have an account? "}

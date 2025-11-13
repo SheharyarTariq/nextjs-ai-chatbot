@@ -270,20 +270,31 @@ About the origin of user's request:
 - country: ${requestHints.country}
 `;
 
+export const getUserContextPrompt = (userName?: string | null) => {
+  if (!userName) return "";
+
+  return `\n\nUser Profile:
+- Name: ${userName}
+- The user has already registered and provided their name. Do not ask for their name again during onboarding. Skip the "First name" step in the onboarding process and use "${userName}" throughout the conversation.`;
+};
+
 export const systemPrompt = ({
   selectedChatModel,
   requestHints,
+  userName,
 }: {
   selectedChatModel: string;
   requestHints: RequestHints;
+  userName?: string | null;
 }) => {
   const requestPrompt = getRequestPromptFromHints(requestHints);
+  const userContextPrompt = getUserContextPrompt(userName);
 
   if (selectedChatModel === "chat-model-reasoning") {
-    return `${regularPrompt}\n\n${requestPrompt}`;
+    return `${regularPrompt}\n\n${requestPrompt}${userContextPrompt}`;
   }
 
-  return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}`;
+  return `${regularPrompt}\n\n${requestPrompt}${userContextPrompt}\n\n${artifactsPrompt}`;
 };
 
 export const codePrompt = `

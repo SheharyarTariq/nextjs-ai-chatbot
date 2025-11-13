@@ -1,4 +1,7 @@
+"use client";
+
 import Form from "next/form";
+import { cn } from "@/lib/utils";
 
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -8,6 +11,7 @@ export function AuthForm({
   children,
   defaultEmail = "",
   type,
+  errors = {},
 }: {
   action: NonNullable<
     string | ((formData: FormData) => void | Promise<void>) | undefined
@@ -15,6 +19,7 @@ export function AuthForm({
   children: React.ReactNode;
   defaultEmail?: string;
   type: "login" | "register";
+  errors?: Record<string, string>;
 }) {
   return (
     <Form action={action} className="flex flex-col gap-4 px-4 sm:px-16">
@@ -28,13 +33,18 @@ export function AuthForm({
           </Label>
 
           <Input
-            className="bg-muted text-md md:text-sm"
+            className={cn(
+              "bg-muted text-md md:text-sm",
+              errors.name && "border-red-500"
+            )}
             id="name"
             name="name"
             placeholder="John Doe"
-            required
             type="text"
           />
+          {errors.name && (
+            <p className="text-red-500 text-sm">{errors.name}</p>
+          )}
         </div>
       )}
       <div className="flex flex-col gap-2">
@@ -48,14 +58,19 @@ export function AuthForm({
         <Input
           autoComplete="email"
           autoFocus
-          className="bg-muted text-md md:text-sm"
+          className={cn(
+            "bg-muted text-md md:text-sm",
+            errors.email && "border-red-500"
+          )}
           defaultValue={defaultEmail}
           id="email"
           name="email"
           placeholder="user@acme.com"
-          required
           type="email"
         />
+        {errors.email && (
+          <p className="text-red-500 text-sm">{errors.email}</p>
+        )}
       </div>
 
       <div className="flex flex-col gap-2">
@@ -67,12 +82,24 @@ export function AuthForm({
         </Label>
 
         <Input
-          className="bg-muted text-md md:text-sm"
+          className={cn(
+            "bg-muted text-md md:text-sm",
+            errors.password && "border-red-500"
+          )}
           id="password"
           name="password"
-          required
           type="password"
         />
+        <div className="flex w-full justify-between">
+          {errors.password && (
+            <p className="text-red-500 text-sm whitespace-nowrap">{errors.password}</p>
+          )}
+          {type === "login" && (
+            <span className="flex w-full justify-end gap-2">
+              <p className="font-normal text-sm text-zinc-600 dark:text-zinc-400">Forget password?</p>
+            </span>
+          )}
+        </div>
       </div>
 
       {type === "register" && (
@@ -85,12 +112,17 @@ export function AuthForm({
           </Label>
 
           <Input
-            className="bg-muted text-md md:text-sm"
+            className={cn(
+              "bg-muted text-md md:text-sm",
+              errors.confirm_password && "border-red-500"
+            )}
             id="confirm_password"
             name="confirm_password"
-            required
             type="password"
           />
+          {errors.confirm_password && (
+            <p className="text-red-500 text-sm">{errors.confirm_password}</p>
+          )}
         </div>
       )}
 
