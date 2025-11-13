@@ -1,6 +1,7 @@
 "use client";
 
 import Form from "next/form";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 import { Input } from "./ui/input";
@@ -96,7 +97,12 @@ export function AuthForm({
           )}
           {type === "login" && (
             <span className="flex w-full justify-end gap-2">
-              <p className="font-normal text-sm text-zinc-600 dark:text-zinc-400">Forget password?</p>
+              <Link
+                href="/forgot-password"
+                className="font-normal text-sm text-zinc-600 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+              >
+                Forgot password?
+              </Link>
             </span>
           )}
         </div>

@@ -68,6 +68,58 @@ export async function createUser(
   }
 }
 
+export async function updateUserResetToken(
+  email: string,
+  resetToken: string,
+  resetTokenExpiry: Date
+) {
+  try {
+    return await db
+      .update(user)
+      .set({ resetToken, resetTokenExpiry })
+      .where(eq(user.email, email));
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to update user reset token"
+    );
+  }
+}
+
+export async function getUserByResetToken(resetToken: string): Promise<User[]> {
+  try {
+    return await db
+      .select()
+      .from(user)
+      .where(eq(user.resetToken, resetToken));
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get user by reset token"
+    );
+  }
+}
+
+export async function updateUserPassword(userId: string, password: string) {
+  const hashedPassword = generateHashedPassword(password);
+
+  try {
+    return await db
+      .update(user)
+      .set({
+        password: hashedPassword,
+        resetToken: null,
+        resetTokenExpiry: null,
+      })
+      .where(eq(user.id, userId));
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to update user password"
+    );
+  }
+}
+
 export async function saveChat({
   id,
   userId,

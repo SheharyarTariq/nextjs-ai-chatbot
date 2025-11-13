@@ -18,6 +18,8 @@ export const user = pgTable("User", {
   name: varchar("name", { length: 64 }),
   email: varchar("email", { length: 64 }).notNull(),
   password: varchar("password", { length: 64 }),
+  resetToken: varchar("resetToken", { length: 255 }),
+  resetTokenExpiry: timestamp("resetTokenExpiry"),
 });
 
 export type User = InferSelectModel<typeof user>;

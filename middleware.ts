@@ -24,7 +24,7 @@ export async function middleware(request: NextRequest) {
   });
 
   if (!token) {
-    if (["/login", "/register"].includes(pathname)) {
+    if (["/login", "/register", "/forgot-password", "/reset-password"].includes(pathname)) {
       return NextResponse.next();
     }
     const redirectUrl = encodeURIComponent(request.url);
@@ -33,7 +33,7 @@ export async function middleware(request: NextRequest) {
     );
   }
 
-  if (token && ["/login", "/register"].includes(pathname)) {
+  if (token && ["/login", "/register", "/forgot-password", "/reset-password"].includes(pathname)) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 

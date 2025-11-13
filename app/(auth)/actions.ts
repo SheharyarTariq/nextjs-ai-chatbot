@@ -1,8 +1,16 @@
 "use server";
 
+import { nanoid } from "nanoid";
 import { z } from "zod";
 
-import { createUser, getUser } from "@/lib/db/queries";
+import {
+  createUser,
+  getUser,
+  getUserByResetToken,
+  updateUserPassword,
+  updateUserResetToken,
+} from "@/lib/db/queries";
+import { sendPasswordResetEmail } from "@/lib/email";
 
 import { signIn } from "./auth";
 
@@ -94,6 +102,123 @@ export const register = async (
       password: validatedData.password,
       redirect: false,
     });
+
+    return { status: "success" };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { status: "invalid_data" };
+    }
+
+    return { status: "failed" };
+  }
+};
+
+const forgotPasswordFormSchema = z.object({
+  email: z.string().email(),
+});
+
+export type ForgotPasswordActionState = {
+  status:
+    | "idle"
+    | "in_progress"
+    | "success"
+    | "failed"
+    | "user_not_found"
+    | "invalid_data";
+};
+
+export const forgotPassword = async (
+  _: ForgotPasswordActionState,
+  formData: FormData
+): Promise<ForgotPasswordActionState> => {
+  try {
+    const validatedData = forgotPasswordFormSchema.parse({
+      email: formData.get("email"),
+    });
+
+    const [user] = await getUser(validatedData.email);
+
+    if (!user) {
+      return { status: "user_not_found" };
+    }
+
+    // Generate reset token
+    const resetToken = nanoid(32);
+    const resetTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    await updateUserResetToken(
+      validatedData.email,
+      resetToken,
+      resetTokenExpiry
+    );
+
+    // Send email
+    const emailResult = await sendPasswordResetEmail(
+      validatedData.email,
+      resetToken,
+      user.name || "User"
+    );
+
+    if (!emailResult.success) {
+      return { status: "failed" };
+    }
+
+    return { status: "success" };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { status: "invalid_data" };
+    }
+
+    return { status: "failed" };
+  }
+};
+
+const resetPasswordFormSchema = z
+  .object({
+    token: z.string(),
+    password: z.string().min(6),
+    confirm_password: z.string().min(6),
+  })
+  .refine((data) => data.password === data.confirm_password, {
+    message: "Passwords don't match",
+    path: ["confirm_password"],
+  });
+
+export type ResetPasswordActionState = {
+  status:
+    | "idle"
+    | "in_progress"
+    | "success"
+    | "failed"
+    | "invalid_token"
+    | "token_expired"
+    | "invalid_data";
+};
+
+export const resetPassword = async (
+  _: ResetPasswordActionState,
+  formData: FormData
+): Promise<ResetPasswordActionState> => {
+  try {
+    const validatedData = resetPasswordFormSchema.parse({
+      token: formData.get("token"),
+      password: formData.get("password"),
+      confirm_password: formData.get("confirm_password"),
+    });
+
+    const [user] = await getUserByResetToken(validatedData.token);
+
+    if (!user) {
+      return { status: "invalid_token" };
+    }
+
+    // Check if token is expired
+    if (user.resetTokenExpiry && user.resetTokenExpiry < new Date()) {
+      return { status: "token_expired" };
+    }
+
+    // Update password and clear reset token
+    await updateUserPassword(user.id, validatedData.password);
 
     return { status: "success" };
   } catch (error) {
