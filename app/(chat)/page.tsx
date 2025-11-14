@@ -5,12 +5,25 @@ import { DataStreamHandler } from "@/components/data-stream-handler";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
 import { generateUUID } from "@/lib/utils";
 import { auth } from "../(auth)/auth";
+import { getChatsByUserId } from "@/lib/db/queries";
 
 export default async function Page() {
   const session = await auth();
 
   if (!session) {
     redirect("/login");
+  }
+
+  const existingChats = await getChatsByUserId({ 
+    id: session.user.id,
+    limit: 1,
+    startingAfter: null,
+    endingBefore: null,
+  });
+
+  // If user has an existing chat, redirect to it
+  if (existingChats.chats.length > 0) {
+    redirect(`/chat/${existingChats.chats[0].id}`);
   }
 
   const id = generateUUID();

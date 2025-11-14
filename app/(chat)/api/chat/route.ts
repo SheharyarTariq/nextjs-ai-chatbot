@@ -31,6 +31,7 @@ import {
   createStreamId,
   deleteChatById,
   getChatById,
+  getChatsByUserId,
   getMessageCountByUserId,
   getMessagesByChatId,
   saveChat,
@@ -132,9 +133,20 @@ export async function POST(request: Request) {
       if (chat.userId !== session.user.id) {
         return new ChatSDKError("forbidden:chat").toResponse();
       }
-      // Only fetch messages if chat already exists
       messagesFromDb = await getMessagesByChatId({ id });
     } else {
+
+      const existingChats = await getChatsByUserId({
+        id: session.user.id,
+        limit: 1,
+        startingAfter: null,
+        endingBefore: null,
+      });
+
+      if (existingChats.chats.length > 0) {
+        return new ChatSDKError("forbidden:chat").toResponse();
+      }
+
       const title = await generateTitleFromUserMessage({
         message,
       });
@@ -145,7 +157,6 @@ export async function POST(request: Request) {
         title,
         visibility: selectedVisibilityType,
       });
-      // New chat - no need to fetch messages, it's empty
     }
 
     const uiMessages = [...convertToUIMessages(messagesFromDb), message];
@@ -316,26 +327,5 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
-
-  if (!id) {
-    return new ChatSDKError("bad_request:api").toResponse();
-  }
-
-  const session = await auth();
-
-  if (!session?.user) {
-    return new ChatSDKError("unauthorized:chat").toResponse();
-  }
-
-  const chat = await getChatById({ id });
-
-  if (chat?.userId !== session.user.id) {
-    return new ChatSDKError("forbidden:chat").toResponse();
-  }
-
-  const deletedChat = await deleteChatById({ id });
-
-  return Response.json(deletedChat, { status: 200 });
+  return new ChatSDKError("forbidden:chat").toResponse();
 }

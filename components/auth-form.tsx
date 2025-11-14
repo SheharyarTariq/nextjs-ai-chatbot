@@ -91,7 +91,7 @@ export function AuthForm({
           name="password"
           type="password"
         />
-        <div className="flex w-full justify-between">
+        <span className="flex w-full justify-between">
           {errors.password && (
             <p className="text-red-500 text-sm whitespace-nowrap">{errors.password}</p>
           )}
@@ -105,11 +105,11 @@ export function AuthForm({
               </Link>
             </span>
           )}
-        </div>
+        </span>
       </div>
 
       {type === "register" && (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col -mt-1 gap-2">
           <Label
             className="font-normal text-zinc-600 dark:text-zinc-400"
             htmlFor="confirm_password"

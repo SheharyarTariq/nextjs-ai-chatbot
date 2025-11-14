@@ -7,12 +7,14 @@ import { getUser } from "@/lib/db/queries";
 import { authConfig } from "./auth.config";
 
 export type UserType = "regular";
+export type UserRole = "admin" | "user";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
       type: UserType;
+      role: UserRole;
       name?: string | null;
     } & DefaultSession["user"];
   }
@@ -23,6 +25,7 @@ declare module "next-auth" {
     email?: string | null;
     name?: string | null;
     type: UserType;
+    role: UserRole;
   }
 }
 
@@ -30,6 +33,7 @@ declare module "next-auth/jwt" {
   interface JWT extends DefaultJWT {
     id: string;
     type: UserType;
+    role: UserRole;
     name?: string | null;
   }
 }
@@ -65,7 +69,11 @@ export const {
           return null;
         }
 
-        return { ...user, type: "regular" };
+        return {
+          ...user,
+          type: "regular" as UserType,
+          role: (user.role || "user") as UserRole
+        };
       },
     }),
   ],
@@ -74,6 +82,7 @@ export const {
       if (user) {
         token.id = user.id as string;
         token.type = user.type;
+        token.role = user.role;
         token.name = user.name;
       }
 
@@ -83,6 +92,7 @@ export const {
       if (session.user) {
         session.user.id = token.id;
         session.user.type = token.type;
+        session.user.role = token.role;
         session.user.name = token.name;
       }
 

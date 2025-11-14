@@ -12,7 +12,6 @@ import { type RegisterActionState, register } from "../actions";
 
 export default function Page() {
   const router = useRouter();
-
   const [email, setEmail] = useState("");
   const [isSuccessful, setIsSuccessful] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
