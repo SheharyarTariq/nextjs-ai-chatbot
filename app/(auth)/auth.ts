@@ -69,10 +69,13 @@ export const {
           return null;
         }
 
+        const adminEmails = process.env.ADMIN?.split(',').map(email => email.trim()) || [];
+        const userRole: UserRole = adminEmails.includes(user.email || '') ? "admin" : "user";
+
         return {
           ...user,
           type: "regular" as UserType,
-          role: (user.role || "user") as UserRole
+          role: userRole
         };
       },
     }),

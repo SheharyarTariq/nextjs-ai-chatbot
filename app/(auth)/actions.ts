@@ -54,7 +54,6 @@ export const login = async (
     if (result?.error || result?.ok === false) {
       return { status: "failed" };
     }
-
     return { status: "success" };
   } catch (error) {
     if (error instanceof z.ZodError) {
