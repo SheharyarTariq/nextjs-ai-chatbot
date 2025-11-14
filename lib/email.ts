@@ -9,7 +9,6 @@ export async function sendPasswordResetEmail(
   const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
 
   try {
-    // Create transporter
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT || "587", 10),
@@ -20,7 +19,6 @@ export async function sendPasswordResetEmail(
       },
     });
 
-    // Send email
     await transporter.sendMail({
       from: process.env.SMTP_FROM || "noreply@brandfitcoach.com",
       to: email,

@@ -21,7 +21,7 @@ export default async function Page() {
     endingBefore: null,
   });
 
-  // If user has an existing chat, redirect to it
+  // redirect to existing chat
   if (existingChats.chats.length > 0) {
     redirect(`/chat/${existingChats.chats[0].id}`);
   }

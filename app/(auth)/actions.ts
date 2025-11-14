@@ -142,9 +142,8 @@ export const forgotPassword = async (
       return { status: "user_not_found" };
     }
 
-    // Generate reset token
     const resetToken = nanoid(32);
-    const resetTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    const resetTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); 
 
     await updateUserResetToken(
       validatedData.email,
@@ -152,7 +151,6 @@ export const forgotPassword = async (
       resetTokenExpiry
     );
 
-    // Send email
     const emailResult = await sendPasswordResetEmail(
       validatedData.email,
       resetToken,
@@ -212,12 +210,10 @@ export const resetPassword = async (
       return { status: "invalid_token" };
     }
 
-    // Check if token is expired
     if (user.resetTokenExpiry && user.resetTokenExpiry < new Date()) {
       return { status: "token_expired" };
     }
 
-    // Update password and clear reset token
     await updateUserPassword(user.id, validatedData.password);
 
     return { status: "success" };
