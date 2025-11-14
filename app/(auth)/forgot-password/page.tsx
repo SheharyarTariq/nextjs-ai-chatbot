@@ -33,7 +33,6 @@ export default function Page() {
   });
 
   const handleStateChange = (status: ForgotPasswordActionState["status"]) => {
-    console.log("state.status", status);
 
     switch (status) {
       case "user_not_found":

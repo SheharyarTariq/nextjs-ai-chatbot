@@ -121,6 +121,60 @@ export async function updateUserPassword(userId: string, password: string) {
   }
 }
 
+export async function getUserById(userId: string): Promise<User | null> {
+  try {
+    const [selectedUser] = await db
+      .select()
+      .from(user)
+      .where(eq(user.id, userId));
+    return selectedUser || null;
+  } catch (_error) {
+    throw new ChatSDKError("bad_request:database", "Failed to get user by id");
+  }
+}
+
+export async function updateUserProfile({
+  userId,
+  name,
+  gender,
+  birthDay,
+  birthMonth,
+  birthYear,
+  password,
+}: {
+  userId: string;
+  name?: string;
+  gender?: string;
+  birthDay?: number;
+  birthMonth?: number;
+  birthYear?: number;
+  password?: string;
+}) {
+  try {
+    const updateData: any = {};
+
+    if (name !== undefined) updateData.name = name;
+    if (gender !== undefined) updateData.gender = gender;
+    if (birthDay !== undefined) updateData.birthDay = birthDay;
+    if (birthMonth !== undefined) updateData.birthMonth = birthMonth;
+    if (birthYear !== undefined) updateData.birthYear = birthYear;
+    if (password) {
+      updateData.password = generateHashedPassword(password);
+    }
+
+    return await db
+      .update(user)
+      .set(updateData)
+      .where(eq(user.id, userId))
+      .returning();
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to update user profile"
+    );
+  }
+}
+
 export async function saveChat({
   id,
   userId,

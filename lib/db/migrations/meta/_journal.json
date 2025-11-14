@@ -78,6 +78,20 @@
       "when": 1763039390134,
       "tag": "0010_third_the_hand",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1763117709239,
+      "tag": "0011_cuddly_felicia_hardy",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1763119800000,
+      "tag": "0012_separate_birth_date_fields",
+      "breakpoints": true
     }
   ]
 }

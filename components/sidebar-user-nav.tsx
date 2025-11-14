@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/sidebar";
 import { LoaderIcon } from "./icons";
 import { toast } from "./toast";
+import Link from "next/link";
 
 export function SidebarUserNav({ user }: { user: User }) {
   const { status } = useSession();
@@ -65,7 +66,7 @@ export function SidebarUserNav({ user }: { user: User }) {
             data-testid="user-nav-menu"
             side="top"
           >
-            <DropdownMenuItem
+            {/* <DropdownMenuItem
               className="cursor-pointer"
               data-testid="user-nav-item-theme"
               onSelect={() =>
@@ -73,6 +74,12 @@ export function SidebarUserNav({ user }: { user: User }) {
               }
             >
               {`Toggle ${resolvedTheme === "light" ? "dark" : "light"} mode`}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator /> */}
+            <DropdownMenuItem asChild data-testid="user-nav-item-auth">
+              <Link href="/profile">
+                Profile Settings
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild data-testid="user-nav-item-auth">
