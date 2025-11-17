@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import Form from "next/form";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { Eye, EyeOff } from "lucide-react";
 
 export function AuthForm({
   action,
@@ -22,6 +24,9 @@ export function AuthForm({
   type: "login" | "register";
   errors?: Record<string, string>;
 }) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   return (
     <Form action={action} className="flex flex-col gap-4 px-4 sm:px-16">
       {type === "register" && (
@@ -82,15 +87,28 @@ export function AuthForm({
           Password
         </Label>
 
-        <Input
-          className={cn(
-            "bg-muted text-md md:text-sm",
-            errors.password && "border-red-500"
-          )}
-          id="password"
-          name="password"
-          type="password"
-        />
+        <div className="relative">
+          <Input
+            className={cn(
+              "bg-muted text-md md:text-sm pr-10",
+              errors.password && "border-red-500"
+            )}
+            id="password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+          >
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
+          </button>
+        </div>
         <span className="flex w-full justify-between">
           {errors.password && (
             <p className="text-red-500 text-sm whitespace-nowrap">{errors.password}</p>
@@ -117,15 +135,28 @@ export function AuthForm({
             Confirm Password
           </Label>
 
-          <Input
-            className={cn(
-              "bg-muted text-md md:text-sm",
-              errors.confirm_password && "border-red-500"
-            )}
-            id="confirm_password"
-            name="confirm_password"
-            type="password"
-          />
+          <div className="relative">
+            <Input
+              className={cn(
+                "bg-muted text-md md:text-sm pr-10",
+                errors.confirm_password && "border-red-500"
+              )}
+              id="confirm_password"
+              name="confirm_password"
+              type={showConfirmPassword ? "text" : "password"}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+            >
+              {showConfirmPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
+          </div>
           {errors.confirm_password && (
             <p className="text-red-500 text-sm">{errors.confirm_password}</p>
           )}

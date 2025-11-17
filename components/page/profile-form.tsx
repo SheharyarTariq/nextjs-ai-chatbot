@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { updateProfile } from "./actions";
+import { updateProfile } from "../../app/(chat)/profile/actions";
 import type { User } from "@/lib/db/schema";
 import { Eye, EyeOff } from "lucide-react";
 import { profileUpdateSchema } from "@/lib/validations/auth";
@@ -134,12 +134,6 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
   return (
     <Form action={handleSubmit} className="flex flex-col gap-6">
-      {errors.general && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-md text-sm">
-          {errors.general}
-        </div>
-      )}
-      
       <div className="flex flex-col gap-2">
         <Label
           className="font-normal text-zinc-600 dark:text-zinc-400"
@@ -231,7 +225,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
               >
                 <SelectValue placeholder="Day" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[300px] overflow-y-auto ">
                 {dayOptions.map((day) => (
                   <SelectItem key={day} value={day.toString()}>
                     {day}
@@ -258,7 +252,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
               >
                 <SelectValue placeholder="Month" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[300px] overflow-y-auto ">
                 {monthOptions.map((month) => (
                   <SelectItem key={month.value} value={month.value}>
                     {month.label}
@@ -285,7 +279,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
               >
                 <SelectValue placeholder="Year" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[300px] overflow-y-auto">
                 {yearOptions.map((year) => (
                   <SelectItem key={year} value={year.toString()}>
                     {year}

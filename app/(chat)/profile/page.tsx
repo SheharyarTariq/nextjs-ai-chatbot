@@ -1,7 +1,7 @@
 import { auth } from "@/app/(auth)/auth";
 import { getUserById } from "@/lib/db/queries";
 import { redirect } from "next/navigation";
-import { ProfileForm } from "./profile-form";
+import { ProfileForm } from "../../../components/page/profile-form";
 
 export default async function ProfilePage() {
   const session = await auth();
