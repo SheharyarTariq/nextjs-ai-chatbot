@@ -12,10 +12,15 @@ import { type RegisterActionState, register } from "../actions";
 
 export default function Page() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirm_password: "",
+  });
   const [isSuccessful, setIsSuccessful] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   const [state, formAction] = useActionState<RegisterActionState, FormData>(
     register,
@@ -46,20 +51,21 @@ export default function Page() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.status]);
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (submittedFormData: FormData) => {
     const data = {
-      name: formData.get("name") as string,
-      email: formData.get("email") as string,
-      password: formData.get("password") as string,
-      confirm_password: formData.get("confirm_password") as string,
+      name: submittedFormData.get("name") as string,
+      email: submittedFormData.get("email") as string,
+      password: submittedFormData.get("password") as string,
+      confirm_password: submittedFormData.get("confirm_password") as string,
     };
+
+    setFormData(data);
 
     try {
       await registerSchema.validate(data, { abortEarly: false });
       setValidationErrors({});
-      setEmail(data.email);
       startTransition(() => {
-        formAction(formData);
+        formAction(submittedFormData);
       });
     } catch (error: any) {
       const errors: Record<string, string> = {};
@@ -87,7 +93,7 @@ export default function Page() {
         </div>
         <AuthForm
           action={handleSubmit}
-          defaultEmail={email}
+          defaultValues={formData}
           type="register"
           errors={validationErrors}
         >

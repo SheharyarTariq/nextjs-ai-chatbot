@@ -14,10 +14,13 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [email, setEmail] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
   const [isSuccessful, setIsSuccessful] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   const [state, formAction] = useActionState<LoginActionState, FormData>(login, {
     status: "idle",
@@ -49,7 +52,6 @@ export function LoginForm() {
           router.refresh();
           return;
         } catch (_error) {
-          // fallback to default navigation
         }
       }
       router.push("/");
@@ -58,18 +60,19 @@ export function LoginForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, searchParams, state.status]);
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (submittedFormData: FormData) => {
     const data = {
-      email: formData.get("email") as string,
-      password: formData.get("password") as string,
+      email: submittedFormData.get("email") as string,
+      password: submittedFormData.get("password") as string,
     };
+
+    setFormData(data);
 
     try {
       await loginSchema.validate(data, { abortEarly: false });
       setValidationErrors({});
-      setEmail(data.email);
       startTransition(() => {
-        formAction(formData);
+        formAction(submittedFormData);
       });
     } catch (error: any) {
       const errors: Record<string, string> = {};
@@ -97,7 +100,7 @@ export function LoginForm() {
         </div>
         <AuthForm
           action={handleSubmit}
-          defaultEmail={email}
+          defaultValues={formData}
           type="login"
           errors={validationErrors}
         >

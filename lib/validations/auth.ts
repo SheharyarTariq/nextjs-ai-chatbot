@@ -14,6 +14,7 @@ export const loginSchema = yup.object().shape({
 export const registerSchema = yup.object().shape({
   name: yup
     .string()
+    .trim()
     .min(2, "Name must be at least 2 characters")
     .max(30, "Name cannot exceed 30 characters")
     .required("Name is required"),
@@ -52,6 +53,7 @@ export const resetPasswordSchema = yup.object().shape({
 export const profileUpdateSchema = yup.object().shape({
   name: yup
     .string()
+    .trim()
     .min(2, "Name must be at least 2 characters")
     .max(30, "Name cannot exceed 30 characters")
     .required("Name is required"),

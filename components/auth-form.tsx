@@ -13,6 +13,7 @@ export function AuthForm({
   action,
   children,
   defaultEmail = "",
+  defaultValues,
   type,
   errors = {},
 }: {
@@ -21,6 +22,12 @@ export function AuthForm({
   >;
   children: React.ReactNode;
   defaultEmail?: string;
+  defaultValues?: {
+    name?: string;
+    email?: string;
+    password?: string;
+    confirm_password?: string;
+  };
   type: "login" | "register";
   errors?: Record<string, string>;
 }) {
@@ -43,6 +50,7 @@ export function AuthForm({
               "bg-muted text-md md:text-sm",
               errors.name && "border-red-500"
             )}
+            defaultValue={defaultValues?.name}
             id="name"
             name="name"
             placeholder="John Doe"
@@ -68,7 +76,7 @@ export function AuthForm({
             "bg-muted text-md md:text-sm",
             errors.email && "border-red-500"
           )}
-          defaultValue={defaultEmail}
+          defaultValue={defaultValues?.email || defaultEmail}
           id="email"
           name="email"
           placeholder="user@acme.com"
@@ -93,6 +101,7 @@ export function AuthForm({
               "bg-muted text-md md:text-sm pr-10",
               errors.password && "border-red-500"
             )}
+            defaultValue={defaultValues?.password}
             id="password"
             name="password"
             type={showPassword ? "text" : "password"}
@@ -141,6 +150,7 @@ export function AuthForm({
                 "bg-muted text-md md:text-sm pr-10",
                 errors.confirm_password && "border-red-500"
               )}
+              defaultValue={defaultValues?.confirm_password}
               id="confirm_password"
               name="confirm_password"
               type={showConfirmPassword ? "text" : "password"}
