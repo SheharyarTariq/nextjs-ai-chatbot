@@ -41,6 +41,7 @@ export async function AgendaSidebar() {
               exerciseDetails={session.exerciseDetails || "No exercise details"}
               mealDetails={session.mealDetails || "No meal details"}
               sleepDetails={session.sleepDetails || "No sleep details"}
+              weekNumber={agenda.currentWeek}
             />
           ))}
         </div>
