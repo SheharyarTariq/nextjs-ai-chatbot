@@ -2,6 +2,7 @@ import { auth } from "@/app/(auth)/auth";
 import { getAgendaByUserId } from "@/lib/db/queries";
 import { AgendaCard } from "@/components/agenda-card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ResetAgendaButton } from "@/components/reset-agenda-button";
 
 export async function AgendaSidebar() {
   const session = await auth();
@@ -28,8 +29,13 @@ export async function AgendaSidebar() {
   return (
     <div className="w-80 border-r bg-background h-full flex flex-col">
       <div className="p-4 border-b">
-        <h2 className="text-xl font-bold">Week {agenda.currentWeek} Schedule</h2>
-        <p className="text-sm text-muted-foreground mt-1">{agenda.goal}</p>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <h2 className="text-xl font-bold">Week {agenda.currentWeek} Schedule</h2>
+            <p className="text-sm text-muted-foreground mt-1">{agenda.goal}</p>
+          </div>
+          <ResetAgendaButton />
+        </div>
       </div>
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">

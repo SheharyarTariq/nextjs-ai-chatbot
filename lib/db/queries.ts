@@ -861,23 +861,19 @@ export async function updateAgenda({
                     ...providedSession,
                   };
                 } else {
-                  // Session doesn't exist, add it
                   mergedWeeklyData[existingWeekIndex].sessions.push(providedSession);
                 }
               }
             } else {
-              // Week doesn't exist, add it
               mergedWeeklyData.push(providedWeek);
             }
           }
 
           updateData.weeklyData = mergedWeeklyData;
         } else {
-          // No existing data, use provided data as-is
           updateData.weeklyData = weeklyData;
         }
       } else {
-        // Direct replacement when mergeWeeklyData is false
         updateData.weeklyData = weeklyData;
       }
     }
@@ -905,6 +901,41 @@ export async function deleteAgendaByUserId({ userId }: { userId: string }) {
     throw new ChatSDKError(
       "bad_request:database",
       "Failed to delete agenda by user id"
+    );
+  }
+}
+
+export async function deleteAgendaAndChatByUserId({ userId }: { userId: string }) {
+  try {
+    const userAgenda = await getAgendaByUserId({ userId });
+
+    if (!userAgenda) {
+      return {
+        success: false,
+        error: "No agenda found to delete",
+      };
+    }
+
+    const chatId = userAgenda.chatId;
+
+    await db.delete(agenda).where(eq(agenda.userId, userId));
+
+    if (chatId) {
+      await db.delete(vote).where(eq(vote.chatId, chatId));
+      await db.delete(message).where(eq(message.chatId, chatId));
+      await db.delete(stream).where(eq(stream.chatId, chatId));
+      await db.delete(chat).where(eq(chat.id, chatId));
+    }
+
+    return {
+      success: true,
+      deletedAgendaId: userAgenda.id,
+      deletedChatId: chatId,
+    };
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to delete agenda and chat by user id"
     );
   }
 }

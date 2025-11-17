@@ -1,12 +1,12 @@
 import { tool } from "ai";
 import type { Session } from "next-auth";
 import { z } from "zod";
-import { deleteAgendaByUserId } from "@/lib/db/queries";
+import { deleteAgendaAndChatByUserId } from "@/lib/db/queries";
 
 export const createDeleteAgendaTool = ({ session }: { session: Session }) =>
   tool({
     description:
-      "Delete the athlete's training agenda from the database. Use this when the user wants to clear/reset their entire plan and start over.",
+      "Delete the athlete's training agenda and the entire conversation from the database. Use this when the user wants to clear/reset/delete their entire plan and conversation to start fresh.",
     inputSchema: z.object({}),
     execute: async () => {
       if (!session?.user?.id) {
@@ -17,27 +17,28 @@ export const createDeleteAgendaTool = ({ session }: { session: Session }) =>
       }
 
       try {
-        const deletedAgenda = await deleteAgendaByUserId({
+        const result = await deleteAgendaAndChatByUserId({
           userId: session.user.id,
         });
 
-        if (!deletedAgenda) {
+        if (!result.success) {
           return {
             success: false,
-            error: "No agenda found to delete.",
+            error: result.error || "No agenda found to delete.",
           };
         }
 
         return {
           success: true,
-          message: "Your agenda has been cleared successfully. You can now create a new plan.",
-          deletedAgendaId: deletedAgenda.id,
+          message: "Your agenda and conversation have been cleared successfully. Redirecting you to start a new conversation...",
+          deletedAgendaId: result.deletedAgendaId,
+          deletedChatId: result.deletedChatId,
         };
       } catch (error: any) {
-        console.error("Error deleting agenda:", error);
+        console.error("Error deleting agenda and conversation:", error);
         return {
           success: false,
-          error: `Failed to delete agenda: ${error.message}`,
+          error: `Failed to delete agenda and conversation: ${error.message}`,
         };
       }
     },

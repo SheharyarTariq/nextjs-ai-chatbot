@@ -213,6 +213,7 @@ export async function POST(request: Request) {
                   "getAgenda",
                   "saveAgenda",
                   "updateAgenda",
+                  "deleteAgenda",
                 ],
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
