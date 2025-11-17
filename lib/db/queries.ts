@@ -837,30 +837,25 @@ export async function updateAgenda({
     const updateData: any = { updatedAt: new Date() };
     if (currentWeek !== undefined) updateData.currentWeek = currentWeek;
 
-    // If weeklyData is provided and mergeWeeklyData is true, merge it with existing data
     if (weeklyData !== undefined) {
       if (mergeWeeklyData) {
         const existingAgenda = await getAgendaByUserId({ userId });
 
         if (existingAgenda && existingAgenda.weeklyData) {
-          // Clone existing weekly data
           const mergedWeeklyData = JSON.parse(JSON.stringify(existingAgenda.weeklyData));
 
-          // Merge the provided weekly data
           for (const providedWeek of weeklyData) {
             const existingWeekIndex = mergedWeeklyData.findIndex(
               (week: any) => week.weekNumber === providedWeek.weekNumber
             );
 
             if (existingWeekIndex !== -1) {
-              // Week exists, merge sessions
               for (const providedSession of providedWeek.sessions) {
                 const existingSessionIndex = mergedWeeklyData[existingWeekIndex].sessions.findIndex(
                   (session: any) => session.day === providedSession.day
                 );
 
                 if (existingSessionIndex !== -1) {
-                  // Session exists, merge properties
                   mergedWeeklyData[existingWeekIndex].sessions[existingSessionIndex] = {
                     ...mergedWeeklyData[existingWeekIndex].sessions[existingSessionIndex],
                     ...providedSession,
