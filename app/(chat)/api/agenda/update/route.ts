@@ -23,7 +23,7 @@ export async function PATCH(request: Request) {
       );
     }
 
-    // Get current agenda
+    // Get current agenda to validate week and day exist
     const agenda = await getAgendaByUserId({ userId: session.user.id });
 
     if (!agenda) {
@@ -33,40 +33,44 @@ export async function PATCH(request: Request) {
       );
     }
 
-    // Clone weeklyData to avoid mutation
-    const updatedWeeklyData = JSON.parse(JSON.stringify(agenda.weeklyData || []));
-
-    // Find the week
-    const weekIndex = updatedWeeklyData.findIndex(
+    // Validate that the week exists
+    const weekData = agenda.weeklyData?.find(
       (week: any) => week.weekNumber === weekNumber
     );
 
-    if (weekIndex === -1) {
+    if (!weekData) {
       return NextResponse.json(
         { error: "Week not found" },
         { status: 404 }
       );
     }
 
-    // Find the session/day
-    const sessionIndex = updatedWeeklyData[weekIndex].sessions.findIndex(
+    // Validate that the day exists
+    const sessionData = weekData.sessions.find(
       (session: any) => session.day === day
     );
 
-    if (sessionIndex === -1) {
+    if (!sessionData) {
       return NextResponse.json(
         { error: "Day not found" },
         { status: 404 }
       );
     }
 
-    // Update the completed status
-    updatedWeeklyData[weekIndex].sessions[sessionIndex].completed = completed;
-
-    // Save to database
+    // Update the session - the updateAgenda function will handle merging
     const [updatedAgenda] = await updateAgenda({
       userId: session.user.id,
-      weeklyData: updatedWeeklyData,
+      weeklyData: [
+        {
+          weekNumber,
+          sessions: [
+            {
+              ...sessionData,
+              completed,
+            },
+          ],
+        },
+      ],
     });
 
     if (!updatedAgenda) {

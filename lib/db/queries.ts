@@ -802,6 +802,7 @@ export async function updateAgenda({
   currentWeek,
   weeklyData,
   userData,
+  mergeWeeklyData = true,
 }: {
   userId: string;
   currentWeek?: number;
@@ -830,11 +831,62 @@ export async function updateAgenda({
     height?: number;
     heartRateZones?: any;
   };
+  mergeWeeklyData?: boolean;
 }) {
   try {
     const updateData: any = { updatedAt: new Date() };
     if (currentWeek !== undefined) updateData.currentWeek = currentWeek;
-    if (weeklyData !== undefined) updateData.weeklyData = weeklyData;
+
+    // If weeklyData is provided and mergeWeeklyData is true, merge it with existing data
+    if (weeklyData !== undefined) {
+      if (mergeWeeklyData) {
+        const existingAgenda = await getAgendaByUserId({ userId });
+
+        if (existingAgenda && existingAgenda.weeklyData) {
+          // Clone existing weekly data
+          const mergedWeeklyData = JSON.parse(JSON.stringify(existingAgenda.weeklyData));
+
+          // Merge the provided weekly data
+          for (const providedWeek of weeklyData) {
+            const existingWeekIndex = mergedWeeklyData.findIndex(
+              (week: any) => week.weekNumber === providedWeek.weekNumber
+            );
+
+            if (existingWeekIndex !== -1) {
+              // Week exists, merge sessions
+              for (const providedSession of providedWeek.sessions) {
+                const existingSessionIndex = mergedWeeklyData[existingWeekIndex].sessions.findIndex(
+                  (session: any) => session.day === providedSession.day
+                );
+
+                if (existingSessionIndex !== -1) {
+                  // Session exists, merge properties
+                  mergedWeeklyData[existingWeekIndex].sessions[existingSessionIndex] = {
+                    ...mergedWeeklyData[existingWeekIndex].sessions[existingSessionIndex],
+                    ...providedSession,
+                  };
+                } else {
+                  // Session doesn't exist, add it
+                  mergedWeeklyData[existingWeekIndex].sessions.push(providedSession);
+                }
+              }
+            } else {
+              // Week doesn't exist, add it
+              mergedWeeklyData.push(providedWeek);
+            }
+          }
+
+          updateData.weeklyData = mergedWeeklyData;
+        } else {
+          // No existing data, use provided data as-is
+          updateData.weeklyData = weeklyData;
+        }
+      } else {
+        // Direct replacement when mergeWeeklyData is false
+        updateData.weeklyData = weeklyData;
+      }
+    }
+
     if (userData !== undefined) updateData.userData = userData;
 
     return await db
