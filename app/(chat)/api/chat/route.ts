@@ -28,6 +28,7 @@ import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
 import { createGetAgendaTool } from "@/lib/ai/tools/get-agenda";
 import { createSaveAgendaTool } from "@/lib/ai/tools/save-agenda";
 import { createUpdateAgendaTool } from "@/lib/ai/tools/update-agenda";
+import { createDeleteAgendaTool } from "@/lib/ai/tools/delete-agenda";
 import { updateDocument } from "@/lib/ai/tools/update-document";
 import { isProductionEnvironment } from "@/lib/constants";
 import {
@@ -225,6 +226,7 @@ export async function POST(request: Request) {
             getAgenda: createGetAgendaTool({ session }),
             saveAgenda: createSaveAgendaTool({ session, chatId: id }),
             updateAgenda: createUpdateAgendaTool({ session }),
+            deleteAgenda: createDeleteAgendaTool({ session }),
           },
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,

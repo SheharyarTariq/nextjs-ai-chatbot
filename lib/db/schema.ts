@@ -214,11 +214,11 @@ export const agenda = pgTable("Agenda", {
       sleep?: boolean;
       energy?: number;
       notes?: string;
-      currentDayNumber?: number; // Current day number in the training program
-      totalTrainingDays?: number; // Total number of training days in the program
-      exerciseDetails?: string; // Exercise details (e.g., "50 min Tempo Run + 15 Core")
-      mealDetails?: string; // Meal details (e.g., "Protein + Slow Carbs")
-      sleepDetails?: string; // Sleep details (e.g., "7 h sleep")
+      currentDayNumber?: number;
+      totalTrainingDays?: number;
+      exerciseDetails?: string;
+      mealDetails?: string; 
+      sleepDetails?: string;
     }>;
   }>>(),
   createdAt: timestamp("createdAt").notNull(),

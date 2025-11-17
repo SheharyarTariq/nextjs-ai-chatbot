@@ -846,3 +846,18 @@ export async function updateAgenda({
     throw new ChatSDKError("bad_request:database", "Failed to update agenda");
   }
 }
+
+export async function deleteAgendaByUserId({ userId }: { userId: string }) {
+  try {
+    const [deletedAgenda] = await db
+      .delete(agenda)
+      .where(eq(agenda.userId, userId))
+      .returning();
+    return deletedAgenda;
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to delete agenda by user id"
+    );
+  }
+}
