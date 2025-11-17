@@ -8,21 +8,21 @@ export const Greeting = () => {
     >
       <motion.div
         animate={{ opacity: 1, y: 0 }}
-        className="font-semibold text-xl md:text-2xl"
+        className="font-semibold text-xl md:text-2xl text-center"
         exit={{ opacity: 0, y: 10 }}
         initial={{ opacity: 0, y: 10 }}
         transition={{ delay: 0.5 }}
       >
-        Hello there!
+        Athlete Standards - For daily use
       </motion.div>
       <motion.div
         animate={{ opacity: 1, y: 0 }}
-        className="text-xl text-zinc-500 md:text-2xl"
+        className="text-sm text-zinc-500 text-center"
         exit={{ opacity: 0, y: 10 }}
         initial={{ opacity: 0, y: 10 }}
         transition={{ delay: 0.6 }}
       >
-        How can I help you today?
+        Your personal weekly planner for training and nutrition. An AI built on the knowledge of daily athletes, experts and coaches forged through years of competition and the high performance principles of Athlete Standards. Combined with your physical agenda it guides you week by week toward your goal.
       </motion.div>
     </div>
   );

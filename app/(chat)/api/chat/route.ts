@@ -25,6 +25,9 @@ import { myProvider } from "@/lib/ai/providers";
 import { createDocument } from "@/lib/ai/tools/create-document";
 import { getWeather } from "@/lib/ai/tools/get-weather";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
+import { createGetAgendaTool } from "@/lib/ai/tools/get-agenda";
+import { createSaveAgendaTool } from "@/lib/ai/tools/save-agenda";
+import { createUpdateAgendaTool } from "@/lib/ai/tools/update-agenda";
 import { updateDocument } from "@/lib/ai/tools/update-document";
 import { isProductionEnvironment } from "@/lib/constants";
 import {
@@ -195,7 +198,6 @@ export async function POST(request: Request) {
           system: systemPrompt({
             selectedChatModel,
             requestHints,
-            userName: session.user.name
           }),
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
@@ -207,6 +209,9 @@ export async function POST(request: Request) {
                   "createDocument",
                   "updateDocument",
                   "requestSuggestions",
+                  "getAgenda",
+                  "saveAgenda",
+                  "updateAgenda",
                 ],
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
@@ -217,6 +222,9 @@ export async function POST(request: Request) {
               session,
               dataStream,
             }),
+            getAgenda: createGetAgendaTool({ session }),
+            saveAgenda: createSaveAgendaTool({ session, chatId: id }),
+            updateAgenda: createUpdateAgendaTool({ session }),
           },
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,

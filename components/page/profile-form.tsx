@@ -18,6 +18,7 @@ import type { User } from "@/lib/db/schema";
 import { Eye, EyeOff } from "lucide-react";
 import { profileUpdateSchema } from "@/lib/validations/auth";
 import { toast } from "@/components/toast";
+import { getAgendaByUserId } from "@/lib/db/queries";
 
 interface ProfileFormProps {
   user: User;

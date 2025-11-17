@@ -19,6 +19,8 @@ import type { VisibilityType } from "@/components/visibility-selector";
 import { ChatSDKError } from "../errors";
 import type { AppUsage } from "../usage";
 import {
+  type Agenda,
+  agenda,
   type Chat,
   chat,
   type DBMessage,
@@ -684,5 +686,163 @@ export async function getStreamIdsByChatId({ chatId }: { chatId: string }) {
       "bad_request:database",
       "Failed to get stream ids by chat id"
     );
+  }
+}
+
+export async function saveAgenda({
+  userId,
+  chatId,
+  goal,
+  startDate,
+  currentWeek,
+  totalWeeks,
+  trainingFrequency,
+  injuries,
+  workType,
+  userData,
+  weeklyData,
+}: {
+  userId: string;
+  chatId: string;
+  goal: string;
+  startDate: Date;
+  currentWeek?: number;
+  totalWeeks?: number;
+  trainingFrequency?: number;
+  injuries?: string;
+  workType?: string;
+  userData?: {
+    name?: string;
+    gender?: string;
+    age?: number;
+    weight?: number;
+    height?: number;
+    heartRateZones?: any;
+  };
+  weeklyData?: Array<{
+    weekNumber: number;
+    sessions: Array<{
+      day: string;
+      completed: boolean;
+      rating?: number;
+      meals?: boolean;
+      sleep?: boolean;
+      energy?: number;
+      notes?: string;
+      currentDayNumber?: number;
+      totalTrainingDays?: number;
+      exerciseDetails?: string;
+      mealDetails?: string;
+      sleepDetails?: string;
+    }>;
+  }>;
+}) {
+  try {
+    const now = new Date();
+    return await db
+      .insert(agenda)
+      .values({
+        userId,
+        chatId,
+        goal,
+        startDate,
+        currentWeek: currentWeek ?? 1,
+        totalWeeks: totalWeeks ?? 12,
+        trainingFrequency,
+        injuries,
+        workType,
+        userData,
+        weeklyData: weeklyData ?? [],
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning();
+  } catch (error: any) {
+    console.error("Database error saving agenda:", error);
+    throw new ChatSDKError("bad_request:database", `Failed to save agenda: ${error.message}`);
+  }
+}
+
+export async function getAgendaByUserId({ userId }: { userId: string }) {
+  try {
+    const [userAgenda] = await db
+      .select()
+      .from(agenda)
+      .where(eq(agenda.userId, userId))
+      .orderBy(desc(agenda.createdAt))
+      .limit(1);
+    return userAgenda || null;
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get agenda by user id"
+    );
+  }
+}
+
+export async function getAgendaByChatId({ chatId }: { chatId: string }) {
+  try {
+    const [chatAgenda] = await db
+      .select()
+      .from(agenda)
+      .where(eq(agenda.chatId, chatId))
+      .orderBy(desc(agenda.createdAt))
+      .limit(1);
+    return chatAgenda || null;
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get agenda by chat id"
+    );
+  }
+}
+
+export async function updateAgenda({
+  userId,
+  currentWeek,
+  weeklyData,
+  userData,
+}: {
+  userId: string;
+  currentWeek?: number;
+  weeklyData?: Array<{
+    weekNumber: number;
+    sessions: Array<{
+      day: string;
+      completed: boolean;
+      rating?: number;
+      meals?: boolean;
+      sleep?: boolean;
+      energy?: number;
+      notes?: string;
+      currentDayNumber?: number;
+      totalTrainingDays?: number;
+      exerciseDetails?: string;
+      mealDetails?: string;
+      sleepDetails?: string;
+    }>;
+  }>;
+  userData?: {
+    name?: string;
+    gender?: string;
+    age?: number;
+    weight?: number;
+    height?: number;
+    heartRateZones?: any;
+  };
+}) {
+  try {
+    const updateData: any = { updatedAt: new Date() };
+    if (currentWeek !== undefined) updateData.currentWeek = currentWeek;
+    if (weeklyData !== undefined) updateData.weeklyData = weeklyData;
+    if (userData !== undefined) updateData.userData = userData;
+
+    return await db
+      .update(agenda)
+      .set(updateData)
+      .where(eq(agenda.userId, userId))
+      .returning();
+  } catch (_error) {
+    throw new ChatSDKError("bad_request:database", "Failed to update agenda");
   }
 }

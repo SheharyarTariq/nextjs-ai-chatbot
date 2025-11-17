@@ -15,6 +15,7 @@ export const registerSchema = yup.object().shape({
   name: yup
     .string()
     .min(2, "Name must be at least 2 characters")
+    .max(30, "Name cannot exceed 30 characters")
     .required("Name is required"),
   email: yup
     .string()
@@ -52,6 +53,7 @@ export const profileUpdateSchema = yup.object().shape({
   name: yup
     .string()
     .min(2, "Name must be at least 2 characters")
+    .max(30, "Name cannot exceed 30 characters")
     .required("Name is required"),
 
   gender: yup

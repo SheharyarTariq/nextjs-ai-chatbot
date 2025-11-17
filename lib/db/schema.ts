@@ -180,3 +180,49 @@ export const stream = pgTable(
 );
 
 export type Stream = InferSelectModel<typeof stream>;
+
+export const agenda = pgTable("Agenda", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => user.id),
+  chatId: uuid("chatId")
+    .notNull()
+    .references(() => chat.id),
+  goal: text("goal").notNull(),
+  startDate: timestamp("startDate").notNull(),
+  currentWeek: integer("currentWeek").notNull().default(1),
+  totalWeeks: integer("totalWeeks").notNull().default(12),
+  trainingFrequency: integer("trainingFrequency"),
+  injuries: text("injuries"),
+  workType: varchar("workType", { length: 50 }),
+  userData: jsonb("userData").$type<{
+    name?: string;
+    gender?: string;
+    age?: number;
+    weight?: number;
+    height?: number;
+    heartRateZones?: any;
+  }>(),
+  weeklyData: jsonb("weeklyData").$type<Array<{
+    weekNumber: number;
+    sessions: Array<{
+      day: string;
+      completed: boolean;
+      rating?: number;
+      meals?: boolean;
+      sleep?: boolean;
+      energy?: number;
+      notes?: string;
+      currentDayNumber?: number; // Current day number in the training program
+      totalTrainingDays?: number; // Total number of training days in the program
+      exerciseDetails?: string; // Exercise details (e.g., "50 min Tempo Run + 15 Core")
+      mealDetails?: string; // Meal details (e.g., "Protein + Slow Carbs")
+      sleepDetails?: string; // Sleep details (e.g., "7 h sleep")
+    }>;
+  }>>(),
+  createdAt: timestamp("createdAt").notNull(),
+  updatedAt: timestamp("updatedAt").notNull(),
+});
+
+export type Agenda = InferSelectModel<typeof agenda>;
