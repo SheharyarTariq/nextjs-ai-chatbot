@@ -35,7 +35,7 @@ export function LoginForm() {
     } else if (state.status === "invalid_data") {
       toast({
         type: "error",
-        description: "Failed validating your submission!",
+        description: "Invalid credentials",
       });
     } else if (state.status === "success") {
       toast({

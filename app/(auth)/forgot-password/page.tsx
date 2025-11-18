@@ -50,7 +50,7 @@ export default function Page() {
       case "invalid_data":
         toast({
           type: "error",
-          description: "Failed validating your submission!",
+          description: "Invalid credentials",
         });
         break;
       case "success":

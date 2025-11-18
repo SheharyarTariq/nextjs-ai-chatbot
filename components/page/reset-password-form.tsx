@@ -65,7 +65,7 @@ export function ResetPasswordForm() {
     } else if (state.status === "invalid_data") {
       toast({
         type: "error",
-        description: "Failed validating your submission!",
+        description: "invalid credentials",
       });
     } else if (state.status === "success") {
       toast({
