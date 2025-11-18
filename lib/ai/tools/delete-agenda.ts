@@ -1,9 +1,16 @@
-import { tool } from "ai";
+import { tool, type UIMessageStreamWriter } from "ai";
 import type { Session } from "next-auth";
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 import { deleteAgendaAndChatByUserId } from "@/lib/db/queries";
+import type { ChatMessage } from "@/lib/types";
 
-export const createDeleteAgendaTool = ({ session }: { session: Session }) =>
+type DeleteAgendaProps = {
+  session: Session;
+  dataStream: UIMessageStreamWriter<ChatMessage>;
+};
+
+export const createDeleteAgendaTool = ({ session, dataStream }: DeleteAgendaProps) =>
   tool({
     description:
       "Delete the athlete's training agenda and the entire conversation from the database. Use this when the user wants to clear/reset/delete their entire plan and conversation to start fresh.",
@@ -27,6 +34,10 @@ export const createDeleteAgendaTool = ({ session }: { session: Session }) =>
             error: result.error || "No agenda found to delete.",
           };
         }
+
+        revalidatePath("/", "layout");
+
+        dataStream.write({ type: "data-agendaRefresh", data: null });
 
         return {
           success: true,

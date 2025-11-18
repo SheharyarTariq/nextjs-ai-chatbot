@@ -1,16 +1,20 @@
-import { tool } from "ai";
+import { tool, type UIMessageStreamWriter } from "ai";
 import type { Session } from "next-auth";
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 import { saveAgenda, getAgendaByUserId } from "@/lib/db/queries";
+import type { ChatMessage } from "@/lib/types";
 
 type SaveAgendaProps = {
   session: Session;
   chatId: string;
+  dataStream: UIMessageStreamWriter<ChatMessage>;
 };
 
 export const createSaveAgendaTool = ({
   session,
   chatId,
+  dataStream,
 }: SaveAgendaProps) =>
   tool({
     description:
@@ -126,8 +130,11 @@ export const createSaveAgendaTool = ({
 
         console.log("Attempting to save agenda with data:", JSON.stringify(agendaData, null, 2));
 
-        // Save the new agenda
         const [agenda] = await saveAgenda(agendaData);
+
+        revalidatePath("/", "layout");
+
+        dataStream.write({ type: "data-agendaRefresh", data: null });
 
         return {
           success: true,

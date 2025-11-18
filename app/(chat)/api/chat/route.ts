@@ -225,9 +225,9 @@ export async function POST(request: Request) {
               dataStream,
             }),
             getAgenda: createGetAgendaTool({ session }),
-            saveAgenda: createSaveAgendaTool({ session, chatId: id }),
-            updateAgenda: createUpdateAgendaTool({ session }),
-            deleteAgenda: createDeleteAgendaTool({ session }),
+            saveAgenda: createSaveAgendaTool({ session, chatId: id, dataStream }),
+            updateAgenda: createUpdateAgendaTool({ session, dataStream }),
+            deleteAgenda: createDeleteAgendaTool({ session, dataStream }),
           },
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
@@ -266,8 +266,6 @@ export async function POST(request: Request) {
             }
           },
         });
-
-        result.consumeStream();
 
         dataStream.merge(
           result.toUIMessageStream({
