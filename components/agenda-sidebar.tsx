@@ -17,9 +17,9 @@ export async function AgendaSidebar() {
     return null;
   }
 
-  // Get the current week's sessions
+  // const currentWeekData = agenda.weeklyData.length - 1
   const currentWeekData = agenda.weeklyData.find(
-    (week: any) => week.weekNumber === agenda.currentWeek
+    (week: any) => week.weekNumber === agenda.weeklyData?.length
   );
 
   if (!currentWeekData || !currentWeekData.sessions) {
@@ -31,7 +31,7 @@ export async function AgendaSidebar() {
       <div className="p-4 border-b">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <h2 className="text-xl font-bold">Week {agenda.currentWeek} Schedule</h2>
+            <h2 className="text-xl font-bold">Week {agenda.weeklyData.length} Schedule</h2>
             <p className="text-sm text-muted-foreground mt-1">{agenda.goal}</p>
           </div>
           <ResetAgendaButton />
