@@ -43,6 +43,18 @@ export function LoginForm() {
         description: "Login Successful",
       });
       setIsSuccessful(true);
+
+      const isProfileIncomplete = !state.user?.gender ||
+                                   !state.user?.birthDay ||
+                                   !state.user?.birthMonth ||
+                                   !state.user?.birthYear;
+
+      if (isProfileIncomplete) {
+        router.push("/profile");
+        router.refresh();
+        return;
+      }
+
       const redirectUrl = searchParams.get("redirectUrl");
       if (redirectUrl) {
         try {

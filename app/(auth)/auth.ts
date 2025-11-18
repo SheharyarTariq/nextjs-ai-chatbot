@@ -16,6 +16,10 @@ declare module "next-auth" {
       type: UserType;
       role: UserRole;
       name?: string | null;
+      gender?: string | null;
+      birthDay?: number | null;
+      birthMonth?: number | null;
+      birthYear?: number | null;
     } & DefaultSession["user"];
   }
 
@@ -26,6 +30,10 @@ declare module "next-auth" {
     name?: string | null;
     type: UserType;
     role: UserRole;
+    gender?: string | null;
+    birthDay?: number | null;
+    birthMonth?: number | null;
+    birthYear?: number | null;
   }
 }
 
@@ -35,6 +43,10 @@ declare module "next-auth/jwt" {
     type: UserType;
     role: UserRole;
     name?: string | null;
+    gender?: string | null;
+    birthDay?: number | null;
+    birthMonth?: number | null;
+    birthYear?: number | null;
   }
 }
 
@@ -87,6 +99,10 @@ export const {
         token.type = user.type;
         token.role = user.role;
         token.name = user.name;
+        token.gender = user.gender;
+        token.birthDay = user.birthDay;
+        token.birthMonth = user.birthMonth;
+        token.birthYear = user.birthYear;
       }
 
       return token;
@@ -97,6 +113,10 @@ export const {
         session.user.type = token.type;
         session.user.role = token.role;
         session.user.name = token.name;
+        session.user.gender = token.gender;
+        session.user.birthDay = token.birthDay;
+        session.user.birthMonth = token.birthMonth;
+        session.user.birthYear = token.birthYear;
       }
 
       return session;

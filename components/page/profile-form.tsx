@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Form from "next/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +26,7 @@ interface ProfileFormProps {
 }
 
 export function ProfileForm({ user }: ProfileFormProps) {
+  const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -95,6 +97,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
           description: "Profile updated successfully!",
         });
         setFormData((prev) => ({ ...prev, password: "", confirm_password: "" }));
+        router.push("/");
+        router.refresh();
       } 
     } catch (error: any) {
       const validationErrors: Record<string, string> = {};

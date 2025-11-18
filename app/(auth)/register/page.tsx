@@ -46,6 +46,7 @@ export default function Page() {
 
       setIsSuccessful(true);
       updateSession();
+      router.push("/profile");
       router.refresh();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

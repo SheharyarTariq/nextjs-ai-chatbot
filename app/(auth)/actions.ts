@@ -33,6 +33,12 @@ const registerFormSchema = z
 
 export type LoginActionState = {
   status: "idle" | "in_progress" | "success" | "failed" | "invalid_data";
+  user?: {
+    gender?: string | null;
+    birthDay?: number | null;
+    birthMonth?: number | null;
+    birthYear?: number | null;
+  };
 };
 
 export const login = async (
@@ -54,7 +60,18 @@ export const login = async (
     if (result?.error || result?.ok === false) {
       return { status: "failed" };
     }
-    return { status: "success" };
+
+    const [user] = await getUser(validatedData.email);
+
+    return {
+      status: "success",
+      user: {
+        gender: user?.gender,
+        birthDay: user?.birthDay,
+        birthMonth: user?.birthMonth,
+        birthYear: user?.birthYear,
+      }
+    };
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { status: "invalid_data" };
