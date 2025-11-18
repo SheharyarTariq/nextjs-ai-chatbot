@@ -4,11 +4,11 @@ export const loginSchema = yup.object().shape({
   email: yup
     .string()
     .email("Please enter a valid email address")
-    .required("Email is required"),
+    .required("Required"),
   password: yup
     .string()
     .min(6, "Password must be at least 6 characters")
-    .required("Password is required"),
+    .required("Required"),
 });
 
 export const registerSchema = yup.object().shape({
@@ -17,15 +17,15 @@ export const registerSchema = yup.object().shape({
     .trim()
     .min(2, "Name must be at least 2 characters")
     .max(30, "Name cannot exceed 30 characters")
-    .required("Name is required"),
+    .required("Required"),
   email: yup
     .string()
     .email("Please enter a valid email address")
-    .required("Email is required"),
+    .required("Required"),
   password: yup
     .string()
     .min(6, "Password must be at least 6 characters")
-    .required("Password is required"),
+    .required("Required"),
   confirm_password: yup
     .string()
     .oneOf([yup.ref("password")], "Passwords must match")
@@ -36,14 +36,14 @@ export const forgotPasswordSchema = yup.object().shape({
   email: yup
     .string()
     .email("Please enter a valid email address")
-    .required("Email is required"),
+    .required("Required"),
 });
 
 export const resetPasswordSchema = yup.object().shape({
   password: yup
     .string()
     .min(6, "Password must be at least 6 characters")
-    .required("Password is required"),
+    .required("Required"),
   confirm_password: yup
     .string()
     .oneOf([yup.ref("password")], "Passwords must match")
@@ -56,21 +56,21 @@ export const profileUpdateSchema = yup.object().shape({
     .trim()
     .min(2, "Name must be at least 2 characters")
     .max(30, "Name cannot exceed 30 characters")
-    .required("Name is required"),
+    .required("Required"),
 
   gender: yup
     .string()
     .oneOf(["male", "female", "other"], "Please select a valid gender")
-    .required("Gender is required"),
+    .required("Required"),
   day: yup
     .string()
-    .required("Day is required"),
+    .required("Required"),
   month: yup
     .string()
-    .required("Month is required"),
+    .required("Required"),
   year: yup
     .string()
-    .required("Year is required"),
+    .required("required"),
   password: yup
     .string()
     .min(6, "Password must be at least 6 characters")

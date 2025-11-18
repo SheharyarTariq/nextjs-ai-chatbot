@@ -17,7 +17,6 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
-  // Merge fresh database data with session type/role fields
   const userWithSessionFields = {
     ...user,
     type: session.user.type,

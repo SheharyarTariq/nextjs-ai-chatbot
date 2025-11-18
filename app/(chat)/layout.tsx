@@ -1,11 +1,9 @@
 import { cookies } from "next/headers";
 import Script from "next/script";
-import { AppSidebar } from "@/components/app-sidebar";
 import { AgendaSidebar } from "@/components/agenda-sidebar";
 import { DataStreamProvider } from "@/components/data-stream-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { auth } from "../(auth)/auth";
-import { ChatHeader } from "@/components/chat-header";
 
 export const experimental_ppr = true;
 
