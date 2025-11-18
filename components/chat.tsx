@@ -106,6 +106,7 @@ export function Chat({
         setUsage(dataPart.data);
       }
       if (dataPart.type === "data-agendaRefresh") {
+        router.push("/");
         router.refresh();
       }
     },
