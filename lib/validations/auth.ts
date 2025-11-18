@@ -7,7 +7,6 @@ export const loginSchema = yup.object().shape({
     .required("Required"),
   password: yup
     .string()
-    .min(6, "Password must be at least 6 characters")
     .required("Required"),
 });
 
@@ -16,7 +15,7 @@ export const registerSchema = yup.object().shape({
     .string()
     .trim()
     .min(2, "Name must be at least 2 characters")
-    .max(30, "Name cannot exceed 30 characters")
+    .max(30, "Name length should not exceed 30 characters")
     .required("Required"),
   email: yup
     .string()
@@ -24,11 +23,11 @@ export const registerSchema = yup.object().shape({
     .required("Required"),
   password: yup
     .string()
-    .min(6, "Password must be at least 6 characters")
+    .min(6, "Password must be 6 characters long")
     .required("Required"),
   confirm_password: yup
     .string()
-    .oneOf([yup.ref("password")], "Passwords must match")
+    .oneOf([yup.ref("password")], "Passwords does not match")
     .required("Please confirm your password"),
 });
 

@@ -33,7 +33,7 @@ export default function Page() {
 
   useEffect(() => {
     if (state.status === "user_exists") {
-      toast({ type: "error", description: "Account already exists!" });
+      toast({ type: "error", description: "Email already exists, Please try another email!" });
     } else if (state.status === "failed") {
       toast({ type: "error", description: "Failed to create account!" });
     } else if (state.status === "invalid_data") {
