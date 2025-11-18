@@ -77,6 +77,12 @@ export function SidebarUserNav({ user }: { user: User }) {
             </DropdownMenuItem>
             <DropdownMenuSeparator /> */}
             <DropdownMenuItem asChild data-testid="user-nav-item-auth">
+              <Link href="/">
+                Home
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild data-testid="user-nav-item-auth">
               <Link href="/profile">
                 Profile Settings
               </Link>

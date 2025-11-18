@@ -5,7 +5,7 @@ import { DataStreamHandler } from "@/components/data-stream-handler";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
 import { generateUUID } from "@/lib/utils";
 import { auth } from "../(auth)/auth";
-import { getChatsByUserId } from "@/lib/db/queries";
+import { getChatsByUserId, getUserById } from "@/lib/db/queries";
 
 export default async function Page() {
   const session = await auth();
@@ -14,7 +14,7 @@ export default async function Page() {
     redirect("/login");
   }
 
-  const existingChats = await getChatsByUserId({ 
+  const existingChats = await getChatsByUserId({
     id: session.user.id,
     limit: 1,
     startingAfter: null,
@@ -26,6 +26,15 @@ export default async function Page() {
     redirect(`/chat/${existingChats.chats[0].id}`);
   }
 
+  // Fetch fresh user data from database and merge with session
+  const freshUser = await getUserById(session.user.id);
+  const userWithFreshData = freshUser ? {
+    ...session.user,
+    ...freshUser,
+    type: session.user.type,
+    role: session.user.role,
+  } : session.user;
+
   const id = generateUUID();
 
   const cookieStore = await cookies();
@@ -36,7 +45,7 @@ export default async function Page() {
       <>
         <Chat
           autoResume={false}
-          user={session.user}
+          user={userWithFreshData}
           id={id}
           initialChatModel={DEFAULT_CHAT_MODEL}
           initialMessages={[]}
@@ -52,7 +61,7 @@ export default async function Page() {
   return (
     <>
       <Chat
-        user={session.user}
+        user={userWithFreshData}
         autoResume={false}
         id={id}
         initialChatModel={modelIdFromCookie.value}

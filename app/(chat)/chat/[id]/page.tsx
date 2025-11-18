@@ -5,7 +5,7 @@ import { auth } from "@/app/(auth)/auth";
 import { Chat } from "@/components/chat";
 import { DataStreamHandler } from "@/components/data-stream-handler";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
-import { getAgendaByUserId, getChatById, getMessagesByChatId } from "@/lib/db/queries";
+import { getAgendaByUserId, getChatById, getMessagesByChatId, getUserById } from "@/lib/db/queries";
 import { convertToUIMessages } from "@/lib/utils";
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
@@ -38,6 +38,15 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const uiMessages = convertToUIMessages(messagesFromDb);
 
+  // Fetch fresh user data from database and merge with session
+  const freshUser = await getUserById(session.user.id);
+  const userWithFreshData = freshUser ? {
+    ...session.user,
+    ...freshUser,
+    type: session.user.type,
+    role: session.user.role,
+  } : session.user;
+
   const cookieStore = await cookies();
   const chatModelFromCookie = cookieStore.get("chat-model");
 
@@ -48,7 +57,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     return (
       <>
         <Chat
-          user={session.user}
+          user={userWithFreshData}
           autoResume={true}
           id={chat.id}
           initialChatModel={DEFAULT_CHAT_MODEL}
@@ -65,7 +74,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   return (
     <>
       <Chat
-        user={session.user}
+        user={userWithFreshData}
         autoResume={true}
         id={chat.id}
         initialChatModel={chatModelFromCookie.value}

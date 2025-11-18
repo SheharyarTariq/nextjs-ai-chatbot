@@ -5,6 +5,7 @@ import { AgendaSidebar } from "@/components/agenda-sidebar";
 import { DataStreamProvider } from "@/components/data-stream-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { auth } from "../(auth)/auth";
+import { ChatHeader } from "@/components/chat-header";
 
 export const experimental_ppr = true;
 
@@ -15,7 +16,6 @@ export default async function Layout({
 }) {
   const [session, cookieStore] = await Promise.all([auth(), cookies()]);
   const isCollapsed = cookieStore.get("sidebar_state")?.value !== "true";
-
   return (
     <>
       <Script
@@ -23,6 +23,7 @@ export default async function Layout({
         strategy="beforeInteractive"
       />
       <DataStreamProvider>
+        
         <SidebarProvider defaultOpen={!isCollapsed}>
           {/* <AppSidebar user={session?.user} /> */}
           <div className="flex w-full h-screen">
