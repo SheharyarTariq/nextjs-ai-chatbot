@@ -41,7 +41,7 @@ export const forgotPasswordSchema = yup.object().shape({
 export const resetPasswordSchema = yup.object().shape({
   password: yup
     .string()
-    .min(6, "Password must be at least 6 characters")
+    .min(6, "Password must be 6 characters long")
     .required("Required"),
   confirm_password: yup
     .string()
@@ -54,12 +54,12 @@ export const profileUpdateSchema = yup.object().shape({
     .string()
     .trim()
     .min(2, "Name must be at least 2 characters")
-    .max(30, "Name cannot exceed 30 characters")
+    .max(30, "Name length should not exceed 30 characters")
     .required("Required"),
 
   gender: yup
     .string()
-    .oneOf(["male", "female", "other"], "Please select a valid gender")
+    .oneOf(["male", "female", "other"], "Required")
     .required("Required"),
   day: yup
     .string()
@@ -69,10 +69,10 @@ export const profileUpdateSchema = yup.object().shape({
     .required("Required"),
   year: yup
     .string()
-    .required("required"),
+    .required("Required"),
   password: yup
     .string()
-    .min(6, "Password must be at least 6 characters")
+    .min(6, "Password must be 6 characters long")
     .optional()
     .transform((value) => (value === "" ? undefined : value)),
   confirm_password: yup
@@ -83,7 +83,7 @@ export const profileUpdateSchema = yup.object().shape({
       is: (password: string) => password && password.length > 0,
       then: (schema) =>
         schema
-          .oneOf([yup.ref("password")], "Passwords must match")
+          .oneOf([yup.ref("password")], "Passwords does not match")
           .required("Please confirm your password"),
     }),
 });

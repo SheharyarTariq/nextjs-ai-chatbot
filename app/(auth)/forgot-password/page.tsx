@@ -58,7 +58,7 @@ export default function Page() {
           type: "success",
           description: "Password reset link sent to your email!",
         });
-        setIsSuccessful(false);
+        setIsSuccessful(true);
         break;
     }
   };

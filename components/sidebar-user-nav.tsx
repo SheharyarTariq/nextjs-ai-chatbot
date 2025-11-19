@@ -77,13 +77,13 @@ export function SidebarUserNav({ user }: { user: User }) {
             </DropdownMenuItem>
             <DropdownMenuSeparator /> */}
             <DropdownMenuItem asChild data-testid="user-nav-item-auth">
-              <Link href="/">
+              <Link href="/" className="hover:cursor-pointer">
                 Home
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild data-testid="user-nav-item-auth">
-              <Link href="/profile">
+              <Link href="/profile" className="hover:cursor-pointer">
                 Profile Settings
               </Link>
             </DropdownMenuItem>

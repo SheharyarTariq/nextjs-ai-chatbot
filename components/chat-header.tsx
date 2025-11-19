@@ -10,7 +10,7 @@ function PureChatHeader({
   user: Session["user"];
 }) {
   return (
-    <header className="sticky top-0 w-full flex items-center gap-2 bg-background px-2 py-1.5 md:px-2">
+    <header className="sticky top-0 w-full flex items-center  gap-2 bg-background px-2 py-1.5 md:px-2">
       <div className="ml-auto">
         <SidebarUserNav user={user} />
       </div>

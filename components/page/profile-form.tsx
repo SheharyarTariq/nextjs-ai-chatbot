@@ -381,7 +381,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
       <div className="flex gap-3 pt-4">
         <Button
           type="submit"
-          className="flex-1"
+          className="flex-1 hover:cursor-pointer"
           disabled={isSubmitting}
         >
           {isSubmitting ? "Saving..." : "Save Changes"}

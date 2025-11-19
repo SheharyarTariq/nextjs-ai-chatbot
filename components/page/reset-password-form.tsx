@@ -28,6 +28,8 @@ export function ResetPasswordForm() {
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const [state, formAction] = useActionState<
     ResetPasswordActionState,
@@ -85,6 +87,9 @@ export function ResetPasswordForm() {
       confirm_password: formData.get("confirm_password") as string,
     };
 
+    setPassword(data.password);
+    setConfirmPassword(data.confirm_password);
+
     try {
       await resetPasswordSchema.validate(data, { abortEarly: false });
       setValidationErrors({});
@@ -141,6 +146,7 @@ export function ResetPasswordForm() {
                 name="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
+                defaultValue={password}
               />
               <button
                 type="button"
@@ -176,6 +182,7 @@ export function ResetPasswordForm() {
                 name="confirm_password"
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="Confirm your password"
+                defaultValue={confirmPassword}
               />
               <button
                 type="button"
