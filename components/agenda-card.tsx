@@ -79,42 +79,38 @@ export function AgendaCard({
   return (
     <>
       <Card className="w-full hover:shadow-md transition-shadow">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2 pt-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold">{day}</CardTitle>
-            <button
+            <CardTitle className="text-base font-semibold">{day}</CardTitle>
+            <Badge
+              variant={completed ? "default" : "secondary"}
+              className={`w-fit ${!completed && !isLoading ? 'cursor-pointer hover:opacity-80' : ''} ${completed || isLoading ? 'cursor-not-allowed' : ''}`}
               onClick={handleIconClick}
-              disabled={completed || isLoading}
-              className="focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 rounded-full disabled:cursor-not-allowed"
-              aria-label={completed ? "Completed" : "Mark as complete"}
             >
               {isLoading ? (
-                <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+                <>
+                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                  Updating...
+                </>
               ) : completed ? (
-                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                "Completed"
               ) : (
-                <Circle className="h-5 w-5 text-gray-300 hover:text-green-400 transition-colors cursor-pointer" />
+                "Pending"
               )}
-            </button>
+            </Badge>
           </div>
-          <Badge
-            variant={completed ? "default" : "secondary"}
-            className="w-fit mt-1"
-          >
-            {completed ? "Completed" : "Pending"}
-          </Badge>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          <div>
-            <p className="font-semibold text-muted-foreground mb-1">Exercise:</p>
+        <CardContent className="space-y-1 text-sm pb-3">
+          <div className="flex gap-1">
+            <p className="font-semibold text-muted-foreground mb-0.5">Exercise:</p>
             <p className="text-foreground">{exerciseDetails}</p>
           </div>
-          <div>
-            <p className="font-semibold text-muted-foreground mb-1">Meals:</p>
+          <div className="flex gap-1">
+            <p className="font-semibold text-muted-foreground mb-0.5">Meals:</p>
             <p className="text-foreground">{mealDetails}</p>
           </div>
-          <div>
-            <p className="font-semibold text-muted-foreground mb-1">Sleep:</p>
+          <div className="flex gap-1">
+            <p className="font-semibold text-muted-foreground mb-0.5">Sleep:</p>
             <p className="text-foreground">{sleepDetails}</p>
           </div>
         </CardContent>
