@@ -1,8 +1,8 @@
 "use client";
 
+import Form from "next/form";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Form from "next/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -15,15 +15,11 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { updateProfile } from "../../app/(chat)/profile/actions";
-import type { User } from "@/lib/db/schema";
 import { Eye, EyeOff } from "lucide-react";
 import { profileUpdateSchema } from "@/lib/validations/auth";
 import { toast } from "@/components/toast";
-import { getAgendaByUserId } from "@/lib/db/queries";
-
-interface ProfileFormProps {
-  user: User;
-}
+import { dayOptions, monthOptions, yearOptions } from "./constants";
+import { ProfileFormProps } from "./types";
 
 export function ProfileForm({ user }: ProfileFormProps) {
   const router = useRouter();
@@ -116,26 +112,6 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
     setIsSubmitting(false);
   };
-
-  const dayOptions = Array.from({ length: 31 }, (_, i) => i + 1);
-
-  const monthOptions = [
-    { value: "1", label: "January" },
-    { value: "2", label: "February" },
-    { value: "3", label: "March" },
-    { value: "4", label: "April" },
-    { value: "5", label: "May" },
-    { value: "6", label: "June" },
-    { value: "7", label: "July" },
-    { value: "8", label: "August" },
-    { value: "9", label: "September" },
-    { value: "10", label: "October" },
-    { value: "11", label: "November" },
-    { value: "12", label: "December" },
-  ];
-
-  const currentYear = new Date().getFullYear();
-  const yearOptions = Array.from({ length: 100 }, (_, i) => currentYear - i);
 
   return (
     <Form action={handleSubmit} className="flex flex-col gap-6">

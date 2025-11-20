@@ -13,7 +13,6 @@ import {
   type ResetPasswordActionState,
   resetPassword,
 } from "../../app/(auth)/actions";
-import { fr } from "zod/v4/locales";
 
 
 export function ResetPasswordForm() {
@@ -79,7 +78,7 @@ export function ResetPasswordForm() {
         router.push("/login");
       }, 2000);
     }
-  }, [state.status, router]);
+  }, [state, router]);
 
   const handleSubmit = async (formData: FormData) => {
     const data = {

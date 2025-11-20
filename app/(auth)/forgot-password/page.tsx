@@ -65,7 +65,7 @@ export default function Page() {
 
   useEffect(() => {
     handleStateChange(state.status);
-  }, [state.status]);
+  }, [state]);
 
   const handleSubmit = async (formData: FormData) => {
     const data = {

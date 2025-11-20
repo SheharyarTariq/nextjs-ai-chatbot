@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useActionState, useEffect, useState, useTransition } from "react";
-
 import { AuthForm } from "@/components/auth-form";
 import { SubmitButton } from "@/components/submit-button";
 import { toast } from "@/components/toast";
@@ -70,7 +69,7 @@ export function LoginForm() {
       router.refresh();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router, searchParams, state.status]);
+  }, [router, searchParams, state]);
 
   const handleSubmit = async (submittedFormData: FormData) => {
     const data = {
