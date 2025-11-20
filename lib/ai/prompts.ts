@@ -29,8 +29,8 @@ This is a guide for using artifacts tools: \`createDocument\` and \`updateDocume
 **When NOT to use \`updateDocument\`:**
 - Immediately after creating a document
 
-Do not update document right after creating it. Wait for user feedback or request to update it.
 `;
+// Do not update document right after creating it. Wait for user feedback or request to update it.
 
 export const regularPrompt = `
 SYSTEM PROMPT — ATHLETE STANDARDS AGENDA
@@ -78,12 +78,18 @@ End Week → Review summary and start new week
 Example midweek start:  📆 WEEK 1 PREPARATION (Remaining days including today)  WED Z2 60 min + Core  THU Strength Lower  FRI Rest / Mobility  SAT Long Run 70 min Z2–Z3  SUN Upper + Review
 
 🧭 ONBOARDING (One question at a time)
+
+IMPORTANT: Before starting onboarding, the system already has access to:
+	•	Name (from user profile)
+	•	Gender (from user profile)
+	•	Age (calculated from date of birth in user profile)
+
+These fields are automatically available and should NOT be asked during onboarding.
+
 Ask step by step:
 	•	Main goal (3 months, measurable examples: "Run a half marathon under 1h20," "Swim 1500 m in 25 min," "Hold Handstand 60 sec"). It has to be a sport related goal, if not the system will say sorry I can not help you with that.
-	•	First name
 	•	Confirm current date → sets start date
-	•	Gender
-	•	Age → then show heart-rate zones in table
+	•	After confirming date, show heart-rate zones in table based on the user's age (already available from profile)
 	•	Weight (kg)
 	•	Height (cm)
 	•	Training frequency (days per week + double-session availability)
@@ -282,6 +288,29 @@ export type RequestHints = {
   country: Geo["country"];
 };
 
+export type UserProfile = {
+  name?: string | null;
+  gender?: string | null;
+  birthDay?: number | null;
+  birthMonth?: number | null;
+  birthYear?: number | null;
+};
+
+const calculateAge = (birthDay?: number | null, birthMonth?: number | null, birthYear?: number | null): number | null => {
+  if (!birthDay || !birthMonth || !birthYear) return null;
+
+  const today = new Date();
+  const birthDate = new Date(birthYear, birthMonth - 1, birthDay);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+
+  return age;
+};
+
 export const getRequestPromptFromHints = (requestHints: RequestHints) => `\
 About the origin of user's request:
 - lat: ${requestHints.latitude}
@@ -290,20 +319,36 @@ About the origin of user's request:
 - country: ${requestHints.country}
 `;
 
+export const getUserProfilePrompt = (userProfile?: UserProfile) => {
+  if (!userProfile) return "";
+
+  const age = calculateAge(userProfile.birthDay, userProfile.birthMonth, userProfile.birthYear);
+
+  return `\n\nUser Profile Information (use this data and DO NOT ask for these fields during onboarding):
+- Name: ${userProfile.name || "Not provided"}
+- Gender: ${userProfile.gender || "Not provided"}
+- Age: ${age !== null ? `${age} years old` : "Not provided"}
+
+IMPORTANT: This information is from the user's profile. Use it throughout conversations and when saving the agenda. Do NOT ask the user for their name, gender, or age.`;
+};
+
 export const systemPrompt = ({
   selectedChatModel,
   requestHints,
+  userProfile,
 }: {
   selectedChatModel: string;
   requestHints: RequestHints;
+  userProfile?: UserProfile;
 }) => {
   const requestPrompt = getRequestPromptFromHints(requestHints);
+  const profilePrompt = getUserProfilePrompt(userProfile);
 
   if (selectedChatModel === "chat-model-reasoning") {
-    return `${regularPrompt}\n\n${requestPrompt}`;
+    return `${regularPrompt}\n\n${requestPrompt}${profilePrompt}`;
   }
 
-  return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}`;
+  return `${regularPrompt}\n\n${requestPrompt}${profilePrompt}\n\n${artifactsPrompt}`;
 };
 
 export const codePrompt = `

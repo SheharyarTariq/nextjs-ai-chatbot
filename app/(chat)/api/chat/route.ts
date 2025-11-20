@@ -20,7 +20,7 @@ import { auth, type UserType } from "@/app/(auth)/auth";
 import type { VisibilityType } from "@/components/visibility-selector";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import type { ChatModel } from "@/lib/ai/models";
-import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
+import { type RequestHints, type UserProfile, systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
 import { createDocument } from "@/lib/ai/tools/create-document";
 import { getWeather } from "@/lib/ai/tools/get-weather";
@@ -38,6 +38,7 @@ import {
   getChatsByUserId,
   getMessageCountByUserId,
   getMessagesByChatId,
+  getUserById,
   saveChat,
   saveMessages,
   updateChatLastContextById,
@@ -174,6 +175,16 @@ export async function POST(request: Request) {
       country,
     };
 
+    // Fetch user profile data
+    const userFromDb = await getUserById(session.user.id);
+    const userProfile: UserProfile = {
+      name: userFromDb?.name,
+      gender: userFromDb?.gender,
+      birthDay: userFromDb?.birthDay,
+      birthMonth: userFromDb?.birthMonth,
+      birthYear: userFromDb?.birthYear,
+    };
+
     await saveMessages({
       messages: [
         {
@@ -199,6 +210,7 @@ export async function POST(request: Request) {
           system: systemPrompt({
             selectedChatModel,
             requestHints,
+            userProfile,
           }),
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),

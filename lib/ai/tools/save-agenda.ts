@@ -18,7 +18,7 @@ export const createSaveAgendaTool = ({
 }: SaveAgendaProps) =>
   tool({
     description:
-      "Save the athlete's training agenda to the database after completing the onboarding process AND generating the initial weekly plan. This should be called once all onboarding information is collected AND the first week's training plan with all session details (exercise, meals, sleep) has been created.",
+      "Save the athlete's training agenda to the database after completing the onboarding process AND generating the initial weekly plan. This should be called once all onboarding information is collected AND the first week's training plan with all session details (exercise, meals, sleep) has been created. NOTE: The user's name, gender, and age are already available from their profile - use those values when saving userData.",
     inputSchema: z.object({
       goal: z
         .string()
@@ -29,11 +29,11 @@ export const createSaveAgendaTool = ({
         .string()
         .describe("The start date for the training plan in ISO format"),
       userData: z.object({
-        name: z.string().describe("The athlete's first name"),
-        gender: z.string().optional().describe("Gender (male/female/other)"),
-        age: z.number().optional().describe("Age in years"),
-        weight: z.number().optional().describe("Weight in kg"),
-        height: z.number().optional().describe("Height in cm"),
+        name: z.string().describe("The athlete's first name (from user profile - do not ask)"),
+        gender: z.string().optional().describe("Gender from user profile (male/female/other) - do not ask"),
+        age: z.number().optional().describe("Age in years (calculated from date of birth in user profile) - do not ask"),
+        weight: z.number().optional().describe("Weight in kg (collected during onboarding)"),
+        height: z.number().optional().describe("Height in cm (collected during onboarding)"),
         heartRateZones: z.any().optional().describe("Heart rate zones table"),
       }),
       trainingFrequency: z
