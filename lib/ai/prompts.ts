@@ -317,6 +317,13 @@ About the origin of user's request:
 - lon: ${requestHints.longitude}
 - city: ${requestHints.city}
 - country: ${requestHints.country}
+
+IMPORTANT - Current Date and Time:
+Today's date is: ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+Current time: ${new Date().toLocaleTimeString('en-US')}
+ISO format: ${new Date().toISOString()}
+
+Use this date when the user asks about "today", when confirming the start date, or when detecting what day of the week it is for the training plan.
 `;
 
 export const getUserProfilePrompt = (userProfile?: UserProfile) => {
