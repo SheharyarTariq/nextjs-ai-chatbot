@@ -175,7 +175,6 @@ export async function POST(request: Request) {
       country,
     };
 
-    // Fetch user profile data
     const userFromDb = await getUserById(session.user.id);
     const userProfile: UserProfile = {
       name: userFromDb?.name,
@@ -207,6 +206,7 @@ export async function POST(request: Request) {
       execute: ({ writer: dataStream }) => {
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
+          temperature: 0.7,
           system: systemPrompt({
             selectedChatModel,
             requestHints,
@@ -218,7 +218,7 @@ export async function POST(request: Request) {
             selectedChatModel === "chat-model-reasoning"
               ? []
               : [
-                  "getWeather",
+                  // "getWeather",
                   "createDocument",
                   "updateDocument",
                   "requestSuggestions",

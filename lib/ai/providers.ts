@@ -20,13 +20,13 @@ const createOpenAIProvider = () => {
 
   return customProvider({
     languageModels: {
-      "chat-model": openai.languageModel("gpt-4.1-mini"),
+      "chat-model": openai.languageModel("gpt-4.1"),
       "chat-model-reasoning": wrapLanguageModel({
         model: openai.languageModel("o4-mini"),
         middleware: extractReasoningMiddleware({ tagName: "think" }),
       }),
-      "title-model": openai.languageModel("gpt-4.1-mini"),
-      "artifact-model": openai.languageModel("gpt-4.1-mini"),
+      "title-model": openai.languageModel("gpt-4.1"),
+      "artifact-model": openai.languageModel("gpt-4.1"),
     },
   });
 };
