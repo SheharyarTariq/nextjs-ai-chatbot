@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Circle, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,9 +21,10 @@ interface AgendaCardProps {
   day: string;
   completed: boolean;
   exerciseDetails: string;
-  mealDetails: string;
-  sleepDetails: string;
+  mealDetails?: string;
+  sleepDetails?: string;
   weekNumber: number;
+  isToday?: boolean;
 }
 
 export function AgendaCard({
@@ -33,6 +34,7 @@ export function AgendaCard({
   mealDetails,
   sleepDetails,
   weekNumber,
+  isToday = false,
 }: AgendaCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -78,10 +80,17 @@ export function AgendaCard({
 
   return (
     <>
-      <Card className="w-full hover:shadow-md transition-shadow">
+      <Card className={`w-full hover:shadow-md transition-shadow ${isToday ? 'border-2 border-primary shadow-md' : ''}`}>
         <CardHeader className="pb-2 pt-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base font-semibold">{day}</CardTitle>
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-base font-semibold">{day}</CardTitle>
+              {isToday && (
+                <Badge variant="outline" className="text-xs">
+                  Today
+                </Badge>
+              )}
+            </div>
             <Badge
               variant={completed ? "default" : "secondary"}
               className={`w-fit ${!completed && !isLoading ? 'cursor-pointer hover:opacity-80' : ''} ${completed || isLoading ? 'cursor-not-allowed' : ''}`}
@@ -105,14 +114,18 @@ export function AgendaCard({
             <p className="font-semibold text-muted-foreground mb-0.5">Exercise:</p>
             <p className="text-foreground">{exerciseDetails}</p>
           </div>
-          <div className="flex gap-1">
-            <p className="font-semibold text-muted-foreground mb-0.5">Meals:</p>
-            <p className="text-foreground">{mealDetails}</p>
-          </div>
-          <div className="flex gap-1">
-            <p className="font-semibold text-muted-foreground mb-0.5">Sleep:</p>
-            <p className="text-foreground">{sleepDetails}</p>
-          </div>
+          {mealDetails && (
+            <div className="flex gap-1">
+              <p className="font-semibold text-muted-foreground mb-0.5">Meals:</p>
+              <p className="text-foreground">{mealDetails}</p>
+            </div>
+          )}
+          {sleepDetails && (
+            <div className="flex gap-1">
+              <p className="font-semibold text-muted-foreground mb-0.5">Sleep:</p>
+              <p className="text-foreground">{sleepDetails}</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 

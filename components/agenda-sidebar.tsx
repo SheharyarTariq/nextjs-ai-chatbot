@@ -1,8 +1,6 @@
 import { auth } from "@/app/(auth)/auth";
 import { getAgendaByUserId } from "@/lib/db/queries";
-import { AgendaCard } from "@/components/agenda-card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ResetAgendaButton } from "@/components/reset-agenda-button";
+import { AgendaSidebarClient } from "@/components/agenda-sidebar-client";
 
 export async function AgendaSidebar() {
   const session = await auth();
@@ -17,41 +15,5 @@ export async function AgendaSidebar() {
     return null;
   }
 
-  // const currentWeekData = agenda.weeklyData.length - 1
-  const currentWeekData = agenda.weeklyData.find(
-    (week: any) => week.weekNumber === agenda.weeklyData?.length
-  );
-
-  if (!currentWeekData || !currentWeekData.sessions) {
-    return null;
-  }
-
-  return (
-    <div className="w-80 border-r bg-background h-full flex flex-col">
-      <div className="p-4 border-b">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <h2 className="text-xl font-bold">Week {agenda.weeklyData.length} Schedule</h2>
-            <p className="text-sm text-muted-foreground mt-1">{agenda.goal}</p>
-          </div>
-          <ResetAgendaButton />
-        </div>
-      </div>
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
-          {currentWeekData.sessions.map((session: any, index: number) => (
-            <AgendaCard
-              key={`${session.day}-${index}`}
-              day={session.day}
-              completed={session.completed || false}
-              exerciseDetails={session.exerciseDetails || "No exercise details"}
-              mealDetails={session.mealDetails || "No meal details"}
-              sleepDetails={session.sleepDetails || "No sleep details"}
-              weekNumber={agenda.currentWeek}
-            />
-          ))}
-        </div>
-      </ScrollArea>
-    </div>
-  );
+  return <AgendaSidebarClient agenda={agenda} />;
 }
