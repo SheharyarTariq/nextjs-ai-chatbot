@@ -80,16 +80,11 @@ export function AgendaCard({
 
   return (
     <>
-      <Card className={`w-full hover:shadow-md transition-shadow ${isToday ? 'border-2 border-primary shadow-md' : ''}`}>
+      <Card className={`w-full hover:shadow-md transition-shadow ${isToday ? 'shadow-md bg-primary-green ' : 'bg-secondary-green'}`}>
         <CardHeader className="pb-2 pt-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <CardTitle className="text-base font-semibold">{day}</CardTitle>
-              {isToday && (
-                <Badge variant="outline" className="text-xs">
-                  Today
-                </Badge>
-              )}
+              <CardTitle className={isToday ? "text-white" : "text-base font-semibold"}>{day}</CardTitle>
             </div>
             <Badge
               variant={completed ? "default" : "secondary"}
@@ -111,19 +106,19 @@ export function AgendaCard({
         </CardHeader>
         <CardContent className="space-y-1 text-sm pb-3">
           <div className="flex gap-1">
-            <p className="font-semibold text-muted-foreground mb-0.5">Exercise:</p>
-            <p className="text-foreground">{exerciseDetails}</p>
+            <p className={`font-semibold mb-0.5 ${isToday ? 'text-white' : 'text-muted-foreground'}`}>Exercise:</p>
+            <p className={isToday ? 'text-white' : 'text-foreground'}>{exerciseDetails}</p>
           </div>
           {mealDetails && (
             <div className="flex gap-1">
-              <p className="font-semibold text-muted-foreground mb-0.5">Meals:</p>
-              <p className="text-foreground">{mealDetails}</p>
+              <p className={`font-semibold mb-0.5 ${isToday ? 'text-white' : 'text-muted-foreground'}`}>Meals:</p>
+              <p className={isToday ? 'text-white' : 'text-foreground'}>{mealDetails}</p>
             </div>
           )}
           {sleepDetails && (
             <div className="flex gap-1">
-              <p className="font-semibold text-muted-foreground mb-0.5">Sleep:</p>
-              <p className="text-foreground">{sleepDetails}</p>
+              <p className={`font-semibold mb-0.5 ${isToday ? 'text-white' : 'text-muted-foreground'}`}>Sleep:</p>
+              <p className={isToday ? 'text-white' : 'text-foreground'}>{sleepDetails}</p>
             </div>
           )}
         </CardContent>

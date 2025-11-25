@@ -47,35 +47,18 @@ export function SidebarUserNav({ user }: { user: User }) {
                 className="h-10 bg-background data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 data-testid="user-nav-button"
               >
-                <Image
-                  alt={user?.email || "User Avatar"}
-                  className="rounded-full"
-                  height={24}
-                  src={`https://avatar.vercel.sh/${user?.email}`}
-                  width={24}
-                />
                 <span className="truncate" data-testid="user-email">
-                  {user?.email || "User"}
+                  {user?.name || "User"}
                 </span>
                 <ChevronDown className="ml-auto" />
               </SidebarMenuButton>
             )}
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-popper-anchor-width)"
+            className="w-(--radix-popper-anchor-width) mr-2"
             data-testid="user-nav-menu"
             side="top"
           >
-            {/* <DropdownMenuItem
-              className="cursor-pointer"
-              data-testid="user-nav-item-theme"
-              onSelect={() =>
-                setTheme(resolvedTheme === "dark" ? "light" : "dark")
-              }
-            >
-              {`Toggle ${resolvedTheme === "light" ? "dark" : "light"} mode`}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator /> */}
             <DropdownMenuItem asChild data-testid="user-nav-item-auth">
               <Link href="/" className="hover:cursor-pointer">
                 Home

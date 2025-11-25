@@ -11,19 +11,16 @@ interface AgendaSidebarClientProps {
 }
 
 export function AgendaSidebarClient({ agenda }: AgendaSidebarClientProps) {
-  const [activeTab, setActiveTab] = useState("today");
+  const [activeTab, setActiveTab] = useState("week");
 
-  // Get current date info
   const today = new Date();
   const daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
   const todayName = daysOfWeek[today.getDay()];
 
-  // Get current week data
   const currentWeekData = agenda.weeklyData.find(
     (week: any) => week.weekNumber === agenda.currentWeek
   );
 
-  // Find today's session
   const todaySession = currentWeekData?.sessions?.find(
     (session: any) => session.day === todayName
   );
@@ -33,7 +30,7 @@ export function AgendaSidebarClient({ agenda }: AgendaSidebarClientProps) {
   }
 
   return (
-    <div className="w-80 border-r bg-background h-full flex flex-col">
+    <div className="w-80 border-r border-t rounded-tr-lg bg-background h-full flex flex-col">
       <div className="p-4 border-b">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
@@ -43,16 +40,15 @@ export function AgendaSidebarClient({ agenda }: AgendaSidebarClientProps) {
           <ResetAgendaButton />
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full ">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="today">Today's Agenda</TabsTrigger>
-            <TabsTrigger value="week">My Agenda</TabsTrigger>
+            <TabsTrigger value="week" className="data-[state=active]:bg-primary-green data-[state=active]:text-white hover:cursor-pointer">My Agenda</TabsTrigger>
+            <TabsTrigger value="today" className="data-[state=active]:bg-primary-green data-[state=active]:text-white hover:cursor-pointer">Today's Agenda</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
 
       <Tabs value={activeTab} className="flex-1 overflow-hidden">
-        {/* Today's Agenda Tab */}
         <TabsContent value="today" className="h-full mt-0">
           <ScrollArea className="h-full p-4">
             <div className="space-y-4">
@@ -86,7 +82,6 @@ export function AgendaSidebarClient({ agenda }: AgendaSidebarClientProps) {
           </ScrollArea>
         </TabsContent>
 
-        {/* My Agenda (Full Week) Tab */}
         <TabsContent value="week" className="h-full mt-0">
           <ScrollArea className="h-full p-4">
             <div className="space-y-4">

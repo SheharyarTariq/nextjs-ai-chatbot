@@ -2,7 +2,6 @@ import { auth } from "@/app/(auth)/auth";
 import { getUserById } from "@/lib/db/queries";
 import { redirect } from "next/navigation";
 import { ProfileForm } from "../../../components/page/profile-form";
-import { ChatHeader } from "@/components/chat-header";
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -17,14 +16,7 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
-  const userWithSessionFields = {
-    ...user,
-    type: session.user.type,
-    role: session.user.role as "admin" | "user",
-  };
-
   return (<>
-      {user.gender && <ChatHeader user={userWithSessionFields} />}
       <div className="flex flex-col items-center justify-center h-full p-4">
         <div className="w-full max-w-2xl">
           <div className="mb-8">
