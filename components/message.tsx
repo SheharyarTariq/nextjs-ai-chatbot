@@ -1,4 +1,6 @@
 "use client";
+import Image from "next/image";
+import logo from "../public/assets/logos.png";
 import type { UseChatHelpers } from "@ai-sdk/react";
 import equal from "fast-deep-equal";
 import { motion } from "framer-motion";
@@ -67,9 +69,11 @@ const PurePreviewMessage = ({
         })}
       >
         {message.role === "assistant" && (
-          <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border">
-            <SparklesIcon size={14} />
-          </div>
+          // <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border">
+          //   <SparklesIcon size={14} />
+          // </div>
+          <Image src={logo} alt="Logo" width={30} height={14}/>
+
         )}
 
         <div
@@ -134,7 +138,7 @@ const PurePreviewMessage = ({
                       data-testid="message-content"
                       style={
                         message.role === "user"
-                          ? { backgroundColor: "#006cff" }
+                          ? { backgroundColor: "#1C6F47" }
                           : undefined
                       }
                     >
@@ -323,9 +327,10 @@ export const ThinkingMessage = () => {
       transition={{ duration: 0.2 }}
     >
       <div className="flex items-start justify-start gap-3">
-        <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border">
-          <SparklesIcon size={14} />
-        </div>
+        {/* <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border"> */}
+          {/* <SparklesIcon size={14} /> */}
+          <Image src={logo} alt="Logo" width={30} height={14}/>
+        {/* </div> */}
 
         <div className="flex w-full flex-col gap-2 md:gap-4">
           <div className="p-0 text-muted-foreground text-sm">

@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
+import logo from "../../public/assets/logos.png";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useActionState, useEffect, useState, useTransition } from "react";
 import { AuthForm } from "@/components/auth-form";
@@ -12,7 +14,7 @@ import { type LoginActionState, login } from "../../app/(auth)/actions";
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
+  
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -20,11 +22,11 @@ export function LoginForm() {
   const [isSuccessful, setIsSuccessful] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [, startTransition] = useTransition();
-
+  
   const [state, formAction] = useActionState<LoginActionState, FormData>(login, {
     status: "idle",
   });
-
+  
   useEffect(() => {
     if (state.status === "failed") {
       toast({
@@ -42,18 +44,18 @@ export function LoginForm() {
         description: "Login Successful",
       });
       setIsSuccessful(true);
-
+      
       const isProfileIncomplete = !state.user?.gender ||
-                                   !state.user?.birthDay ||
-                                   !state.user?.birthMonth ||
-                                   !state.user?.birthYear;
-
+      !state.user?.birthDay ||
+      !state.user?.birthMonth ||
+      !state.user?.birthYear;
+      
       if (isProfileIncomplete) {
         router.push("/profile");
         router.refresh();
         return;
       }
-
+      
       const redirectUrl = searchParams.get("redirectUrl");
       if (redirectUrl) {
         try {
@@ -70,15 +72,15 @@ export function LoginForm() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, searchParams, state]);
-
+  
   const handleSubmit = async (submittedFormData: FormData) => {
     const data = {
       email: submittedFormData.get("email") as string,
       password: submittedFormData.get("password") as string,
     };
-
+    
     setFormData(data);
-
+    
     try {
       await loginSchema.validate(data, { abortEarly: false });
       setValidationErrors({});
@@ -99,11 +101,12 @@ export function LoginForm() {
       });
     }
   };
-
+  
   return (
     <div className="flex h-dvh w-screen items-start justify-center bg-background pt-12 md:items-center md:pt-0">
       <div className="flex w-full max-w-md flex-col gap-12 overflow-hidden rounded-2xl">
         <div className="flex flex-col items-center justify-center gap-2 px-4 text-center sm:px-16">
+          <Image src={logo} alt="Logo" width={100} height={100} />
           <h3 className="font-semibold text-xl dark:text-zinc-50">Sign In</h3>
           <p className="text-gray-500 text-sm dark:text-zinc-400">
             Use your email and password to sign in

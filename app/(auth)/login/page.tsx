@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { LoginForm } from "../../../components/page/login-form";
 import Image from "next/image";
 
+
 export default function Page() {
   return (
     <Suspense fallback={

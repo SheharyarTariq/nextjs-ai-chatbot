@@ -56,7 +56,7 @@ export async function sendPasswordResetEmail(
               .button {
                 display: inline-block;
                 padding: 12px 30px;
-                background-color: #000000;
+                background-color: #1C6F47;
                 color: #ffffff !important;
                 text-decoration: none;
                 border-radius: 6px;

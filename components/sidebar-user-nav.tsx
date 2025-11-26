@@ -44,7 +44,7 @@ export function SidebarUserNav({ user }: { user: User }) {
               </SidebarMenuButton>
             ) : (
               <SidebarMenuButton
-                className="h-10 bg-background data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                className="h-10 hover:cursor-pointer bg-background data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 data-testid="user-nav-button"
               >
                 <span className="truncate" data-testid="user-email">
@@ -67,7 +67,13 @@ export function SidebarUserNav({ user }: { user: User }) {
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild data-testid="user-nav-item-auth">
               <Link href="/profile" className="hover:cursor-pointer">
-                Profile Settings
+                Profile
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild data-testid="user-nav-item-auth">
+              <Link href="#" className="hover:cursor-pointer">
+                Note
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />

@@ -1,18 +1,17 @@
 import Link from "next/link";
+import Image from "next/image";
+import logo from "../../public/assets/logos.png";
+import Form from "next/form";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useActionState, useEffect, useState, useTransition } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import Form from "next/form";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/submit-button";
 import { toast } from "@/components/toast";
 import { resetPasswordSchema } from "@/lib/validations/auth";
-import {
-  type ResetPasswordActionState,
-  resetPassword,
-} from "../../app/(auth)/actions";
+import { type ResetPasswordActionState, resetPassword } from "../../app/(auth)/actions";
 
 
 export function ResetPasswordForm() {
@@ -118,6 +117,7 @@ export function ResetPasswordForm() {
     <div className="flex h-dvh w-screen items-start justify-center bg-background pt-12 md:items-center md:pt-0">
       <div className="flex w-full max-w-md flex-col gap-12 overflow-hidden rounded-2xl">
         <div className="flex flex-col items-center justify-center gap-2 px-4 text-center sm:px-16">
+          <Image src={logo} alt="Logo" width={100} height={100} className="mx-auto mb-4" />
           <h3 className="font-semibold text-xl dark:text-zinc-50">
             Set New Password
           </h3>

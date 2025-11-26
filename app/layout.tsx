@@ -8,12 +8,17 @@ import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://chat.vercel.ai"),
-  title: "Next.js Chatbot Template",
-  description: "Next.js chatbot template using the AI SDK.",
+  title: "Brandfit Coach",
+  description: "Brandfit AI Coach is your personal AI assistant to help you with your fitness journey.",
+   icons: {
+    icon: "/assets/logos.png",
+    shortcut: "/assets/logos.png",
+    apple: "/assets/logos.png",
+  },
 };
 
 export const viewport = {
-  maximumScale: 1, // Disable auto-zoom on mobile Safari
+  maximumScale: 1,
 };
 
 const geist = Geist({

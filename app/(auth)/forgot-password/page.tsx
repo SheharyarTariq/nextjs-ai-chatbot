@@ -1,19 +1,18 @@
 "use client";
 
+import logo from "../../../public/assets/logos.png";
+import Form from "next/form";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState, useTransition } from "react";
-import Form from "next/form";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/submit-button";
 import { toast } from "@/components/toast";
 import { forgotPasswordSchema } from "@/lib/validations/auth";
-import {
-  type ForgotPasswordActionState,
-  forgotPassword,
-} from "../actions";
+import { type ForgotPasswordActionState, forgotPassword } from "../actions";
 
 export default function Page() {
   const router = useRouter();
@@ -98,6 +97,7 @@ export default function Page() {
     <div className="flex h-dvh w-screen items-start justify-center bg-background pt-12 md:items-center md:pt-0">
       <div className="flex w-full max-w-md flex-col gap-12 overflow-hidden rounded-2xl">
         <div className="flex flex-col items-center justify-center gap-2 px-4 text-center sm:px-16">
+          <Image src={logo} alt="Logo" width={100} height={100} />
           <h3 className="font-semibold text-xl dark:text-zinc-50">
             Forgot Password
           </h3>
