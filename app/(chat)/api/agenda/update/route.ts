@@ -23,7 +23,6 @@ export async function PATCH(request: Request) {
       );
     }
 
-    // Get current agenda to validate week and day exist
     const agenda = await getAgendaByUserId({ userId: session.user.id });
 
     if (!agenda) {
@@ -33,7 +32,6 @@ export async function PATCH(request: Request) {
       );
     }
 
-    // Validate that the week exists
     const weekData = agenda.weeklyData?.find(
       (week: any) => week.weekNumber === weekNumber
     );
@@ -45,7 +43,6 @@ export async function PATCH(request: Request) {
       );
     }
 
-    // Validate that the day exists - match by date if provided, otherwise by day name
     const sessionData = weekData.sessions.find(
       (session: any) => {
         if (date && session.date) {
@@ -62,7 +59,6 @@ export async function PATCH(request: Request) {
       );
     }
 
-    // Update the session - the updateAgenda function will handle merging
     const [updatedAgenda] = await updateAgenda({
       userId: session.user.id,
       weeklyData: [
