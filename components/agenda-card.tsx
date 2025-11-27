@@ -19,6 +19,7 @@ import { toast } from "sonner";
 
 interface AgendaCardProps {
   day: string;
+  date?: string;
   completed: boolean;
   exerciseDetails: string;
   mealDetails?: string;
@@ -29,6 +30,7 @@ interface AgendaCardProps {
 
 export function AgendaCard({
   day,
+  date,
   completed,
   exerciseDetails,
   mealDetails,
@@ -57,6 +59,7 @@ export function AgendaCard({
         body: JSON.stringify({
           weekNumber,
           day,
+          date,
           completed: true,
         }),
       });
@@ -80,50 +83,75 @@ export function AgendaCard({
 
   return (
     <>
-      <Card className={`w-full hover:shadow-md transition-shadow ${isToday ? 'shadow-md bg-primary-green ' : 'bg-secondary-green'}`}>
-        <CardHeader className="pb-2 pt-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <CardTitle className={isToday ? "text-white" : "text-base font-semibold"}>{day}</CardTitle>
-            </div>
-            <Badge
-              variant={completed ? "default" : "secondary"}
-              className={`w-fit ${!completed && !isLoading ? 'cursor-pointer hover:opacity-80' : ''} ${completed || isLoading ? 'cursor-not-allowed' : ''}`}
-              onClick={handleIconClick}
-            >
-              {isLoading ? (
+      <Card
+        className={`w-full rounded-2xl border hover:shadow-md transition-shadow ${
+          isToday ? "bg-primary-green text-white" : "bg-secondary-green"
+        }`}
+      >
+        <CardContent className="p-4">
+          <div  className="flex h-full items-center gap-4">
+            <div style={{ height: "-webkit-fill-available" }} className="flex flex-col items-center justify-between">
+              <p className={`text-2xl font-normal ${isToday ? "text-white" : "text-foreground"}`}>
+                {day?.slice(0, 3).toUpperCase()}
+              </p>
+
+              {date && (
                 <>
-                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                  Updating...
+                  <p className={`text-2xl font-bold ${isToday ? "text-white" : "text-foreground"}`}>
+                    {new Date(date).getDate()}
+                  </p>
+                  <p className={`text-2xl font-normal ${isToday ? "text-white" : "text-foreground"}`}>
+                    {new Date(date).toLocaleDateString("en-US", { month: "short" })}
+                  </p>
                 </>
-              ) : completed ? (
-                "Completed"
-              ) : (
-                "Pending"
               )}
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-1 text-sm pb-3">
-          <div className="flex gap-1">
-            <p className={`font-semibold mb-0.5 ${isToday ? 'text-white' : 'text-muted-foreground'}`}>Exercise:</p>
-            <p className={isToday ? 'text-white' : 'text-foreground'}>{exerciseDetails}</p>
-          </div>
-          {mealDetails && (
-            <div className="flex gap-1">
-              <p className={`font-semibold mb-0.5 ${isToday ? 'text-white' : 'text-muted-foreground'}`}>Meals:</p>
-              <p className={isToday ? 'text-white' : 'text-foreground'}>{mealDetails}</p>
             </div>
-          )}
-          {sleepDetails && (
-            <div className="flex gap-1">
-              <p className={`font-semibold mb-0.5 ${isToday ? 'text-white' : 'text-muted-foreground'}`}>Sleep:</p>
-              <p className={isToday ? 'text-white' : 'text-foreground'}>{sleepDetails}</p>
+
+            <div className="flex-1">
+              <div className="flex items-start justify-between gap-2">
+                <h3 className={`font-semibold leading-snug ${
+                  isToday ? "text-white" : "text-foreground"
+                }`}>
+                  {exerciseDetails}
+                </h3>
+
+                <Badge
+                  variant={completed && isToday ? "secondary" : completed ? "default" : "secondary"}
+                  className={`whitespace-nowrap ${
+                    !completed && !isLoading ? "cursor-pointer hover:opacity-80" : ""
+                  } ${completed || isLoading ? "cursor-not-allowed" : ""}`}
+                  onClick={handleIconClick}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                      Updating...
+                    </>
+                  ) : completed ? (
+                    "Completed"
+                  ) : (
+                    "Pending"
+                  )}
+                </Badge>
+              </div>
+              {mealDetails && (
+                <p className={`mt-1 text-sm ${
+                  isToday ? "text-white/90" : "text-muted-foreground"
+                }`}>
+                  {mealDetails}
+                </p>
+              )}
+              {sleepDetails && (
+                <p className={`text-sm ${
+                  isToday ? "text-white/90" : "text-muted-foreground"
+                }`}>
+                  {sleepDetails}
+                </p>
+              )}
             </div>
-          )}
+          </div>
         </CardContent>
       </Card>
-
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

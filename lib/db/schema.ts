@@ -26,6 +26,7 @@ export const user = pgTable("User", {
   birthDay: integer("birthDay"),
   birthMonth: integer("birthMonth"),
   birthYear: integer("birthYear"),
+  notes: text("notes"),
 });
 
 export type User = InferSelectModel<typeof user>;
@@ -208,6 +209,7 @@ export const agenda = pgTable("Agenda", {
     weekNumber: number;
     sessions: Array<{
       day: string;
+      date: string;
       completed: boolean;
       rating?: number;
       meals?: boolean;
@@ -217,7 +219,7 @@ export const agenda = pgTable("Agenda", {
       currentDayNumber?: number;
       totalTrainingDays?: number;
       exerciseDetails?: string;
-      mealDetails?: string; 
+      mealDetails?: string;
       sleepDetails?: string;
     }>;
   }>>(),

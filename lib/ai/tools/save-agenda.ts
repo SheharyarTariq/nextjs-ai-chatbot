@@ -59,6 +59,9 @@ export const createSaveAgendaTool = ({
                 day: z
                   .string()
                   .describe("Day of the week (MON, TUE, WED, THU, FRI, SAT, SUN)"),
+                date: z
+                  .string()
+                  .describe("The actual calendar date for this session in ISO format (YYYY-MM-DD). Must be calculated based on the start date and day of week."),
                 completed: z
                   .boolean()
                   .default(false)

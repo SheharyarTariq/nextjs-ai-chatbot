@@ -30,6 +30,9 @@ export const createUpdateAgendaTool = ({ session, dataStream }: UpdateAgendaProp
                   .describe(
                     "Day of the week (MON, TUE, WED, THU, FRI, SAT, SUN)"
                   ),
+                date: z
+                  .string()
+                  .describe("The actual calendar date for this session in ISO format (YYYY-MM-DD)"),
                 completed: z
                   .boolean()
                   .describe("Whether the training session was completed"),

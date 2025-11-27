@@ -14,7 +14,7 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json();
-    const { weekNumber, day, completed } = body;
+    const { weekNumber, day, date, completed } = body;
 
     if (typeof weekNumber !== "number" || !day || typeof completed !== "boolean") {
       return NextResponse.json(
@@ -45,9 +45,14 @@ export async function PATCH(request: Request) {
       );
     }
 
-    // Validate that the day exists
+    // Validate that the day exists - match by date if provided, otherwise by day name
     const sessionData = weekData.sessions.find(
-      (session: any) => session.day === day
+      (session: any) => {
+        if (date && session.date) {
+          return session.date === date;
+        }
+        return session.day === day;
+      }
     );
 
     if (!sessionData) {
