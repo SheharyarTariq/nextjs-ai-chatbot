@@ -20,7 +20,7 @@ import {
 import { LoaderIcon } from "./icons";
 import { toast } from "./toast";
 import Link from "next/link";
-import { NoteModal } from "./note-modal";
+
 
 export function SidebarUserNav({ user }: { user: User }) {
   const { status } = useSession();
@@ -82,16 +82,7 @@ export function SidebarUserNav({ user }: { user: User }) {
                 <DropdownMenuSeparator />
               </>
             )}
-            <NoteModal
-              trigger={
-                <DropdownMenuItem
-                  data-testid="user-nav-item-auth"
-                  onSelect={(e) => e.preventDefault()}
-                >
-                  <span className="hover:cursor-pointer">Note</span>
-                </DropdownMenuItem>
-              }
-            />
+
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild data-testid="user-nav-item-auth">
               <button

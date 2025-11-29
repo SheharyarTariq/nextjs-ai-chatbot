@@ -26,7 +26,6 @@ export const user = pgTable("User", {
   birthDay: integer("birthDay"),
   birthMonth: integer("birthMonth"),
   birthYear: integer("birthYear"),
-  notes: text("notes"),
 });
 
 export type User = InferSelectModel<typeof user>;

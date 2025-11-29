@@ -942,38 +942,4 @@ export async function deleteAgendaAndChatByUserId({ userId }: { userId: string }
   }
 }
 
-export async function updateUserNotes({
-  userId,
-  notes,
-}: {
-  userId: string;
-  notes: string;
-}) {
-  try {
-    return await db
-      .update(user)
-      .set({ notes })
-      .where(eq(user.id, userId))
-      .returning();
-  } catch (_error) {
-    throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to update user notes"
-    );
-  }
-}
 
-export async function getUserNotes({ userId }: { userId: string }) {
-  try {
-    const [selectedUser] = await db
-      .select({ notes: user.notes })
-      .from(user)
-      .where(eq(user.id, userId));
-    return selectedUser?.notes || null;
-  } catch (_error) {
-    throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to get user notes"
-    );
-  }
-}
