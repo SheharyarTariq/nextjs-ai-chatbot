@@ -72,6 +72,16 @@ export function SidebarUserNav({ user }: { user: User }) {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
+            {user.role === "admin" && (
+              <>
+                <DropdownMenuItem asChild data-testid="user-nav-item-admin">
+                  <Link href="/admin" className="hover:cursor-pointer">
+                    Admin Settings
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
             <NoteModal
               trigger={
                 <DropdownMenuItem
