@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
 import {
@@ -14,6 +14,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -26,6 +35,11 @@ interface AgendaCardProps {
   sleepDetails?: string;
   weekNumber: number;
   isToday?: boolean;
+  rating?: number;
+  energy?: number;
+  meals?: boolean;
+  sleep?: boolean;
+  notes?: string;
 }
 
 export function AgendaCard({
@@ -37,18 +51,34 @@ export function AgendaCard({
   sleepDetails,
   weekNumber,
   isToday = false,
+  rating: initialRating,
+  energy: initialEnergy,
+  meals: initialMeals,
+  sleep: initialSleep,
+  notes: initialNotes,
 }: AgendaCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Form state
+  const [rating, setRating] = useState(initialRating?.toString() || "2");
+  const [energy, setEnergy] = useState(initialEnergy?.toString() || "2");
+  const [meals, setMeals] = useState(initialMeals || false);
+  const [sleep, setSleep] = useState(initialSleep || false);
+  const [notes, setNotes] = useState(initialNotes || "");
+
   const router = useRouter();
 
   const handleIconClick = () => {
-    if (!completed) {
-      setIsDialogOpen(true);
-    }
+    setIsDialogOpen(true);
   };
 
   const handleConfirm = async () => {
+    if (completed) {
+      setIsDialogOpen(false);
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await fetch("/api/agenda/update", {
@@ -61,6 +91,11 @@ export function AgendaCard({
           day,
           date,
           completed: true,
+          rating: parseInt(rating),
+          energy: parseInt(energy),
+          meals,
+          sleep,
+          notes,
         }),
       });
 
@@ -89,7 +124,7 @@ export function AgendaCard({
         }`}
       >
         <CardContent className="p-4">
-          <div  className="flex h-full items-center gap-4">
+          <div className="flex h-full items-center gap-4">
             <div style={{ height: "-webkit-fill-available" }} className="flex flex-col items-center justify-between">
               <p className={`text-2xl font-normal ${isToday ? "text-white" : "text-foreground"}`}>
                 {day?.slice(0, 3).toUpperCase()}
@@ -117,9 +152,9 @@ export function AgendaCard({
 
                 <Badge
                   variant={completed && isToday ? "secondary" : completed ? "default" : "secondary"}
-                  className={`whitespace-nowrap ${
-                    !completed && !isLoading ? "cursor-pointer hover:opacity-80" : ""
-                  } ${completed || isLoading ? "cursor-not-allowed" : ""}`}
+                  className={`whitespace-nowrap cursor-pointer hover:opacity-80 ${
+                    isLoading ? "cursor-not-allowed" : ""
+                  }`}
                   onClick={handleIconClick}
                 >
                   {isLoading ? (
@@ -153,24 +188,102 @@ export function AgendaCard({
         </CardContent>
       </Card>
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Mark as Completed</AlertDialogTitle>
+            <AlertDialogTitle>
+              {completed ? "Session Details" : "Mark Session as Completed"}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to mark {day} as completed? This will update
-              your training progress.
+              {completed 
+                ? "Here are the details you recorded for this session." 
+                : "Please provide details about your session."}
             </AlertDialogDescription>
           </AlertDialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="rating">Session Rating</Label>
+                <Select value={rating} onValueChange={setRating} disabled={completed}>
+                  <SelectTrigger id="rating">
+                    <SelectValue placeholder="Select rating" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 - Low</SelectItem>
+                    <SelectItem value="2">2 - Average</SelectItem>
+                    <SelectItem value="3">3 - Strong</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="energy">Energy Level</Label>
+                <Select value={energy} onValueChange={setEnergy} disabled={completed}>
+                  <SelectTrigger id="energy">
+                    <SelectValue placeholder="Select energy" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 - Low</SelectItem>
+                    <SelectItem value="2">2 - Stable</SelectItem>
+                    <SelectItem value="3">3 - High</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className={`flex items-center space-x-2 border p-3 rounded-md ${completed ? "opacity-70" : ""}`}>
+                <input
+                  type="checkbox"
+                  id="meals"
+                  checked={meals}
+                  onChange={(e) => setMeals(e.target.checked)}
+                  disabled={completed}
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary disabled:cursor-not-allowed"
+                />
+                <Label htmlFor="meals" className={completed ? "cursor-not-allowed" : "cursor-pointer"}>Meals Completed</Label>
+              </div>
+              
+              <div className={`flex items-center space-x-2 border p-3 rounded-md ${completed ? "opacity-70" : ""}`}>
+                <input
+                  type="checkbox"
+                  id="sleep"
+                  checked={sleep}
+                  onChange={(e) => setSleep(e.target.checked)}
+                  disabled={completed}
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary disabled:cursor-not-allowed"
+                />
+                <Label htmlFor="sleep" className={completed ? "cursor-not-allowed" : "cursor-pointer"}>Sleep Completed</Label>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="notes">Notes</Label>
+              <Textarea
+                id="notes"
+                placeholder="How did it go?"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                readOnly={completed}
+                className={completed ? "bg-muted" : ""}
+              />
+            </div>
+          </div>
+
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+            {!completed && (
+              <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+            )}
             <AlertDialogAction onClick={handleConfirm} disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Updating...
+                  Saving...
                 </>
+              ) : completed ? (
+                "Close"
               ) : (
-                "Confirm"
+                "Save & Complete"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

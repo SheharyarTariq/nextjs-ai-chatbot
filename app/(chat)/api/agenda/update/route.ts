@@ -14,7 +14,7 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json();
-    const { weekNumber, day, date, completed } = body;
+    const { weekNumber, day, date, completed, rating, meals, sleep, energy, notes } = body;
 
     if (typeof weekNumber !== "number" || !day || typeof completed !== "boolean") {
       return NextResponse.json(
@@ -68,6 +68,11 @@ export async function PATCH(request: Request) {
             {
               ...sessionData,
               completed,
+              rating,
+              meals,
+              sleep,
+              energy,
+              notes,
             },
           ],
         },

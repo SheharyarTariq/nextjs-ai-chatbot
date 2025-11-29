@@ -23,14 +23,14 @@ export function AgendaSidebarClient({ agenda }: AgendaSidebarClientProps) {
   );
 
   const todaySession = currentWeekData?.sessions?.find(
-    (session: any) => session.date === todayDateString || session.day === todayName
+    (session: any) => session.date === todayDateString
   );
 
   if (!currentWeekData || !currentWeekData.sessions) {
     return null;
   }
 
-  console.log("AgendaSidebarClient - todaySession:", currentWeekData); //:todo remove
+
   return (
     <div className="p-5">
       <div className="w-88 border rounded-lg bg-background h-full flex flex-col">
@@ -67,11 +67,16 @@ export function AgendaSidebarClient({ agenda }: AgendaSidebarClientProps) {
                       sleepDetails={todaySession.sleepDetails}
                       weekNumber={agenda.currentWeek}
                       isToday={true}
+                      rating={todaySession.rating}
+                      energy={todaySession.energy}
+                      meals={todaySession.meals}
+                      sleep={todaySession.sleep}
+                      notes={todaySession.notes}
                     />
                   </div>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
-                    <p className="text-sm">No session scheduled for today.</p>
+                    <p className="text-sm">No session pending/scheduled for today.</p>
                     <p className="text-sm mt-2">Enjoy your rest day!</p>
                   </div>
                 )}
@@ -92,7 +97,12 @@ export function AgendaSidebarClient({ agenda }: AgendaSidebarClientProps) {
                     mealDetails={session.mealDetails}
                     sleepDetails={session.sleepDetails}
                     weekNumber={agenda.currentWeek}
-                    isToday={session.date === todayDateString || session.day === todayName}
+                    isToday={session.date === todayDateString}
+                    rating={session.rating}
+                    energy={session.energy}
+                    meals={session.meals}
+                    sleep={session.sleep}
+                    notes={session.notes}
                   />
                 ))}
               </div>
