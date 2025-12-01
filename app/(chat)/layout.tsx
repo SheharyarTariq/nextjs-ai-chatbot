@@ -36,7 +36,7 @@ export default async function Layout({
           <div className="flex flex-col w-full h-screen">
 
             {user?.gender && (
-              <div className="sticky top-0 z-50 bg-[#F5F5F5]">
+              <div className="sticky top-0 z-50">
                 <ChatHeader user={userWithSessionFields} />
               </div>
             )}
