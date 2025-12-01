@@ -60,6 +60,15 @@ import postgres from "postgres";
 const client = postgres(process.env.POSTGRES_URL!);
 const db = drizzle(client);
 
+import * as fs from 'fs';
+import * as path from 'path';
+
+function logToDebugFile(message: string) {
+    const logPath = path.join(process.cwd(), 'debug-chat.log');
+    const timestamp = new Date().toISOString();
+    fs.appendFileSync(logPath, `[${timestamp}] ${message}\n`);
+}
+
 const openai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY,
 });
@@ -218,10 +227,15 @@ export async function POST(request: Request) {
     // RAG: Retrieve relevant context
     let contextText = "";
     try {
+      const userMessageText = message.parts.filter(p => p.type === 'text').map(p => p.text).join('\n');
+      logToDebugFile(`Generating embedding for query: ${userMessageText.substring(0, 50)}...`);
+      
       const { embedding } = await embed({
         model: openai.embedding('text-embedding-3-small'),
-        value: message.parts.filter(p => p.type === 'text').map(p => p.text).join('\n'),
+        value: userMessageText,
       });
+
+      logToDebugFile("Embedding generated successfully. Querying database for similar chunks...");
 
       const similarity = sql<number>`1 - (${embeddings.embedding} <=> ${JSON.stringify(embedding)}::vector)`;
 
@@ -231,14 +245,18 @@ export async function POST(request: Request) {
           similarity,
         })
         .from(embeddings)
-        .where(gt(similarity, 0.5))
+        .where(gt(similarity, 0.3))
         .orderBy(desc(similarity))
         .limit(5);
 
+      logToDebugFile(`Found ${similarChunks.length} similar chunks.`);
       if (similarChunks.length > 0) {
+        logToDebugFile(`Top chunk similarity: ${similarChunks[0].similarity}`);
+        logToDebugFile(`Top chunk text preview: ${similarChunks[0].text.substring(0, 100)}...`);
         contextText = similarChunks.map(chunk => chunk.text).join("\n\n");
       }
-    } catch (error) {
+    } catch (error: any) {
+      logToDebugFile(`Error retrieving context: ${error.message}`);
       console.error("Error retrieving context:", error);
     }
 
@@ -251,7 +269,7 @@ export async function POST(request: Request) {
             selectedChatModel,
             requestHints,
             userProfile,
-          }) + (contextText ? `\n\nRelevant context from uploaded books:\n${contextText}` : ""),
+          }) + (contextText ? `\n\nIMPORTANT: You have access to the following content from the "Athlete Standards" book/knowledge base. Use this information to answer the user's questions, explain concepts, or provide quotes. This is your core knowledge source:\n\n${contextText}` : ""),
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
           experimental_activeTools:
