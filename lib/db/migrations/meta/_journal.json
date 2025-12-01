@@ -113,13 +113,6 @@
       "when": 1764450596448,
       "tag": "0015_quick_speed",
       "breakpoints": true
-    },
-    {
-      "idx": 16,
-      "version": "7",
-      "when": 1764595770007,
-      "tag": "0016_slimy_terror",
-      "breakpoints": true
     }
   ]
 }
