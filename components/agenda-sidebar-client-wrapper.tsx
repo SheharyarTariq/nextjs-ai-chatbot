@@ -5,9 +5,9 @@ import type { ReactNode } from "react";
 
 export function AgendaSidebarClientWrapper({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const isProfilePage = pathname === "/profile";
+  const isChatPage = pathname.startsWith("/chat/");
 
-  if (isProfilePage) {
+  if (!isChatPage) {
     return null;
   }
 

@@ -21,7 +21,7 @@ export default async function ProfilePage() {
         <div className="w-full max-w-2xl">
           <div className="mb-8">
             <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-              Profile Settings
+              Profile
             </h1>
             <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
               Manage your account information and preferences

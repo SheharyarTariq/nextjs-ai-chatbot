@@ -50,6 +50,19 @@ import type { AppUsage } from "@/lib/usage";
 import { convertToUIMessages, generateUUID } from "@/lib/utils";
 import { generateTitleFromUserMessage } from "../../actions";
 import { type PostRequestBody, postRequestBodySchema } from "./schema";
+import { createOpenAI } from "@ai-sdk/openai";
+import { embed } from "ai";
+import { embeddings } from "@/lib/db/schema";
+import { cosineDistance, desc, gt, sql } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+
+const client = postgres(process.env.POSTGRES_URL!);
+const db = drizzle(client);
+
+const openai = createOpenAI({
+  apiKey: process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+});
 
 export const maxDuration = 60;
 
@@ -202,6 +215,34 @@ export async function POST(request: Request) {
 
     let finalMergedUsage: AppUsage | undefined;
 
+    // RAG: Retrieve relevant context
+    let contextText = "";
+    try {
+      const { embedding } = await embed({
+        model: openai.embedding('text-embedding-3-small'),
+        value: message.parts.filter(p => p.type === 'text').map(p => p.text).join('\n'),
+      });
+
+      const similarity = sql<number>`1 - (${embeddings.embedding} <=> ${JSON.stringify(embedding)})`;
+
+      const similarChunks = await db
+        .select({
+          text: embeddings.originalText,
+          similarity,
+        })
+        .from(embeddings)
+        .where(gt(similarity, 0.5)) // Threshold for similarity
+        .orderBy(desc(similarity))
+        .limit(5);
+
+      if (similarChunks.length > 0) {
+        contextText = similarChunks.map(chunk => chunk.text).join("\n\n");
+        console.log("Found relevant context:", similarChunks.length, "chunks");
+      }
+    } catch (error) {
+      console.error("Error retrieving context:", error);
+    }
+
     const stream = createUIMessageStream({
       execute: ({ writer: dataStream }) => {
         const result = streamText({
@@ -211,22 +252,22 @@ export async function POST(request: Request) {
             selectedChatModel,
             requestHints,
             userProfile,
-          }),
+          }) + (contextText ? `\n\nRelevant context from uploaded books:\n${contextText}` : ""),
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
           experimental_activeTools:
             selectedChatModel === "chat-model-reasoning"
               ? []
               : [
-                  // "getWeather",
-                  "createDocument",
-                  "updateDocument",
-                  "requestSuggestions",
-                  "getAgenda",
-                  "saveAgenda",
-                  "updateAgenda",
-                  "deleteAgenda",
-                ],
+                // "getWeather",
+                "createDocument",
+                "updateDocument",
+                "requestSuggestions",
+                "getAgenda",
+                "saveAgenda",
+                "updateAgenda",
+                "deleteAgenda",
+              ],
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
             getWeather,

@@ -75,7 +75,7 @@ export function SidebarUserNav({ user }: { user: User }) {
             {user.role === "admin" && (
               <>
                 <DropdownMenuItem asChild data-testid="user-nav-item-admin">
-                  <Link href="/admin" className="hover:cursor-pointer">
+                  <Link href="/admin/books" className="hover:cursor-pointer">
                     Admin Settings
                   </Link>
                 </DropdownMenuItem>
@@ -83,7 +83,6 @@ export function SidebarUserNav({ user }: { user: User }) {
               </>
             )}
 
-            <DropdownMenuSeparator />
             <DropdownMenuItem asChild data-testid="user-nav-item-auth">
               <button
                 className="w-full cursor-pointer"

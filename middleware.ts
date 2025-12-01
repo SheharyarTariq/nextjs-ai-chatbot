@@ -20,8 +20,9 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
-    secureCookie: !isDevelopmentEnvironment,
   });
+
+  console.log("Middleware: Cookies:", request.cookies.getAll().map(c => c.name));
 
   if (!token) {
     if (["/login", "/register", "/forgot-password", "/reset-password"].includes(pathname)) {
@@ -35,6 +36,15 @@ export async function middleware(request: NextRequest) {
 
   if (token && ["/login", "/register", "/forgot-password", "/reset-password"].includes(pathname)) {
     return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  if (pathname.startsWith("/admin")) {
+    console.log("Middleware: Accessing admin route", pathname);
+    console.log("Middleware: Token role:", token?.role);
+    if (token?.role !== "admin") {
+      console.log("Middleware: Redirecting to / due to missing admin role");
+      return NextResponse.redirect(new URL("/", request.url));
+    }
   }
 
   return NextResponse.next();

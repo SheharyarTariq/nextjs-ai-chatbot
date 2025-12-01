@@ -227,3 +227,35 @@ export const agenda = pgTable("Agenda", {
 });
 
 export type Agenda = InferSelectModel<typeof agenda>;
+
+export const book = pgTable("Book", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  name: text("name").notNull(),
+  uploadDate: timestamp("uploadDate").notNull().defaultNow(),
+  size: varchar("size", { length: 32 }),
+  type: varchar("type", { length: 16 }).notNull().default("pdf"),
+  processingStatus: varchar("processingStatus", {
+    enum: ["queued", "processing", "completed", "failed"]
+  }).notNull().default("queued"),
+  textContent: text("textContent"),
+  totalChunks: integer("totalChunks"),
+  processedChunks: integer("processedChunks"),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => user.id),
+});
+
+export type Book = InferSelectModel<typeof book>;
+
+export const embeddings = pgTable("embeddings", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  bookId: uuid("book_id")
+    .notNull()
+    .references(() => book.id, { onDelete: 'cascade' }),
+  chunkIndex: integer("chunk_index").notNull(),
+  originalText: text("original_text").notNull(),
+  embedding: varchar("embedding").notNull(), // Vector column for pgvector embeddings
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type Embedding = InferSelectModel<typeof embeddings>;
