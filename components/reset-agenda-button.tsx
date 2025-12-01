@@ -3,18 +3,9 @@
 import { useState } from "react";
 import { Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { DeleteModal } from "@/components/delete-modal";
 
 export function ResetAgendaButton() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -59,35 +50,15 @@ export function ResetAgendaButton() {
         <Trash2 className="h-4 w-4" />
       </Button>
 
-      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Reset Agenda and Conversation</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to reset your agenda and delete the entire
-              conversation? This action cannot be undone. All your training data,
-              progress, and chat history will be permanently deleted.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleReset}
-              disabled={isLoading}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Resetting...
-                </>
-              ) : (
-                "Reset Everything"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteModal
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        onConfirm={handleReset}
+        loading={isLoading}
+        title="Reset Agenda and Conversation"
+        description="Are you sure you want to reset your agenda and delete the entire conversation? This action cannot be undone. All your training data, progress, and chat history will be permanently deleted."
+        confirmText="Reset Everything"
+      />
     </>
   );
 }

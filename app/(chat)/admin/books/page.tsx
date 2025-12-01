@@ -7,20 +7,17 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Upload, Book, FileText } from "lucide-react";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { Book as BookType } from "@/lib/db/schema";
+import { DeleteModal } from "@/components/delete-modal";
 
 export default function BooksPage() {
     const router = useRouter();
     const { data: session, status } = useSession();
     const [books, setBooks] = useState<BookType[]>([]);
     const [isUploading, setIsUploading] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [bookToDelete, setBookToDelete] = useState<string | null>(null);
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -99,11 +96,17 @@ export default function BooksPage() {
         }
     };
 
-    const handleDeleteBook = async (bookId: string) => {
-        if (!confirm("Are you sure you want to delete this book?")) return;
+    const handleDeleteClick = (bookId: string) => {
+        setBookToDelete(bookId);
+        setDeleteModalOpen(true);
+    };
 
+    const confirmDeleteBook = async () => {
+        if (!bookToDelete) return;
+
+        setIsDeleting(true);
         try {
-            const response = await fetch(`/api/books?id=${bookId}`, {
+            const response = await fetch(`/api/books?id=${bookToDelete}`, {
                 method: "DELETE",
             });
 
@@ -116,6 +119,10 @@ export default function BooksPage() {
         } catch (error) {
             console.error("Error deleting book:", error);
             toast.error("Failed to delete book");
+        } finally {
+            setIsDeleting(false);
+            setDeleteModalOpen(false);
+            setBookToDelete(null);
         }
     };
 
@@ -222,7 +229,7 @@ export default function BooksPage() {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => handleDeleteBook(book.id)}
+                                    onClick={() => handleDeleteClick(book.id)}
                                     className="text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
                                 >
                                     <Trash2 className="h-4 w-4" />
@@ -232,6 +239,15 @@ export default function BooksPage() {
                     )}
                 </div>
             </div>
+
+            <DeleteModal
+                open={deleteModalOpen}
+                onOpenChange={setDeleteModalOpen}
+                onConfirm={confirmDeleteBook}
+                loading={isDeleting}
+                title="Delete Book"
+                description="Are you sure you want to delete this book? This action cannot be undone."
+            />
         </div>
     );
 }
