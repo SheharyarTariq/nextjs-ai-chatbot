@@ -231,13 +231,12 @@ export async function POST(request: Request) {
           similarity,
         })
         .from(embeddings)
-        .where(gt(similarity, 0.5)) // Threshold for similarity
+        .where(gt(similarity, 0.5))
         .orderBy(desc(similarity))
         .limit(5);
 
       if (similarChunks.length > 0) {
         contextText = similarChunks.map(chunk => chunk.text).join("\n\n");
-        console.log("Found relevant context:", similarChunks.length, "chunks");
       }
     } catch (error) {
       console.error("Error retrieving context:", error);

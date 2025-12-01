@@ -13,7 +13,6 @@ export const runtime = 'nodejs';
 const client = postgres(process.env.POSTGRES_URL!);
 const db = drizzle(client);
 
-// Helper to chunk text
 function chunkText(text: string, chunkSize: number = 1000, overlap: number = 200): string[] {
     const chunks: string[] = [];
     let startIndex = 0;
@@ -30,9 +29,7 @@ function chunkText(text: string, chunkSize: number = 1000, overlap: number = 200
 export async function POST(request: NextRequest) {
     const session = await auth();
 
-    // Debug API Key
     const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
-    console.log("API Key present:", !!apiKey);
 
     const openai = createOpenAI({
         apiKey: apiKey,

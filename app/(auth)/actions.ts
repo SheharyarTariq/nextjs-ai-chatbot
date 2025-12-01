@@ -62,7 +62,6 @@ export const login = async (
     }
 
     const [user] = await getUser(validatedData.email);
-    console.log("Login Action Debug: User object:", user);
 
     return {
       status: "success",

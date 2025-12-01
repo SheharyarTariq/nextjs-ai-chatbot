@@ -64,8 +64,8 @@ export default function BooksPage() {
             return;
         }
 
-        if (file.size > 150 * 1024 * 1024) {
-            toast.error("File size must be less than 150MB");
+        if (file.size > 30 * 1024 * 1024) {
+            toast.error("File size too big. File size should be less than 30mb");
             return;
         }
 
@@ -183,7 +183,7 @@ export default function BooksPage() {
                             {isUploading ? "Uploading..." : "Choose File"}
                         </Button>
                         <span className="text-sm text-gray-500">
-                            PDF, DOCX, and TXT files up to 150MB
+                            PDF, DOCX, and TXT files up to 30MB
                         </span>
                     </div>
 

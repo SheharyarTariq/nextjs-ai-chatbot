@@ -131,8 +131,6 @@ export const createSaveAgendaTool = ({
           weeklyData: input.weeklyData || [],
         };
 
-        console.log("Attempting to save agenda with data:", JSON.stringify(agendaData, null, 2));
-
         const [agenda] = await saveAgenda(agendaData);
 
         revalidatePath("/", "layout");

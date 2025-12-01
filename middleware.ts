@@ -27,8 +27,6 @@ export async function middleware(request: NextRequest) {
     console.warn("Middleware: AUTH_SECRET is MISSING");
   }
 
-  console.log("Middleware: Cookies:", request.cookies.getAll().map(c => c.name));
-
   if (!token) {
     if (["/login", "/register", "/forgot-password", "/reset-password"].includes(pathname)) {
       return NextResponse.next();
@@ -44,10 +42,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith("/admin")) {
-    console.log("Middleware: Accessing admin route", pathname);
-    console.log("Middleware: Token role:", token?.role);
     if (token?.role !== "admin") {
-      console.log("Middleware: Redirecting to / due to missing admin role");
       return NextResponse.redirect(new URL("/", request.url));
     }
   }
