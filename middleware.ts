@@ -20,7 +20,12 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
+    secureCookie: process.env.NODE_ENV === "production",
   });
+
+  if (!process.env.AUTH_SECRET) {
+    console.warn("Middleware: AUTH_SECRET is MISSING");
+  }
 
   console.log("Middleware: Cookies:", request.cookies.getAll().map(c => c.name));
 
