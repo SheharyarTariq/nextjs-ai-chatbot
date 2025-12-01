@@ -177,6 +177,20 @@ export async function updateUserProfile({
   }
 }
 
+export async function updateUserRole(userId: string, role: "admin" | "user") {
+  try {
+    return await db
+      .update(user)
+      .set({ role })
+      .where(eq(user.id, userId));
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to update user role"
+    );
+  }
+}
+
 export async function saveChat({
   id,
   userId,

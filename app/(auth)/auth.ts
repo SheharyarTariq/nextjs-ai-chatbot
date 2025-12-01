@@ -3,7 +3,7 @@ import NextAuth, { type DefaultSession } from "next-auth";
 import type { DefaultJWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
 import { DUMMY_PASSWORD } from "@/lib/constants";
-import { getUser } from "@/lib/db/queries";
+import { getUser, updateUserRole } from "@/lib/db/queries";
 import { authConfig } from "./auth.config";
 
 export type UserType = "regular";
@@ -88,6 +88,11 @@ export const {
         console.log("Auth Debug: Admin emails:", adminEmails);
         const userRole: UserRole = adminEmails.includes(user.email || '') ? "admin" : "user";
         console.log("Auth Debug: Assigned role:", userRole);
+        console.log("Auth Debug: User object:", user);
+
+        if (userRole !== user.role) {
+          await updateUserRole(user.id, userRole);
+        }
 
         return {
           ...user,
