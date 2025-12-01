@@ -70,6 +70,19 @@ export function AgendaCard({
 
   const handleIconClick = () => {
     if (isLoading) return;
+
+    if (date) {
+      const sessionDate = new Date(date);
+      const today = new Date();
+      sessionDate.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
+
+      if (sessionDate > today) {
+        toast.error("You cannot complete future sessions");
+        return;
+      }
+    }
+
     setIsDialogOpen(true);
   };
 
