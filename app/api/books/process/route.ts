@@ -35,8 +35,7 @@ export async function POST(request: NextRequest) {
         apiKey: apiKey,
     });
 
-    // @ts-ignore
-    const pdf = require("pdf-parse");
+
 
     if (!session || !session.user) {
         return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -58,6 +57,8 @@ export async function POST(request: NextRequest) {
 
         // Extract text based on file type
         if (fileExtension === 'pdf') {
+            // @ts-ignore
+            const pdf = require("pdf-parse");
             const data = await pdf(buffer);
             textContent = data.text;
         } else if (fileExtension === 'docx') {
