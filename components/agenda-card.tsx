@@ -78,7 +78,7 @@ export function AgendaCard({
       today.setHours(0, 0, 0, 0);
 
       if (sessionDate > today) {
-        toast.error("You cannot complete future sessions");
+        toast.error("You cannot update future sessions");
         return;
       }
     }

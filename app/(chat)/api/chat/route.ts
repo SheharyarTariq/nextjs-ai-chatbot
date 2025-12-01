@@ -223,7 +223,7 @@ export async function POST(request: Request) {
         value: message.parts.filter(p => p.type === 'text').map(p => p.text).join('\n'),
       });
 
-      const similarity = sql<number>`1 - (${embeddings.embedding} <=> ${JSON.stringify(embedding)})`;
+      const similarity = sql<number>`1 - (${embeddings.embedding} <=> ${JSON.stringify(embedding)}::vector)`;
 
       const similarChunks = await db
         .select({

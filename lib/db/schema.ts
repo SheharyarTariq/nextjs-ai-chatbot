@@ -11,6 +11,7 @@ import {
   timestamp,
   uuid,
   varchar,
+  vector,
 } from "drizzle-orm/pg-core";
 import type { AppUsage } from "../usage";
 
@@ -254,7 +255,7 @@ export const embeddings = pgTable("embeddings", {
     .references(() => book.id, { onDelete: 'cascade' }),
   chunkIndex: integer("chunk_index").notNull(),
   originalText: text("original_text").notNull(),
-  embedding: varchar("embedding").notNull(), // Vector column for pgvector embeddings
+  embedding: vector("embedding", { dimensions: 1536 }).notNull(), // Vector column for pgvector embeddings
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

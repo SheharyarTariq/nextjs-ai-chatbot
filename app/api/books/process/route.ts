@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
             bookId: newBook.id,
             chunkIndex: index,
             originalText: chunk,
-            embedding: JSON.stringify(vectors[index]), // pgvector expects string representation or array
+            embedding: vectors[index], // pgvector expects array of numbers
             userId: session.user.id!,
         }));
 

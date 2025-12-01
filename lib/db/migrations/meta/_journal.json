@@ -113,6 +113,13 @@
       "when": 1764450596448,
       "tag": "0015_quick_speed",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1764617041645,
+      "tag": "0016_faithful_silver_sable",
+      "breakpoints": true
     }
   ]
 }
