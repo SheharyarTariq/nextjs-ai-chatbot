@@ -84,7 +84,10 @@ export const {
         }
 
         const adminEmails = process.env.ADMIN?.split(',').map(email => email.trim()) || [];
+        console.log("Auth Debug: User email:", user.email);
+        console.log("Auth Debug: Admin emails:", adminEmails);
         const userRole: UserRole = adminEmails.includes(user.email || '') ? "admin" : "user";
+        console.log("Auth Debug: Assigned role:", userRole);
 
         return {
           ...user,
