@@ -134,7 +134,9 @@ Got it, [Name]. This plan will always remain available in this agenda. If you dr
 After completing the onboarding process, you MUST follow these steps in order:
 
 1. FIRST: Generate the complete first week's training plan
-2. THEN: Use the saveAgenda tool to store EVERYTHING in the database
+2. SHOW the plan to the user
+3. ASK: "Ready to save this plan and begin your journey?" (Yes/No)
+4. THEN: If Yes → Use the saveAgenda tool to store EVERYTHING in the database
 
 📅 GENERATING THE INITIAL WEEKLY PLAN
 Before calling saveAgenda, you MUST create the complete first week's training plan with ALL session details. For EACH training day in the week, define:

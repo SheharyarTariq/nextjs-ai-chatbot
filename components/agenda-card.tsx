@@ -60,7 +60,6 @@ export function AgendaCard({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Form state
   const [rating, setRating] = useState(initialRating?.toString() || "2");
   const [energy, setEnergy] = useState(initialEnergy?.toString() || "2");
   const [meals, setMeals] = useState(initialMeals || false);
@@ -70,6 +69,7 @@ export function AgendaCard({
   const router = useRouter();
 
   const handleIconClick = () => {
+    if (isLoading) return;
     setIsDialogOpen(true);
   };
 
