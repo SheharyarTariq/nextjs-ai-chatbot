@@ -93,6 +93,13 @@ export function AgendaCard({
       }
     }
 
+    setRating(initialRating?.toString() || "");
+    setEnergy(initialEnergy?.toString() || "");
+    setMeals(initialMeals || false);
+    setSleep(initialSleep || false);
+    setNotes(initialNotes || "");
+    setErrors({});
+
     setIsDialogOpen(true);
   };
 
