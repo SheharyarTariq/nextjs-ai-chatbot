@@ -44,3 +44,7 @@ yarn-error.log*
 /playwright/*
 
 *.tsbuildinfo
+
+#log
+debug-chat.log
+*.log
