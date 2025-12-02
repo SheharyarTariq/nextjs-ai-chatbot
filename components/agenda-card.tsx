@@ -25,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import * as yup from "yup";
 
 interface AgendaCardProps {
   day: string;
@@ -60,11 +61,20 @@ export function AgendaCard({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
-  const [rating, setRating] = useState(initialRating?.toString() || "2");
-  const [energy, setEnergy] = useState(initialEnergy?.toString() || "2");
+  const [rating, setRating] = useState(initialRating?.toString() || "");
+  const [energy, setEnergy] = useState(initialEnergy?.toString() || "");
   const [meals, setMeals] = useState(initialMeals || false);
   const [sleep, setSleep] = useState(initialSleep || false);
   const [notes, setNotes] = useState(initialNotes || "");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validationSchema = yup.object().shape({
+    rating: yup.string().required("Session rating is required"),
+    energy: yup.string().required("Energy level is required"),
+    meals: yup.boolean().required("Meals is required"),
+    sleep: yup.boolean().required("Sleep is required"),
+    notes: yup.string(),
+  });
 
   const router = useRouter();
 
@@ -78,7 +88,7 @@ export function AgendaCard({
       today.setHours(0, 0, 0, 0);
 
       if (sessionDate > today) {
-        toast.error("You cannot update future sessions");
+        toast.error("You can not complete any future session till the day arrives.");
         return;
       }
     }
@@ -86,10 +96,31 @@ export function AgendaCard({
     setIsDialogOpen(true);
   };
 
-  const handleConfirm = async () => {
+  const handleConfirm = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    
     if (completed) {
       setIsDialogOpen(false);
       return;
+    }
+
+    try {
+      await validationSchema.validate(
+        { rating, energy, meals, sleep, notes },
+        { abortEarly: false }
+      );
+      setErrors({});
+    } catch (err) {
+      if (err instanceof yup.ValidationError) {
+        const newErrors: Record<string, string> = {};
+        err.inner.forEach((error) => {
+          if (error.path) {
+            newErrors[error.path] = error.message;
+          }
+        });
+        setErrors(newErrors);
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -227,6 +258,9 @@ export function AgendaCard({
                     <SelectItem value="3">3 - Strong</SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.rating && (
+                  <p className="text-sm text-red-500">{errors.rating}</p>
+                )}
               </div>
               
               <div className="space-y-2">
@@ -241,6 +275,9 @@ export function AgendaCard({
                     <SelectItem value="3">3 - High</SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.energy && (
+                  <p className="text-sm text-red-500">{errors.energy}</p>
+                )}
               </div>
             </div>
 
