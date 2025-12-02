@@ -60,13 +60,9 @@ import postgres from "postgres";
 const client = postgres(process.env.POSTGRES_URL!);
 const db = drizzle(client);
 
-import * as fs from 'fs';
-import * as path from 'path';
-
 function logToDebugFile(message: string) {
-    const logPath = path.join(process.cwd(), 'debug-chat.log');
     const timestamp = new Date().toISOString();
-    fs.appendFileSync(logPath, `[${timestamp}] ${message}\n`);
+    console.log(`[${timestamp}] ${message}`);
 }
 
 const openai = createOpenAI({
