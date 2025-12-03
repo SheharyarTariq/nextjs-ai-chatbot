@@ -69,10 +69,10 @@ export function AgendaCard({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validationSchema = yup.object().shape({
-    rating: yup.string().required("Session rating is required"),
-    energy: yup.string().required("Energy level is required"),
-    meals: yup.boolean().required("Meals is required"),
-    sleep: yup.boolean().required("Sleep is required"),
+    rating: yup.string().required("Required"),
+    energy: yup.string().required("Required"),
+    meals: yup.boolean().required("Required"),
+    sleep: yup.boolean().required("Required"),
     notes: yup.string(),
   });
 
@@ -156,7 +156,7 @@ export function AgendaCard({
         throw new Error(data.error || "Failed to update agenda");
       }
 
-      toast.success(`${day} marked as completed!`);
+      toast.success("Status updated successfully");
       setIsDialogOpen(false);
       router.refresh();
     } catch (error: any) {
