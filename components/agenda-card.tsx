@@ -177,16 +177,16 @@ export function AgendaCard({
         <CardContent className="p-4">
           <div className="flex h-full items-center gap-4">
             <div style={{ height: "-webkit-fill-available" }} className="flex flex-col items-center justify-between">
-              <p className={`text-2xl font-normal ${isToday ? "text-white" : "text-foreground"}`}>
+              <p className={`text-base sm:text-2xl font-normal ${isToday ? "text-white" : "text-foreground"}`}>
                 {day?.slice(0, 3).toUpperCase()}
               </p>
 
               {date && (
                 <>
-                  <p className={`text-2xl font-bold ${isToday ? "text-white" : "text-foreground"}`}>
+                  <p className={`text-lg sm:text-2xl font-bold ${isToday ? "text-white" : "text-foreground"}`}>
                     {new Date(date).getDate()}
                   </p>
-                  <p className={`text-2xl font-normal ${isToday ? "text-white" : "text-foreground"}`}>
+                  <p className={`text-lg sm:text-2xl font-normal ${isToday ? "text-white" : "text-foreground"}`}>
                     {new Date(date).toLocaleDateString("en-US", { month: "short" })}
                   </p>
                 </>
@@ -195,7 +195,7 @@ export function AgendaCard({
 
             <div className="flex-1">
               <div className="flex items-start justify-between gap-2">
-                <h3 className={`font-semibold leading-snug ${
+                <h3 className={`text-sm sm:text-base break-all font-semibold leading-snug ${
                   isToday ? "text-white" : "text-foreground"
                 }`}>
                   {exerciseDetails}
@@ -221,14 +221,14 @@ export function AgendaCard({
                 </Badge>
               </div>
               {mealDetails && (
-                <p className={`mt-1 text-sm ${
+                <p className={`mt-1 text-xs sm:text-sm ${
                   isToday ? "text-white/90" : "text-muted-foreground"
                 }`}>
                   {mealDetails}
                 </p>
               )}
               {sleepDetails && (
-                <p className={`text-sm ${
+                <p className={`text-xs sm:text-sm ${
                   isToday ? "text-white/90" : "text-muted-foreground"
                 }`}>
                   {sleepDetails}

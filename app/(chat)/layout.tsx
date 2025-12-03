@@ -6,7 +6,7 @@ import { DataStreamProvider } from "@/components/data-stream-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { auth } from "../(auth)/auth";
 import { getUserById } from "@/lib/db/queries";
-import { ChatHeader } from "@/components/chat-header";
+import { ChatLayoutClient } from "../../components/chat-layout-client";
 
 export const experimental_ppr = true;
 
@@ -33,25 +33,12 @@ export default async function Layout({
 
         <SidebarProvider defaultOpen={!isCollapsed}>
           {/* <AppSidebar user={session?.user} /> */}
-          <div className="flex flex-col w-full h-screen">
-
-            {user?.gender && (
-              <div className="sticky top-0 z-50">
-                <ChatHeader user={userWithSessionFields} />
-              </div>
-            )}
-
-            <div className="flex flex-1 overflow-hidden">
-              <AgendaSidebarClientWrapper>
-                <AgendaSidebar />
-              </AgendaSidebarClientWrapper>
-
-              <SidebarInset className="flex-1 overflow-y-auto">
-                {children}
-              </SidebarInset>
-            </div>
-
-          </div>
+          <ChatLayoutClient 
+            user={userWithSessionFields}
+            agendaSidebar={<AgendaSidebar />}
+          >
+            {children}
+          </ChatLayoutClient>
 
         </SidebarProvider>
       </DataStreamProvider>
