@@ -95,12 +95,41 @@ export async function POST(request: NextRequest) {
         // Chunk text
         const chunks = chunkText(textContent);
 
-        // Generate embeddings
-        // We'll process in batches to avoid rate limits if necessary, but for now simple batch
-        const { embeddings: vectors } = await embedMany({
-            model: openai.embedding('text-embedding-3-small'),
-            values: chunks,
-        });
+        console.log(`Processing ${chunks.length} chunks for file: ${file.name}`);
+
+        // Generate embeddings in batches to avoid token limits
+        // OpenAI embedding API has limits: ~8,000 inputs or ~320,000 tokens per request
+        // With 1000-char chunks (~250 tokens each), we batch 100 chunks = ~25,000 tokens
+        const EMBEDDING_BATCH_SIZE = 100;
+        const vectors: number[][] = [];
+
+        try {
+            for (let i = 0; i < chunks.length; i += EMBEDDING_BATCH_SIZE) {
+                const batchChunks = chunks.slice(i, Math.min(i + EMBEDDING_BATCH_SIZE, chunks.length));
+                
+                console.log(`Generating embeddings for batch ${Math.floor(i / EMBEDDING_BATCH_SIZE) + 1}/${Math.ceil(chunks.length / EMBEDDING_BATCH_SIZE)} (${batchChunks.length} chunks)`);
+                
+                const { embeddings: batchVectors } = await embedMany({
+                    model: openai.embedding('text-embedding-3-small'),
+                    values: batchChunks,
+                });
+                
+                vectors.push(...batchVectors);
+
+                // Update progress in database
+                await db
+                    .update(book)
+                    .set({
+                        processedChunks: vectors.length,
+                    })
+                    .where(eq(book.id, newBook.id));
+            }
+
+            console.log(`Successfully generated ${vectors.length} embeddings`);
+        } catch (embeddingError: any) {
+            console.error("Error generating embeddings:", embeddingError);
+            throw new Error(`Embedding generation failed: ${embeddingError.message}`);
+        }
 
         // Save embeddings
         const embeddingValues = chunks.map((chunk, index) => ({
