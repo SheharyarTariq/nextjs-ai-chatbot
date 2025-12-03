@@ -58,9 +58,16 @@ export async function POST(request: NextRequest) {
         // Extract text based on file type
         if (fileExtension === 'pdf') {
             // @ts-ignore
-            const pdf = require("pdf-parse");
-            const data = await pdf(buffer);
-            textContent = data.text;
+            const PDFParser = require("pdf2json");
+            const pdfParser = new PDFParser(null, 1);
+
+            textContent = await new Promise((resolve, reject) => {
+                pdfParser.on("pdfParser_dataError", (errData: any) => reject(errData.parserError));
+                pdfParser.on("pdfParser_dataReady", (pdfData: any) => {
+                    resolve(pdfParser.getRawTextContent());
+                });
+                pdfParser.parseBuffer(buffer);
+            });
         } else if (fileExtension === 'docx') {
             const result = await mammoth.extractRawText({ buffer });
             textContent = result.value;
