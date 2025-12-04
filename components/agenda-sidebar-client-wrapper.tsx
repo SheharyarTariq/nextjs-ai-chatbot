@@ -14,9 +14,9 @@ export function AgendaSidebarClientWrapper({
   isVisible = true 
 }: AgendaSidebarClientWrapperProps) {
   const pathname = usePathname();
-  const isChatPage = pathname.startsWith("/chat/");
+  const isValidPage = pathname === "/" || pathname.startsWith("/chat/");
 
-  if (!isChatPage) {
+  if (!isValidPage) {
     return null;
   }
 
