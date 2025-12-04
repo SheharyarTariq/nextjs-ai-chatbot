@@ -18,7 +18,6 @@ export function ChatLayoutClient({ agendaSidebar, children, user }: ChatLayoutCl
 
   return (
     <div className="flex flex-col w-full h-screen">
-      {/* Header - always visible at the top */}
       {user?.gender && (
         <div className="sticky top-0 z-50">
           <ChatHeader user={user} />
@@ -26,16 +25,13 @@ export function ChatLayoutClient({ agendaSidebar, children, user }: ChatLayoutCl
       )}
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Agenda Sidebar - hidden on mobile unless agenda tab is active */}
         <AgendaSidebarClientWrapper isVisible={mobileActiveTab === "agenda"}>
           {agendaSidebar}
         </AgendaSidebarClientWrapper>
 
-        {/* Chat Area - hidden on mobile when agenda tab is active */}
         <SidebarInset 
           className={cn(
             "flex-1 overflow-y-auto",
-            // Hide on mobile when agenda is active
             mobileActiveTab === "agenda" && "max-md:hidden"
           )}
         >
@@ -43,7 +39,6 @@ export function ChatLayoutClient({ agendaSidebar, children, user }: ChatLayoutCl
         </SidebarInset>
       </div>
 
-      {/* Mobile Bottom Navigation - always visible on mobile */}
       <MobileBottomNav 
         activeTab={mobileActiveTab} 
         onTabChange={setMobileActiveTab} 

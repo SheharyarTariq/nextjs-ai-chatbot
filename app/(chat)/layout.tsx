@@ -32,7 +32,6 @@ export default async function Layout({
       <DataStreamProvider>
 
         <SidebarProvider defaultOpen={!isCollapsed}>
-          {/* <AppSidebar user={session?.user} /> */}
           <ChatLayoutClient 
             user={userWithSessionFields}
             agendaSidebar={<AgendaSidebar />}
