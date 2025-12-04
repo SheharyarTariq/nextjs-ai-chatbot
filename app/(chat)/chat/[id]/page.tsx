@@ -38,7 +38,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const uiMessages = convertToUIMessages(messagesFromDb);
 
-  // Fetch fresh user data from database and merge with session
   const freshUser = await getUserById(session.user.id);
   const userWithFreshData = freshUser ? {
     ...session.user,

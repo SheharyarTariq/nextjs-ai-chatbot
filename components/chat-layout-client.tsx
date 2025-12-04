@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import { AgendaSidebarClientWrapper } from "@/components/agenda-sidebar-client-wrapper";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { SidebarInset } from "@/components/ui/sidebar";
@@ -15,6 +16,8 @@ interface ChatLayoutClientProps {
 
 export function ChatLayoutClient({ agendaSidebar, children, user }: ChatLayoutClientProps) {
   const [mobileActiveTab, setMobileActiveTab] = useState<"chat" | "agenda">("chat");
+  const pathname = usePathname();
+  const isChatPage = pathname === "/" || pathname.startsWith("/chat/");
 
   return (
     <div className="flex flex-col w-full h-screen">
@@ -32,7 +35,7 @@ export function ChatLayoutClient({ agendaSidebar, children, user }: ChatLayoutCl
         <SidebarInset 
           className={cn(
             "flex-1 overflow-y-auto",
-            mobileActiveTab === "agenda" && "max-md:hidden"
+            isChatPage && mobileActiveTab === "agenda" && "max-md:hidden"
           )}
         >
           {children}

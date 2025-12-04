@@ -1,6 +1,7 @@
 "use client";
 
 import { CalendarDays, MessageSquare } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 interface MobileBottomNavProps {
@@ -9,6 +10,13 @@ interface MobileBottomNavProps {
 }
 
 export function MobileBottomNav({ activeTab, onTabChange }: MobileBottomNavProps) {
+  const pathname = usePathname();
+  const isValidPage = pathname === "/" || pathname.startsWith("/chat/");
+
+  if (!isValidPage) {
+    return null;
+  }
+
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t md:hidden">
       <div className="grid grid-cols-2 h-16">
