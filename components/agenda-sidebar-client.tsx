@@ -32,8 +32,8 @@ export function AgendaSidebarClient({ agenda }: AgendaSidebarClientProps) {
 
 
   return (
-    <div className="p-5">
-      <div className="w-88 border rounded-lg bg-background h-full flex flex-col">
+    <div className="p-5 h-full">
+      <div className="w-full md:w-88 border rounded-lg bg-background h-full flex flex-col">
         <div className="p-4 border-b">
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1">

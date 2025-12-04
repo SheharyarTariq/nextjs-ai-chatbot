@@ -1,17 +1,34 @@
 "use client";
 
 import { memo } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { SidebarUserNav } from "./sidebar-user-nav";
 import { Session } from "next-auth";
+import { ArrowLeft } from "lucide-react";
 
 function PureChatHeader({
   user,
 }: {
   user: Session["user"];
 }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const showBackButton = pathname === "/profile" || pathname.startsWith("/admin/");
+
   return (
     <header className="sticky top-0 w-full bg-[#F5F5F5]! flex items-center gap-2 bg-background px-2 py-1.5 md:px-2">
-      <h1 className="text-primary-green font-bold text-[22px]">For Daily Use.</h1>
+      {showBackButton ? (
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-primary-green font-bold hover:cursor-pointer text-[22px] hover:opacity-80 transition-opacity"
+          aria-label="Go back"
+        >
+          <ArrowLeft className="w-6 h-6" />
+          <span>Back</span>
+        </button>
+      ) : (
+        <h1 className="text-primary-green font-bold text-[22px]">For Daily Use.</h1>
+      )}
       <div className="ml-auto">
         <SidebarUserNav user={user} />
       </div>
