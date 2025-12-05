@@ -880,10 +880,26 @@ export async function updateAgenda({
                   mergedWeeklyData[existingWeekIndex].sessions.push(providedSession);
                 }
               }
+              
+              // Sort sessions by date after merging
+              mergedWeeklyData[existingWeekIndex].sessions.sort((a: any, b: any) => {
+                const dateA = new Date(a.date).getTime();
+                const dateB = new Date(b.date).getTime();
+                return dateA - dateB;
+              });
             } else {
+              // Sort sessions in the new week as well
+              providedWeek.sessions.sort((a: any, b: any) => {
+                const dateA = new Date(a.date).getTime();
+                const dateB = new Date(b.date).getTime();
+                return dateA - dateB;
+              });
               mergedWeeklyData.push(providedWeek);
             }
           }
+
+          // Also sort weeks by week number
+          mergedWeeklyData.sort((a: any, b: any) => a.weekNumber - b.weekNumber);
 
           updateData.weeklyData = mergedWeeklyData;
         } else {

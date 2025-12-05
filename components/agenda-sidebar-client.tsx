@@ -22,7 +22,16 @@ export function AgendaSidebarClient({ agenda }: AgendaSidebarClientProps) {
     (week: any) => week.weekNumber === agenda.currentWeek
   );
 
-  const todaySession = currentWeekData?.sessions?.find(
+  // Sort sessions by date to ensure proper chronological order
+  const sortedSessions = currentWeekData?.sessions
+    ? [...currentWeekData.sessions].sort((a: any, b: any) => {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return dateA - dateB;
+      })
+    : [];
+
+  const todaySession = sortedSessions.find(
     (session: any) => session.date === todayDateString
   );
 
@@ -87,7 +96,7 @@ export function AgendaSidebarClient({ agenda }: AgendaSidebarClientProps) {
           <TabsContent value="week" className="h-full mt-0">
             <ScrollArea className="h-full p-4">
               <div className="space-y-4">
-                {currentWeekData.sessions.map((session: any, index: number) => (
+                {sortedSessions.map((session: any, index: number) => (
                   <AgendaCard
                     key={`${session.day}-${index}`}
                     day={session.day}
