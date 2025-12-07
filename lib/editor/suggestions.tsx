@@ -123,7 +123,6 @@ export function createSuggestionWidget(
   return {
     dom,
     destroy: () => {
-      // Wrapping unmount in setTimeout to avoid synchronous unmounting during render
       setTimeout(() => {
         root.unmount();
       }, 0);
