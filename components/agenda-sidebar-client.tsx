@@ -22,7 +22,6 @@ export function AgendaSidebarClient({ agenda }: AgendaSidebarClientProps) {
     (week: any) => week.weekNumber === agenda.currentWeek
   );
 
-  // Sort sessions by date to ensure proper chronological order
   const sortedSessions = currentWeekData?.sessions
     ? [...currentWeekData.sessions].sort((a: any, b: any) => {
         const dateA = new Date(a.date).getTime();

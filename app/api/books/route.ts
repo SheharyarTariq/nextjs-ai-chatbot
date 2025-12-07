@@ -14,14 +14,16 @@ export async function GET() {
         return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check for admin role if needed, or just allow all users to see their own uploads
-    // For now, assuming all authenticated users can see their own uploads
+    // Only admins can access books
+    if (session.user.role !== "admin") {
+        return Response.json({ error: "Forbidden - Admin access required" }, { status: 403 });
+    }
 
     try {
+        // Admins can see all books in the knowledge base
         const books = await db
             .select()
             .from(book)
-            .where(eq(book.userId, session.user.id!))
             .orderBy(desc(book.uploadDate));
 
         return Response.json(books);
@@ -40,12 +42,17 @@ export async function DELETE(request: Request) {
         return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Only admins can delete books
+    if (session.user.role !== "admin") {
+        return Response.json({ error: "Forbidden - Admin access required" }, { status: 403 });
+    }
+
     if (!id) {
         return Response.json({ error: "Missing book ID" }, { status: 400 });
     }
 
     try {
-        // Verify ownership
+        // Verify book exists
         const [existingBook] = await db
             .select()
             .from(book)
@@ -55,13 +62,10 @@ export async function DELETE(request: Request) {
             return Response.json({ error: "Book not found" }, { status: 404 });
         }
 
-        if (existingBook.userId !== session.user.id) {
-            return Response.json({ error: "Forbidden" }, { status: 403 });
-        }
-
-        // Delete embeddings first (cascade should handle this, but good to be explicit or rely on cascade)
-        // Since we set onDelete: 'cascade' in schema, deleting book should be enough.
-
+        // Delete embeddings associated with this book
+        await db.delete(embeddings).where(eq(embeddings.bookId, id));
+        
+        // Delete the book
         await db.delete(book).where(eq(book.id, id));
 
         return Response.json({ success: true });

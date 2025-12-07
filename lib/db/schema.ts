@@ -260,3 +260,18 @@ export const embeddings = pgTable("embeddings", {
 });
 
 export type Embedding = InferSelectModel<typeof embeddings>;
+
+export const prompt = pgTable("Prompt", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  name: varchar("name", { length: 100 }).notNull().default("System Prompt"),
+  content: text("content").notNull(),
+  version: integer("version").notNull().default(1),
+  description: text("description"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+  createdBy: uuid("createdBy")
+    .notNull()
+    .references(() => user.id),
+});
+
+export type Prompt = InferSelectModel<typeof prompt>;

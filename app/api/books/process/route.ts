@@ -41,6 +41,11 @@ export async function POST(request: NextRequest) {
         return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Only admins can upload books
+    if (session.user.role !== "admin") {
+        return Response.json({ error: "Forbidden - Admin access required" }, { status: 403 });
+    }
+
     let newBookId: string | null = null;
 
     try {

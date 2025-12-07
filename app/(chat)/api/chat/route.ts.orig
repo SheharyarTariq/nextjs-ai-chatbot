@@ -20,7 +20,7 @@ import { auth, type UserType } from "@/app/(auth)/auth";
 import type { VisibilityType } from "@/components/visibility-selector";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import type { ChatModel } from "@/lib/ai/models";
-import { type RequestHints, type UserProfile, systemPrompt, regularPrompt, artifactsPrompt, getRequestPromptFromHints, getUserProfilePrompt } from "@/lib/ai/prompts";
+import { type RequestHints, type UserProfile, systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
 import { createDocument } from "@/lib/ai/tools/create-document";
 import { getWeather } from "@/lib/ai/tools/get-weather";
@@ -52,8 +52,8 @@ import { generateTitleFromUserMessage } from "../../actions";
 import { type PostRequestBody, postRequestBodySchema } from "./schema";
 import { createOpenAI } from "@ai-sdk/openai";
 import { embed } from "ai";
-import { embeddings, prompt } from "@/lib/db/schema";
-import { cosineDistance, desc, gt, sql, eq, and } from "drizzle-orm";
+import { embeddings } from "@/lib/db/schema";
+import { cosineDistance, desc, gt, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
@@ -72,32 +72,6 @@ const openai = createOpenAI({
 export const maxDuration = 60;
 
 let globalStreamContext: ResumableStreamContext | null = null;
-
-// Fetch system prompt from database with caching
-const getSystemPromptFromDB = cache(
-  async (): Promise<string | null> => {
-    try {
-      const [systemPrompt] = await db
-        .select()
-        .from(prompt)
-        .limit(1);
-
-      if (systemPrompt) {
-        logToDebugFile(`Using system prompt from database (version ${systemPrompt.version})`);
-        return systemPrompt.content;
-      }
-      
-      logToDebugFile("No system prompt found in database, using fallback");
-      return null;
-    } catch (error) {
-      console.error("Error fetching system prompt from database:", error);
-      logToDebugFile("Error fetching system prompt from database, using fallback");
-      return null;
-    }
-  },
-  ["system-prompt"],
-  { revalidate: 60, tags: ["system-prompt"] } // Cache for 60 seconds, cleared on prompt update
-);
 
 const getTokenlensCatalog = cache(
   async (): Promise<ModelCatalog | undefined> => {
@@ -283,28 +257,15 @@ export async function POST(request: Request) {
     }
 
     const stream = createUIMessageStream({
-      execute: async ({ writer: dataStream }) => {
-        const dbPromptContent = await getSystemPromptFromDB();
-        const basePrompt = dbPromptContent || regularPrompt;
-        
-        const requestPrompt = getRequestPromptFromHints(requestHints);
-        const profilePrompt = getUserProfilePrompt(userProfile);
-        
-        let fullSystemPrompt: string;
-        if (selectedChatModel === "chat-model-reasoning") {
-          fullSystemPrompt = `${basePrompt}\n\n${requestPrompt}${profilePrompt}`;
-        } else {
-          fullSystemPrompt = `${basePrompt}\n\n${requestPrompt}${profilePrompt}\n\n${artifactsPrompt}`;
-        }
-        
-        if (contextText) {
-          fullSystemPrompt += `\n\nIMPORTANT: You have access to the following content from the "Athlete Standards" book/knowledge base. Use this information to answer the user's questions, explain concepts, or provide quotes. This is your core knowledge source:\n\n${contextText}`;
-        }
-
+      execute: ({ writer: dataStream }) => {
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
           temperature: 0.7,
-          system: fullSystemPrompt,
+          system: systemPrompt({
+            selectedChatModel,
+            requestHints,
+            userProfile,
+          }) + (contextText ? `\n\nIMPORTANT: You have access to the following content from the "Athlete Standards" book/knowledge base. Use this information to answer the user's questions, explain concepts, or provide quotes. This is your core knowledge source:\n\n${contextText}` : ""),
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
           experimental_activeTools:

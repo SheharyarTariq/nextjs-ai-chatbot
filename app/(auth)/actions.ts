@@ -108,10 +108,16 @@ export const register = async (
     if (user) {
       return { status: "user_exists" } as RegisterActionState;
     }
+    
+    // Check if the email matches the admin email from environment variable
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+    const role = validatedData.email === adminEmail ? "admin" : "user";
+    
     await createUser(
       validatedData.email,
       validatedData.password,
-      validatedData.name
+      validatedData.name,
+      role
     );
     await signIn("credentials", {
       email: validatedData.email,
