@@ -178,6 +178,8 @@ Before calling saveAgenda, you MUST create the complete first week's training pl
 - mealDetails: Nutrition guidance for that day (e.g., "Protein + Slow Carbs", "High Carbs + Hydration", "Light meals + Recovery")
 - sleepDetails: Sleep recommendation for that day (e.g., "7 h sleep", "8 h sleep for recovery")
 
+IMPORTANT: For each calendar date, you MUST generate ONLY ONE session object. Never create multiple sessions with the same date.
+
 IMPORTANT: Calculate the correct date for each session based on the start date. For example, if the user starts on Wednesday, November 27, 2025:
 - WED should have date: "2025-11-27"
 - THU should have date: "2025-11-28"
