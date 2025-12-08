@@ -3,13 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Upload, Book, FileText, Edit, Save, X } from "lucide-react";
 import { Book as BookType, Prompt as PromptType } from "@/lib/db/schema";
 import { DeleteModal } from "@/components/delete-modal";
 import { promptSchema } from "@/lib/validations/prompt";
+import { toast } from "@/components/toast";
 
 type TabType = "knowledge" | "prompts";
 
@@ -61,7 +61,10 @@ export default function AdminPage() {
       setBooks(data);
     } catch (error) {
       console.error("Error fetching books:", error);
-      toast.error("Failed to fetch books");
+      toast({
+        type: "error",
+        description: "Failed to fetch books",
+      });
     }
   };
 
@@ -82,7 +85,10 @@ export default function AdminPage() {
       }
     } catch (error) {
       console.error("Error fetching system prompt:", error);
-      toast.error("Failed to fetch system prompt");
+      toast({
+        type: "error",
+        description: "Failed to fetch system prompt",
+      });
     } finally {
       setIsLoadingPrompt(false);
     }
@@ -96,12 +102,16 @@ export default function AdminPage() {
     const fileExtension = '.' + file.name.toLowerCase().split('.').pop();
 
     if (!allowedExtensions.includes(fileExtension)) {
-      toast.error("Only PDF, DOCX, and TXT files are allowed");
-      return;
+      toast({
+        type: "error",
+        description: "Only PDF, DOCX, and TXT files are allowed"});
     }
 
     if (file.size > 3 * 1024 * 1024) {
-      toast.error("File size too big. File size should be less than 3MB");
+      toast({
+        type: "error",
+        description: "File size too big. File size should be less than 3MB",
+      })
       return;
     }
 
@@ -117,11 +127,17 @@ export default function AdminPage() {
       });
 
       if (response.ok) {
-        toast.success("Book uploaded and processing started");
+        toast({
+          type: "success",
+          description: "Book uploaded and processing started",
+        });
         fetchBooks();
       } else {
         const errorData = await response.json();
-        toast.error(errorData.error || "Failed to process book");
+        toast({
+          type: "error",
+          description: errorData.error || "Failed to process book",
+        });
       }
 
       setIsUploading(false);
@@ -130,7 +146,10 @@ export default function AdminPage() {
       }
     } catch (error) {
       console.error("Error uploading file:", error);
-      toast.error("Failed to upload file");
+      toast({
+        type: "error",
+        description: "Failed to upload file",
+      });
       setIsUploading(false);
     }
   };
@@ -150,14 +169,23 @@ export default function AdminPage() {
       });
 
       if (response.ok) {
-        toast.success("Book deleted successfully");
+        toast({
+          type: "success",
+          description: "Book deleted successfully",
+        });
         fetchBooks();
       } else {
-        toast.error("Failed to delete book");
+        toast({
+          type: "error",
+          description: "Failed to delete book",
+        });
       }
     } catch (error) {
       console.error("Error deleting book:", error);
-      toast.error("Failed to delete book");
+      toast ({
+        type: "error",
+        description: "Failed to delete book",
+      });
     } finally {
       setIsDeleting(false);
       setDeleteModalOpen(false);
@@ -190,12 +218,18 @@ export default function AdminPage() {
       });
 
       if (response.ok) {
-        toast.success(systemPrompt ? "Prompt updated successfully" : "Prompt created");
+        toast({
+           type: "success",
+          description: systemPrompt ? "Prompt updated successfully" : "Prompt created",
+        });
         await fetchSystemPrompt();
         setIsEditingPrompt(false);
       } else {
         const error = await response.json();
-        toast.error(error.error || "Failed to save prompt");
+        toast({
+          type: "error",
+          description: error.error || "Failed to save prompt",
+        });
       }
     } catch (error: any) {
       if (error.name === "ValidationError") {
@@ -211,7 +245,10 @@ export default function AdminPage() {
         // toast.error(firstError);
       } else {
         console.error("Error saving prompt:", error);
-        toast.error("Failed to save prompt");
+        toast({
+          type: "error",
+          description: "Failed to save prompt",
+        });
       }
     } finally {
       setIsSavingPrompt(false);

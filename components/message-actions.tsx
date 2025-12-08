@@ -6,7 +6,7 @@ import { useCopyToClipboard } from "usehooks-ts";
 import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
 import { Action, Actions } from "./elements/actions";
-import { CopyIcon, PencilEditIcon, ThumbDownIcon, ThumbUpIcon } from "./icons";
+import { CopyIcon, ThumbDownIcon, ThumbUpIcon } from "./icons";
 
 export function PureMessageActions({
   chatId,
