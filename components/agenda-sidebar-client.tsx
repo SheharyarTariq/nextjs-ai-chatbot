@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { AgendaCard } from "@/components/agenda-card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResetAgendaButton } from "@/components/reset-agenda-button";
@@ -12,27 +12,44 @@ interface AgendaSidebarClientProps {
 
 export function AgendaSidebarClient({ agenda }: AgendaSidebarClientProps) {
   const [activeTab, setActiveTab] = useState("week");
+  const todaySessionRef = useRef<HTMLDivElement>(null);
 
   const today = new Date();
   const todayDateString = today.toISOString().split('T')[0];
   const daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
   const todayName = daysOfWeek[today.getDay()];
 
+  const allWeeksData = agenda.weeklyData
+    ?.filter((week: any) => week.weekNumber <= agenda.currentWeek)
+    ?.sort((a: any, b: any) => a.weekNumber - b.weekNumber) || [];
+
   const currentWeekData = agenda.weeklyData.find(
     (week: any) => week.weekNumber === agenda.currentWeek
   );
 
-  const sortedSessions = currentWeekData?.sessions
+  const currentWeekSortedSessions = currentWeekData?.sessions
     ? [...currentWeekData.sessions].sort((a: any, b: any) => {
-        const dateA = new Date(a.date).getTime();
-        const dateB = new Date(b.date).getTime();
-        return dateA - dateB;
-      })
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return dateA - dateB;
+    })
     : [];
 
-  const todaySession = sortedSessions.find(
+  const todaySession = currentWeekSortedSessions.find(
     (session: any) => session.date === todayDateString
   );
+
+  useEffect(() => {
+    if (activeTab === "week" && todaySessionRef.current) {
+      const timeoutId = setTimeout(() => {
+        todaySessionRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [activeTab]);
 
   if (!currentWeekData || !currentWeekData.sessions) {
     return null;
@@ -94,25 +111,50 @@ export function AgendaSidebarClient({ agenda }: AgendaSidebarClientProps) {
 
           <TabsContent value="week" className="h-full mt-0">
             <ScrollArea className="h-full p-4">
-              <div className="space-y-4">
-                {sortedSessions.map((session: any, index: number) => (
-                  <AgendaCard
-                    key={`${session.day}-${index}`}
-                    day={session.day}
-                    date={session.date}
-                    completed={session.completed || false}
-                    exerciseDetails={session.exerciseDetails || "No exercise details"}
-                    mealDetails={session.mealDetails}
-                    sleepDetails={session.sleepDetails}
-                    weekNumber={agenda.currentWeek}
-                    isToday={session.date === todayDateString}
-                    rating={session.rating}
-                    energy={session.energy}
-                    meals={session.meals}
-                    sleep={session.sleep}
-                    notes={session.notes}
-                  />
-                ))}
+              <div className="space-y-6">
+                {allWeeksData.map((weekData: any) => {
+                  const sortedSessions = weekData.sessions
+                    ? [...weekData.sessions].sort((a: any, b: any) => {
+                      const dateA = new Date(a.date).getTime();
+                      const dateB = new Date(b.date).getTime();
+                      return dateA - dateB;
+                    })
+                    : [];
+
+                  const isCurrentWeek = weekData.weekNumber === agenda.currentWeek;
+
+                  return (
+                    <div key={weekData.weekNumber} className="space-y-3">
+                      <div className="space-y-3">
+                        {sortedSessions.map((session: any, index: number) => {
+                          const isToday = session.date === todayDateString;
+                          return (
+                            <div
+                              key={`week-${weekData.weekNumber}-${session.day}-${index}`}
+                              ref={isToday ? todaySessionRef : null}
+                            >
+                              <AgendaCard
+                                day={session.day}
+                                date={session.date}
+                                completed={session.completed || false}
+                                exerciseDetails={session.exerciseDetails || "No exercise details"}
+                                mealDetails={session.mealDetails}
+                                sleepDetails={session.sleepDetails}
+                                weekNumber={weekData.weekNumber}
+                                isToday={isToday}
+                                rating={session.rating}
+                                energy={session.energy}
+                                meals={session.meals}
+                                sleep={session.sleep}
+                                notes={session.notes}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </ScrollArea>
           </TabsContent>
@@ -121,3 +163,4 @@ export function AgendaSidebarClient({ agenda }: AgendaSidebarClientProps) {
     </div>
   );
 }
+

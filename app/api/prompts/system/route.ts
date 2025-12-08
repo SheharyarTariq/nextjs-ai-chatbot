@@ -86,7 +86,6 @@ export async function POST(request: Request) {
             })
             .returning();
 
-        // Invalidate cache so the new prompt is used immediately
         revalidateTag("system-prompt");
 
         return NextResponse.json(newPrompt, { status: 201 });
@@ -96,7 +95,6 @@ export async function POST(request: Request) {
     }
 }
 
-// PUT update system prompt
 export async function PUT(request: Request) {
     const session = await auth();
 
@@ -120,7 +118,6 @@ export async function PUT(request: Request) {
             return NextResponse.json({ error: "Content is required" }, { status: 400 });
         }
 
-        // Get current prompt to increment version
         const [currentPrompt] = await db
             .select()
             .from(prompt)

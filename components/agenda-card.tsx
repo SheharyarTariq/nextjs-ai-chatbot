@@ -24,8 +24,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import * as yup from "yup";
+import { toast } from "./toast";
 
 interface AgendaCardProps {
   day: string;
@@ -88,7 +88,9 @@ export function AgendaCard({
       today.setHours(0, 0, 0, 0);
 
       if (sessionDate > today) {
-        toast.error("You can not complete any future session till the day arrives.");
+        toast({
+          type: "error",
+          description: "You can not complete any future session till the day arrives."});
         return;
       }
     }
@@ -156,12 +158,18 @@ export function AgendaCard({
         throw new Error(data.error || "Failed to update agenda");
       }
 
-      toast.success("Status updated successfully");
+      toast({
+        type: "success",
+        description: "Status updated successfully",
+      });
       setIsDialogOpen(false);
       router.refresh();
     } catch (error: any) {
       console.error("Error updating agenda:", error);
-      toast.error(error.message || "Failed to update agenda");
+      toast({
+        description: error.message || "Failed to update agenda",
+        type: "error",
+      });
     } finally {
       setIsLoading(false);
     }

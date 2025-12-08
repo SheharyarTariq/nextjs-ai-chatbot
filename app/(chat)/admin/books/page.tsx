@@ -44,11 +44,6 @@ export default function AdminPage() {
       return;
     }
 
-    if (session.user.role !== "admin") {
-      // router.push("/");
-      // return;
-    }
-
     fetchBooks();
     fetchSystemPrompt();
   }, [session, status, router]);
@@ -80,7 +75,6 @@ export default function AdminPage() {
           content: data.content,
         });
       } else if (response.status === 404) {
-        // No system prompt exists yet
         setSystemPrompt(null);
       }
     } catch (error) {
@@ -199,10 +193,8 @@ export default function AdminPage() {
 
   const handleSavePrompt = async () => {
     try {
-      // Clear previous errors
       setPromptErrors({});
 
-      // Validate using Yup schema
       await promptSchema.validate(promptFormData, { abortEarly: false });
 
       setIsSavingPrompt(true);
@@ -241,8 +233,6 @@ export default function AdminPage() {
         });
         setPromptErrors(errors);
 
-        // const firstError = error.errors?.[0] || "Please fix the validation errors";
-        // toast.error(firstError);
       } else {
         console.error("Error saving prompt:", error);
         toast({
@@ -524,7 +514,6 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Delete Modal */}
       <DeleteModal
         open={deleteModalOpen}
         onOpenChange={setDeleteModalOpen}

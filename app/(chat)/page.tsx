@@ -21,12 +21,10 @@ export default async function Page() {
     endingBefore: null,
   });
 
-  // redirect to existing chat
   if (existingChats.chats.length > 0) {
     redirect(`/chat/${existingChats.chats[0].id}`);
   }
 
-  // Fetch fresh user data from database and merge with session
   const freshUser = await getUserById(session.user.id);
   const userWithFreshData = freshUser ? {
     ...session.user,

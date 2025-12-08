@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { DeleteModal } from "@/components/delete-modal";
+import { toast } from "./toast";
 
 export function ResetAgendaButton() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -25,14 +25,19 @@ export function ResetAgendaButton() {
         throw new Error(data.error || "Failed to reset agenda");
       }
 
-      toast.success("Agenda and conversation reset successfully!");
+      toast({
+        type: "success",
+        description: "Agenda and conversation reset successfully!"});
       setIsDialogOpen(false);
 
       router.push("/");
       router.refresh();
     } catch (error: any) {
       console.error("Error resetting agenda:", error);
-      toast.error(error.message || "Failed to reset agenda");
+      toast({
+        type: "error",
+        description: error.message || "Failed to reset agenda"
+      });
     } finally {
       setIsLoading(false);
     }

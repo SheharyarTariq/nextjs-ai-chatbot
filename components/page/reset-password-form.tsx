@@ -114,7 +114,7 @@ export function ResetPasswordForm() {
   }
 
   return (
-    <div className="flex min-h-dvh w-screen items-center justify-center bg-background pt-12 md:pt-0">
+    <div className="flex min-h-dvh w-screen items-center justify-center bg-background pt-0">
       <div className="flex w-full max-w-md flex-col gap-12 overflow-hidden rounded-2xl">
         <div className="flex flex-col items-center justify-center gap-2 px-4 text-center sm:px-16">
           <Image src={logo} alt="Logo" width={100} height={100} className="mx-auto mb-4" />

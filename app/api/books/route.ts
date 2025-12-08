@@ -14,13 +14,11 @@ export async function GET() {
         return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Only admins can access books
     if (session.user.role !== "admin") {
         return Response.json({ error: "Forbidden - Admin access required" }, { status: 403 });
     }
 
     try {
-        // Admins can see all books in the knowledge base
         const books = await db
             .select()
             .from(book)
@@ -42,7 +40,6 @@ export async function DELETE(request: Request) {
         return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Only admins can delete books
     if (session.user.role !== "admin") {
         return Response.json({ error: "Forbidden - Admin access required" }, { status: 403 });
     }
@@ -52,7 +49,6 @@ export async function DELETE(request: Request) {
     }
 
     try {
-        // Verify book exists
         const [existingBook] = await db
             .select()
             .from(book)
@@ -62,10 +58,8 @@ export async function DELETE(request: Request) {
             return Response.json({ error: "Book not found" }, { status: 404 });
         }
 
-        // Delete embeddings associated with this book
         await db.delete(embeddings).where(eq(embeddings.bookId, id));
         
-        // Delete the book
         await db.delete(book).where(eq(book.id, id));
 
         return Response.json({ success: true });

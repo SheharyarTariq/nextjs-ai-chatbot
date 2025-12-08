@@ -48,3 +48,9 @@ yarn-error.log*
 #log
 debug-chat.log
 *.log
+
+# One-time scripts and backups
+apply-db-prompt-integration.sh
+*.backup
+*.orig
+

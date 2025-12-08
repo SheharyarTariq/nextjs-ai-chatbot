@@ -109,7 +109,6 @@ export const register = async (
       return { status: "user_exists" } as RegisterActionState;
     }
     
-    // Check if the email matches the admin email from environment variable
     const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
     const role = validatedData.email === adminEmail ? "admin" : "user";
     

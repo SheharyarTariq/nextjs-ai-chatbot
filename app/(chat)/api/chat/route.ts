@@ -73,7 +73,6 @@ export const maxDuration = 60;
 
 let globalStreamContext: ResumableStreamContext | null = null;
 
-// Fetch system prompt from database with caching
 const getSystemPromptFromDB = cache(
   async (): Promise<string | null> => {
     try {
@@ -96,7 +95,7 @@ const getSystemPromptFromDB = cache(
     }
   },
   ["system-prompt"],
-  { revalidate: 60, tags: ["system-prompt"] } // Cache for 60 seconds, cleared on prompt update
+  { revalidate: 60, tags: ["system-prompt"] } 
 );
 
 const getTokenlensCatalog = cache(
@@ -246,7 +245,6 @@ export async function POST(request: Request) {
 
     let finalMergedUsage: AppUsage | undefined;
 
-    // RAG: Retrieve relevant context
     let contextText = "";
     try {
       const userMessageText = message.parts.filter(p => p.type === 'text').map(p => p.text).join('\n');
@@ -311,7 +309,6 @@ export async function POST(request: Request) {
             selectedChatModel === "chat-model-reasoning"
               ? []
               : [
-                // "getWeather",
                 "createDocument",
                 "updateDocument",
                 "requestSuggestions",
