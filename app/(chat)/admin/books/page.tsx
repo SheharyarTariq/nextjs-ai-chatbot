@@ -264,7 +264,7 @@ export default function AdminPage() {
     }
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
             <div className="flex items-center gap-3 mb-8">
                 <Book className="h-8 w-8 text-primary-green" />
                 <h1 className="text-3xl font-bold">Admin Management</h1>
@@ -343,9 +343,9 @@ export default function AdminPage() {
                                 </div>
                             ) : (
                                 books.map((book) => (
-                                    <div key={book.id} className="p-6 flex items-center justify-between">
-                                        <div className="flex-1">
-                                            <h3 className="text-gray-500 font-medium text-lg">{book.name}</h3>
+                                    <div key={book.id} className="p-6 flex items-center justify-between gap-4">
+                                        <div className="flex-1 min-w-0 overflow-hidden">
+                                            <h3 className="text-gray-500 font-medium text-lg truncate" title={book.name}>{book.name}</h3>
                                             <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
                                                 <span>
                                                     Uploaded: {new Date(book.uploadDate).toLocaleDateString()}

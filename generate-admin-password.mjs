@@ -1,4 +1,3 @@
-// Generate password hash for admin user
 import { hash } from 'bcrypt-ts';
 
 const password = 'User@123';

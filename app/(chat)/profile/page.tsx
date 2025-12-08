@@ -16,20 +16,17 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
-  return (<>
-      <div className="flex flex-col items-center justify-center h-full p-4">
-        <div className="w-full max-w-2xl">
-          <div className="mb-8">
-            <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-              Profile
-            </h1>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
-              Manage your account information and preferences
-            </p>
-          </div>
-          <ProfileForm user={user} />
+  return (
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+            Profile
+          </h1>
+          <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
+            Manage your account information and preferences
+          </p>
         </div>
+        <ProfileForm user={user} />
       </div>
-    </>
   );
 }
