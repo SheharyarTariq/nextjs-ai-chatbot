@@ -63,9 +63,6 @@ export async function sendPasswordResetEmail(
                 margin: 20px 0;
                 font-weight: 500;
               }
-              .button:hover {
-                background-color: #333333;
-              }
               .footer {
                 margin-top: 30px;
                 padding-top: 20px;
