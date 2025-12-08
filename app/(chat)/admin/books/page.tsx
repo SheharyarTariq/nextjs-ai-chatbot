@@ -100,8 +100,8 @@ export default function AdminPage() {
             return;
         }
 
-        if (file.size > 30 * 1024 * 1024) {
-            toast.error("File size too big. File size should be less than 30mb");
+        if (file.size > 3 * 1024 * 1024) {
+            toast.error("File size too big. File size should be less than 3MB");
             return;
         }
 
@@ -220,7 +220,7 @@ export default function AdminPage() {
 
     const handleCancelEdit = () => {
         setIsEditingPrompt(false);
-        setPromptErrors({}); // Clear validation errors
+        setPromptErrors({});
         if (systemPrompt) {
             setPromptFormData({
                 name: systemPrompt.name,
@@ -322,7 +322,7 @@ export default function AdminPage() {
                                     {isUploading ? "Uploading..." : "Choose File"}
                                 </Button>
                                 <span className="text-sm text-gray-500">
-                                    PDF, DOCX, and TXT files up to 30MB
+                                    PDF, DOCX, and TXT files up to 3MB
                                 </span>
                             </div>
                         </div>
