@@ -65,7 +65,7 @@ export async function POST(request: Request) {
         }
 
         const body = await request.json();
-        const { name, content, description } = body;
+        const { name, content } = body;
 
         if (!content) {
             return NextResponse.json(
@@ -79,7 +79,6 @@ export async function POST(request: Request) {
             .values({
                 name: name || "System Prompt",
                 content,
-                description: description || null,
                 createdBy: session.user.id!,
                 createdAt: new Date(),
                 updatedAt: new Date(),
@@ -111,7 +110,7 @@ export async function PUT(request: Request) {
 
     try {
         const body = await request.json();
-        const { id, name, content, description } = body;
+        const { id, name, content } = body;
 
         if (!id) {
             return NextResponse.json({ error: "Missing prompt ID" }, { status: 400 });
@@ -136,7 +135,6 @@ export async function PUT(request: Request) {
             .set({
                 name: name || "System Prompt",
                 content,
-                description,
                 updatedAt: new Date(),
                 version: currentPrompt.version + 1,
             })

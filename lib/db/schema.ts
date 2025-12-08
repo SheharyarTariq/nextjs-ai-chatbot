@@ -266,7 +266,6 @@ export const prompt = pgTable("Prompt", {
   name: varchar("name", { length: 100 }).notNull().default("System Prompt"),
   content: text("content").notNull(),
   version: integer("version").notNull().default(1),
-  description: text("description"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
   createdBy: uuid("createdBy")

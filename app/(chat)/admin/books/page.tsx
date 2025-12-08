@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Trash2, Upload, Book, FileText, Edit, Save, X } from "lucide-react";
 import { Book as BookType, Prompt as PromptType } from "@/lib/db/schema";
 import { DeleteModal } from "@/components/delete-modal";
+import { promptSchema } from "@/lib/validations/prompt";
 
 type TabType = "knowledge" | "prompts";
 
@@ -31,8 +32,9 @@ export default function AdminPage() {
     const [promptFormData, setPromptFormData] = useState({
         name: "System Prompt",
         content: "",
-        description: "",
     });
+    const [promptErrors, setPromptErrors] = useState<Record<string, string>>({});
+
 
     useEffect(() => {
         if (status === "loading") return;
@@ -73,7 +75,6 @@ export default function AdminPage() {
                 setPromptFormData({
                     name: data.name,
                     content: data.content,
-                    description: data.description || "",
                 });
             } else if (response.status === 404) {
                 // No system prompt exists yet
@@ -170,10 +171,11 @@ export default function AdminPage() {
 
     const handleSavePrompt = async () => {
         try {
-            if (!promptFormData.content) {
-                toast.error("Content is required");
-                return;
-            }
+            // Clear previous errors
+            setPromptErrors({});
+
+            // Validate using Yup schema
+            await promptSchema.validate(promptFormData, { abortEarly: false });
 
             setIsSavingPrompt(true);
             const method = systemPrompt ? "PUT" : "POST";
@@ -188,16 +190,29 @@ export default function AdminPage() {
             });
 
             if (response.ok) {
-                toast.success(systemPrompt ? "Prompt updated" : "Prompt created");
+                toast.success(systemPrompt ? "Prompt updated successfully" : "Prompt created");
                 await fetchSystemPrompt();
                 setIsEditingPrompt(false);
             } else {
                 const error = await response.json();
                 toast.error(error.error || "Failed to save prompt");
             }
-        } catch (error) {
-            console.error("Error saving prompt:", error);
-            toast.error("Failed to save prompt");
+        } catch (error: any) {
+            if (error.name === "ValidationError") {
+                const errors: Record<string, string> = {};
+                error.inner.forEach((err: any) => {
+                    if (err.path) {
+                        errors[err.path] = err.message;
+                    }
+                });
+                setPromptErrors(errors);
+                
+                // const firstError = error.errors?.[0] || "Please fix the validation errors";
+                // toast.error(firstError);
+            } else {
+                console.error("Error saving prompt:", error);
+                toast.error("Failed to save prompt");
+            }
         } finally {
             setIsSavingPrompt(false);
         }
@@ -205,11 +220,11 @@ export default function AdminPage() {
 
     const handleCancelEdit = () => {
         setIsEditingPrompt(false);
+        setPromptErrors({}); // Clear validation errors
         if (systemPrompt) {
             setPromptFormData({
                 name: systemPrompt.name,
                 content: systemPrompt.content,
-                description: systemPrompt.description || "",
             });
         }
     };
@@ -251,7 +266,7 @@ export default function AdminPage() {
     return (
         <div className="container mx-auto px-4 py-8 max-w-6xl">
             <div className="flex items-center gap-3 mb-8">
-                <Book className="h-8 w-8 text-blue-600" />
+                <Book className="h-8 w-8 text-primary-green" />
                 <h1 className="text-3xl font-bold">Admin Management</h1>
             </div>
 
@@ -260,9 +275,9 @@ export default function AdminPage() {
                 <div className="flex gap-4">
                     <button
                         onClick={() => setActiveTab("knowledge")}
-                        className={`pb-3 px-2 font-medium transition-colors ${
+                        className={`pb-3 px-2 hover:cursor-pointer font-medium transition-colors ${
                             activeTab === "knowledge"
-                                ? "text-blue-600 border-b-2 border-blue-600"
+                                ? "text-primary-green border-b-2 border-primary-green"
                                 : "text-gray-500 hover:text-gray-700"
                         }`}
                     >
@@ -270,9 +285,9 @@ export default function AdminPage() {
                     </button>
                     <button
                         onClick={() => setActiveTab("prompts")}
-                        className={`pb-3 px-2 font-medium transition-colors ${
+                        className={`pb-3 px-2 hover:cursor-pointer font-medium transition-colors ${
                             activeTab === "prompts"
-                                ? "text-blue-600 border-b-2 border-blue-600"
+                                ? "text-primary-green border-b-2 border-primary-green"
                                 : "text-gray-500 hover:text-gray-700"
                         }`}
                     >
@@ -387,27 +402,14 @@ export default function AdminPage() {
                                     onChange={(e) =>
                                         setPromptFormData({ ...promptFormData, name: e.target.value })
                                     }
-                                    className="w-full px-3 py-2 border rounded-md text-gray-900"
+                                    className={`w-full px-3 py-2 border rounded-md text-gray-900 ${
+                                        promptErrors.name ? "border-red-500" : ""
+                                    }`}
                                     placeholder="System Prompt"
                                 />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Description (Optional)
-                                </label>
-                                <input
-                                    type="text"
-                                    value={promptFormData.description}
-                                    onChange={(e) =>
-                                        setPromptFormData({
-                                            ...promptFormData,
-                                            description: e.target.value,
-                                        })
-                                    }
-                                    className="w-full px-3 py-2 border rounded-md text-gray-900"
-                                    placeholder="Brief description of this prompt"
-                                />
+                                {promptErrors.name && (
+                                    <p className="text-red-500 text-sm mt-1">{promptErrors.name}</p>
+                                )}
                             </div>
 
                             <div>
@@ -419,10 +421,13 @@ export default function AdminPage() {
                                     onChange={(e) =>
                                         setPromptFormData({ ...promptFormData, content: e.target.value })
                                     }
-                                    className="w-full px-3 py-2 border rounded-md font-mono text-sm text-gray-900"
+                                    className={"w-full px-3 py-2 border rounded-md font-mono text-sm text-gray-900 "}
                                     rows={20}
                                     placeholder="Enter the system prompt content here..."
                                 />
+                                {promptErrors.content && (
+                                    <p className="text-red-500 text-sm mt-1">{promptErrors.content}</p>
+                                )}
                             </div>
 
                             <div className="flex gap-2">
@@ -453,13 +458,6 @@ export default function AdminPage() {
                                 <h3 className="text-sm font-medium text-gray-700 mb-1">Name</h3>
                                 <p className="text-gray-900">{systemPrompt.name}</p>
                             </div>
-
-                            {systemPrompt.description && (
-                                <div>
-                                    <h3 className="text-sm font-medium text-gray-700 mb-1">Description</h3>
-                                    <p className="text-gray-600">{systemPrompt.description}</p>
-                                </div>
-                            )}
 
                             <div>
                                 <h3 className="text-sm font-medium text-gray-700 mb-1">Status</h3>
