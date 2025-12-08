@@ -26,7 +26,6 @@ export default function AdminPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [systemPrompt, setSystemPrompt] = useState<PromptType | null>(null);
-  const [isLoadingPrompt, setIsLoadingPrompt] = useState(false);
   const [isEditingPrompt, setIsEditingPrompt] = useState(false);
   const [isSavingPrompt, setIsSavingPrompt] = useState(false);
   const [promptFormData, setPromptFormData] = useState({
@@ -64,7 +63,6 @@ export default function AdminPage() {
   };
 
   const fetchSystemPrompt = async () => {
-    setIsLoadingPrompt(true);
     try {
       const response = await fetch("/api/prompts/system");
       if (response.ok) {
@@ -83,8 +81,6 @@ export default function AdminPage() {
         type: "error",
         description: "Failed to fetch system prompt",
       });
-    } finally {
-      setIsLoadingPrompt(false);
     }
   };
 
@@ -98,7 +94,8 @@ export default function AdminPage() {
     if (!allowedExtensions.includes(fileExtension)) {
       toast({
         type: "error",
-        description: "Only PDF, DOCX, and TXT files are allowed"});
+        description: "Only PDF, DOCX, and TXT files are allowed"
+      });
     }
 
     if (file.size > 3 * 1024 * 1024) {
@@ -176,7 +173,7 @@ export default function AdminPage() {
       }
     } catch (error) {
       console.error("Error deleting book:", error);
-      toast ({
+      toast({
         type: "error",
         description: "Failed to delete book",
       });
@@ -211,7 +208,7 @@ export default function AdminPage() {
 
       if (response.ok) {
         toast({
-           type: "success",
+          type: "success",
           description: systemPrompt ? "Prompt updated successfully" : "Prompt created",
         });
         await fetchSystemPrompt();
@@ -303,8 +300,8 @@ export default function AdminPage() {
           <button
             onClick={() => setActiveTab("knowledge")}
             className={`pb-3 px-2 hover:cursor-pointer font-medium transition-colors ${activeTab === "knowledge"
-                ? "text-primary-green border-b-2 border-primary-green"
-                : "text-gray-500 hover:text-gray-700"
+              ? "text-primary-green border-b-2 border-primary-green"
+              : "text-gray-500 hover:text-gray-700"
               }`}
           >
             Knowledge Base
@@ -312,8 +309,8 @@ export default function AdminPage() {
           <button
             onClick={() => setActiveTab("prompts")}
             className={`pb-3 px-2 hover:cursor-pointer font-medium transition-colors ${activeTab === "prompts"
-                ? "text-primary-green border-b-2 border-primary-green"
-                : "text-gray-500 hover:text-gray-700"
+              ? "text-primary-green border-b-2 border-primary-green"
+              : "text-gray-500 hover:text-gray-700"
               }`}
           >
             System Prompt
@@ -386,7 +383,7 @@ export default function AdminPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleDeleteBookClick(book.id)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+                      className="text-red-600 hover:cursor-pointer hover:text-red-700 hover:bg-red-50 cursor-pointer"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -411,11 +408,13 @@ export default function AdminPage() {
             )}
           </div>
 
-          {isLoadingPrompt ? (
-            <div className="p-8 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-            </div>
-          ) : isEditingPrompt || !systemPrompt ? (
+          {
+          // isLoadingPrompt ? (
+          //   <div className="p-8 text-center">
+          //     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          //   </div>
+          // ) : 
+          isEditingPrompt || !systemPrompt ? (
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
