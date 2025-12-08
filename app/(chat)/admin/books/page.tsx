@@ -490,7 +490,7 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div className="text-xs text-gray-500 space-y-1">
+              {/* <div className="text-xs text-gray-500 space-y-1">
                 <div>
                   Created: {new Date(systemPrompt.createdAt).toLocaleDateString()}{" "}
                   {new Date(systemPrompt.createdAt).toLocaleTimeString()}
@@ -500,7 +500,7 @@ export default function AdminPage() {
                   {new Date(systemPrompt.updatedAt).toLocaleTimeString()}
                 </div>
                 <div>Version: {systemPrompt.version}</div>
-              </div>
+              </div> */}
 
               <div>
                 <h3 className="text-sm font-medium text-gray-700 mb-2">Content Preview</h3>
