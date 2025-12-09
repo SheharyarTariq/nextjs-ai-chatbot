@@ -85,7 +85,9 @@ function PureMultimodalInput({
 
   const adjustHeight = useCallback(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = "44px";
+      // Set initial height based on mobile breakpoint
+      const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+      textareaRef.current.style.height = isMobile ? "36px" : "44px";
     }
   }, []);
 
@@ -95,9 +97,22 @@ function PureMultimodalInput({
     }
   }, [adjustHeight]);
 
+  useEffect(() => {
+    // Adjust height when window size changes
+    const handleResize = () => {
+      if (textareaRef.current) {
+        const isMobile = window.innerWidth < 640;
+        textareaRef.current.style.height = isMobile ? "36px" : "44px";
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const resetHeight = useCallback(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = "44px";
+      const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+      textareaRef.current.style.height = isMobile ? "36px" : "44px";
     }
   }, []);
 
@@ -308,7 +323,7 @@ function PureMultimodalInput({
       />
 
       <PromptInput
-        className="rounded-xl border border-border bg-background p-3 shadow-xs transition-all duration-200 focus-within:border-border hover:border-muted-foreground/50"
+        className="rounded-full border border-border bg-background py-2 sm:py-3 px-4 sm:px-6 shadow-xs transition-all duration-200 focus-within:border-border hover:border-muted-foreground/50"
         onSubmit={(event) => {
           event.preventDefault();
           if (status !== "ready") {
@@ -320,7 +335,7 @@ function PureMultimodalInput({
       >
         {(attachments.length > 0 || uploadQueue.length > 0) && (
           <div
-            className="flex flex-row items-end gap-2 overflow-x-scroll"
+            className="flex flex-row items-end gap-1.5 sm:gap-2 overflow-x-scroll mb-1.5 sm:mb-2"
             data-testid="attachments-preview"
           >
             {attachments.map((attachment) => (
@@ -351,14 +366,14 @@ function PureMultimodalInput({
             ))}
           </div>
         )}
-        <div className="flex flex-row items-start gap-1 sm:gap-2">
+        <div className="flex flex-row items-center gap-1 sm:gap-2">
           <PromptInputTextarea
             autoFocus
-            className="grow resize-none border-0! border-none! bg-transparent p-2 text-sm outline-none ring-0 [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-scrollbar]:hidden"
+            className="grow resize-none border-0! border-none! bg-transparent p-1.5 sm:p-2 text-sm outline-none ring-0 [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-scrollbar]:hidden min-h-[36px] sm:min-h-[44px]"
             data-testid="multimodal-input"
             disableAutoResize={true}
             maxHeight={200}
-            minHeight={44}
+            minHeight={36}
             onChange={handleInput}
             placeholder="Send a message..."
             ref={textareaRef}
@@ -366,33 +381,19 @@ function PureMultimodalInput({
             value={input}
           />{" "}
           {/* <Context {...contextProps} /> */}
-        </div>
-        <PromptInputToolbar className="border-top-0! border-t-0! p-0 shadow-none flex justify-end dark:border-0 dark:border-transparent!">
-          {/* <PromptInputTools className="gap-0 sm:gap-0.5">
-            <AttachmentsButton
-              fileInputRef={fileInputRef}
-              selectedModelId={selectedModelId}
-              status={status}
-            />
-            <ModelSelectorCompact
-              onModelChange={onModelChange}
-              selectedModelId={selectedModelId}
-            />
-          </PromptInputTools> */}
-
           {status === "submitted" ? (
             <StopButton setMessages={setMessages} stop={stop} />
           ) : (
             <PromptInputSubmit
-              className="size-8 rounded-full bg-primary-green text-primary-foreground transition-colors duration-200 hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground"
+              className="size-7 sm:size-8 shrink-0 rounded-full bg-primary-green text-primary-foreground transition-colors duration-200 hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground"
               disabled={!input.trim() || uploadQueue.length > 0}
               status={status}
 	            data-testid="send-button"
             >
-              <ArrowUpIcon size={14} />
+              <ArrowUpIcon size={12} className="sm:w-[14px] sm:h-[14px]" />
             </PromptInputSubmit>
           )}
-        </PromptInputToolbar>
+        </div>
       </PromptInput>
     </div>
   );
@@ -517,7 +518,7 @@ function PureStopButton({
 }) {
   return (
     <Button
-      className="size-7 rounded-full bg-primary-green p-1 text-background transition-colors duration-200 hover:bg-foreground/90 disabled:bg-muted disabled:text-muted-foreground"
+      className="size-7 sm:size-8 shrink-0 rounded-full bg-primary-green p-1 text-background transition-colors duration-200 hover:bg-foreground/90 disabled:bg-muted disabled:text-muted-foreground"
       data-testid="stop-button"
       onClick={(event) => {
         event.preventDefault();
@@ -525,7 +526,7 @@ function PureStopButton({
         setMessages((messages) => messages);
       }}
     >
-      <StopIcon size={14} />
+      <StopIcon size={12} className="sm:w-[14px] sm:h-[14px]" />
     </Button>
   );
 }
