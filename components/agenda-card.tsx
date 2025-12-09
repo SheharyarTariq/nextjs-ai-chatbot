@@ -260,7 +260,7 @@ export function AgendaCard({
           </AlertDialogHeader>
           
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 grid-cols-1 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="rating">Session Rating</Label>
                 <Select value={rating} onValueChange={setRating} disabled={completed}>
@@ -296,7 +296,7 @@ export function AgendaCard({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 grid-cols-1 gap-4">
               <div className={`flex items-center space-x-2 border p-3 rounded-md ${completed ? "opacity-70" : ""}`}>
                 <input
                   type="checkbox"

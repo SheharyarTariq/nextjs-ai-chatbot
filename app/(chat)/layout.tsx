@@ -1,11 +1,10 @@
 import { cookies } from "next/headers";
 import Script from "next/script";
 import { AgendaSidebar } from "@/components/agenda-sidebar";
-import { AgendaSidebarClientWrapper } from "@/components/agenda-sidebar-client-wrapper";
 import { DataStreamProvider } from "@/components/data-stream-provider";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { auth } from "../(auth)/auth";
-import { getUserById } from "@/lib/db/queries";
+import { getAgendaByUserId, getUserById } from "@/lib/db/queries";
 import { ChatLayoutClient } from "../../components/chat-layout-client";
 
 export const experimental_ppr = true;
@@ -19,10 +18,13 @@ export default async function Layout({
   const isCollapsed = cookieStore.get("sidebar_state")?.value !== "true";
   const user = await getUserById(session!.user.id);
   const userWithSessionFields = {
-  ...user!,
-  type: session!.user.type,
-  role: session!.user.role as "admin" | "user",
-};
+    ...user!,
+    type: session!.user.type,
+    role: session!.user.role as "admin" | "user",
+  };
+
+  const agenda = await getAgendaByUserId({ userId: session!.user.id });
+
   return (
     <>
       <Script
@@ -32,9 +34,10 @@ export default async function Layout({
       <DataStreamProvider>
 
         <SidebarProvider defaultOpen={!isCollapsed}>
-          <ChatLayoutClient 
+          <ChatLayoutClient
             user={userWithSessionFields}
             agendaSidebar={<AgendaSidebar />}
+            agenda={agenda}
           >
             {children}
           </ChatLayoutClient>
@@ -44,3 +47,4 @@ export default async function Layout({
     </>
   );
 }
+

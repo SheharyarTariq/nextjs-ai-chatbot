@@ -7,14 +7,16 @@ import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { ChatHeader } from "@/components/chat-header";
+import { TodayAgendaFloatingWrapper } from "@/components/today-agenda-floating-wrapper";
 
 interface ChatLayoutClientProps {
   agendaSidebar: ReactNode;
   children: ReactNode;
   user: any;
+  agenda?: any;
 }
 
-export function ChatLayoutClient({ agendaSidebar, children, user }: ChatLayoutClientProps) {
+export function ChatLayoutClient({ agendaSidebar, children, user, agenda }: ChatLayoutClientProps) {
   const [mobileActiveTab, setMobileActiveTab] = useState<"chat" | "agenda">("chat");
   const pathname = usePathname();
   const isChatPage = pathname === "/" || pathname.startsWith("/chat/");
@@ -32,7 +34,7 @@ export function ChatLayoutClient({ agendaSidebar, children, user }: ChatLayoutCl
           {agendaSidebar}
         </AgendaSidebarClientWrapper>
 
-        <SidebarInset 
+        <SidebarInset
           className={cn(
             "flex-1 overflow-y-auto",
             isChatPage && mobileActiveTab === "agenda" && "max-md:hidden"
@@ -42,9 +44,16 @@ export function ChatLayoutClient({ agendaSidebar, children, user }: ChatLayoutCl
         </SidebarInset>
       </div>
 
-      <MobileBottomNav 
-        activeTab={mobileActiveTab} 
-        onTabChange={setMobileActiveTab} 
+      {isChatPage && (
+        <TodayAgendaFloatingWrapper
+          agenda={agenda}
+          isVisible={mobileActiveTab === "chat"}
+        />
+      )}
+
+      <MobileBottomNav
+        activeTab={mobileActiveTab}
+        onTabChange={setMobileActiveTab}
       />
     </div>
   );

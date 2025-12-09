@@ -71,7 +71,7 @@ export function AgendaSidebarClient({ agenda }: AgendaSidebarClientProps) {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full ">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="week" className="data-[state=active]:bg-primary-green data-[state=active]:text-white hover:cursor-pointer">My Agenda</TabsTrigger>
-              <TabsTrigger value="today" className="data-[state=active]:bg-primary-green data-[state=active]:text-white hover:cursor-pointer">Today's Agenda</TabsTrigger>
+              <TabsTrigger value="today" className="data-[state=active]:bg-primary-green data-[state=active]:text-white hover:cursor-pointer">Event</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
