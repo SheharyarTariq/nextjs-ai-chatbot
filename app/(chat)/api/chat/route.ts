@@ -251,7 +251,7 @@ export async function POST(request: Request) {
       logToDebugFile(`Generating embedding for query: ${userMessageText.substring(0, 50)}...`);
       
       const { embedding } = await embed({
-        model: openai.embedding('text-embedding-3-small'),
+        model: openai.embedding('text-embedding-3-large'),
         value: userMessageText,
       });
 
@@ -265,7 +265,7 @@ export async function POST(request: Request) {
           similarity,
         })
         .from(embeddings)
-        .where(gt(similarity, 0.3))
+        .where(gt(similarity, 0.5))
         .orderBy(desc(similarity))
         .limit(5);
 

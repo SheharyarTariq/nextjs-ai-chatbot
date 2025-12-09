@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
                 console.log(`Generating embeddings for batch ${Math.floor(i / EMBEDDING_BATCH_SIZE) + 1}/${Math.ceil(chunks.length / EMBEDDING_BATCH_SIZE)} (${batchChunks.length} chunks)`);
                 
                 const { embeddings: batchVectors } = await embedMany({
-                    model: openai.embedding('text-embedding-3-small'),
+                    model: openai.embedding('text-embedding-3-large'),
                     values: batchChunks,
                 });
                 
