@@ -61,8 +61,8 @@ const client = postgres(process.env.POSTGRES_URL!);
 const db = drizzle(client);
 
 function logToDebugFile(message: string) {
-    const timestamp = new Date().toISOString();
-    console.log(`[${timestamp}] ${message}`);
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] ${message}`);
 }
 
 const openai = createOpenAI({
@@ -85,7 +85,7 @@ const getSystemPromptFromDB = cache(
         logToDebugFile(`Using system prompt from database (version ${systemPrompt.version})`);
         return systemPrompt.content;
       }
-      
+
       logToDebugFile("No system prompt found in database, using fallback");
       return null;
     } catch (error) {
@@ -95,7 +95,7 @@ const getSystemPromptFromDB = cache(
     }
   },
   ["system-prompt"],
-  { revalidate: 60, tags: ["system-prompt"] } 
+  { revalidate: 60, tags: ["system-prompt"] }
 );
 
 const getTokenlensCatalog = cache(
@@ -249,7 +249,7 @@ export async function POST(request: Request) {
     try {
       const userMessageText = message.parts.filter(p => p.type === 'text').map(p => p.text).join('\n');
       logToDebugFile(`Generating embedding for query: ${userMessageText.substring(0, 50)}...`);
-      
+
       const { embedding } = await embed({
         model: openai.embedding('text-embedding-3-small'),
         value: userMessageText,
@@ -284,17 +284,17 @@ export async function POST(request: Request) {
       execute: async ({ writer: dataStream }) => {
         const dbPromptContent = await getSystemPromptFromDB();
         const basePrompt = dbPromptContent || regularPrompt;
-        
+
         const requestPrompt = getRequestPromptFromHints(requestHints);
         const profilePrompt = getUserProfilePrompt(userProfile);
-        
+
         let fullSystemPrompt: string;
         if (selectedChatModel === "chat-model-reasoning") {
           fullSystemPrompt = `${basePrompt}\n\n${requestPrompt}${profilePrompt}`;
         } else {
           fullSystemPrompt = `${basePrompt}\n\n${requestPrompt}${profilePrompt}\n\n${artifactsPrompt}`;
         }
-        
+
         if (contextText) {
           fullSystemPrompt += `\n\nIMPORTANT: You have access to the following content from the "Athlete Standards" book/knowledge base. Use this information to answer the user's questions, explain concepts, or provide quotes. This is your core knowledge source:\n\n${contextText}`;
         }
@@ -304,7 +304,7 @@ export async function POST(request: Request) {
           temperature: 0.7,
           system: fullSystemPrompt,
           messages: convertToModelMessages(uiMessages),
-          stopWhen: stepCountIs(5),
+          stopWhen: stepCountIs(20),
           experimental_activeTools:
             selectedChatModel === "chat-model-reasoning"
               ? []
