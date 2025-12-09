@@ -265,7 +265,7 @@ export async function POST(request: Request) {
           similarity,
         })
         .from(embeddings)
-        .where(gt(similarity, 0.5))
+        .where(gt(similarity, 0.3))
         .orderBy(desc(similarity))
         .limit(5);
 
