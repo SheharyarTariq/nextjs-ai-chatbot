@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://chat.vercel.ai"),
   title: "Brandfit Coach",
   description: "Brandfit AI Coach is your personal AI assistant to help you with your fitness journey.",
-   icons: {
+  icons: {
     icon: "/assets/logos.png",
     shortcut: "/assets/logos.png",
     apple: "/assets/logos.png",
@@ -79,9 +79,9 @@ export default function RootLayout({
       <body className="antialiased">
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="light"
+          forcedTheme="light"
           disableTransitionOnChange
-          enableSystem
         >
           <Toaster position="top-center" />
           <SessionProvider>{children}</SessionProvider>
