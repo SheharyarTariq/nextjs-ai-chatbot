@@ -251,7 +251,7 @@ export async function POST(request: Request) {
       logToDebugFile(`Generating embedding for query: ${userMessageText.substring(0, 50)}...`);
       
       const { embedding } = await embed({
-        model: openai.embedding('text-embedding-3-large'),
+        model: openai.embedding('text-embedding-3-small'),
         value: userMessageText,
       });
 
