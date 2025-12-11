@@ -22,14 +22,14 @@ export function ChatLayoutClient({ agendaSidebar, children, user, agenda }: Chat
   const isChatPage = pathname === "/" || pathname.startsWith("/chat/");
 
   return (
-    <div className="flex flex-col w-full h-screen">
+    <div className="flex flex-col w-full min-h-screen" style={{ minHeight: '-webkit-fill-available' }}>
       {user?.gender && (
         <div className="sticky top-0 z-50">
           <ChatHeader user={user} />
         </div>
       )}
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0">
         <AgendaSidebarClientWrapper isVisible={mobileActiveTab === "agenda"}>
           {agendaSidebar}
         </AgendaSidebarClientWrapper>

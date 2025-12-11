@@ -5,7 +5,6 @@ import Image from "next/image";
 import type { User } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
-import { useEffect } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,16 +23,8 @@ import Link from "next/link";
 
 
 export function SidebarUserNav({ user }: { user: User }) {
-  const { status, data: session } = useSession();
+  const { status } = useSession();
   const { setTheme, resolvedTheme } = useTheme();
-
-  // DEBUG: Track session status for iOS Safari debugging
-  useEffect(() => {
-    toast({
-      type: status === "loading" ? "error" : "success",
-      description: `Session status: ${status}${session?.user ? `, User: ${session.user.email}` : ""}`,
-    });
-  }, [status, session]);
 
   return (
     <SidebarMenu>
