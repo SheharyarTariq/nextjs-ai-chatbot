@@ -102,6 +102,15 @@ export function Chat({
     }),
     onData: (dataPart) => {
       setDataStream((ds) => (ds ? [...ds, dataPart] : []));
+
+      // DEBUG: Toast when stream data is received
+      if (dataPart.type === "data-usage" || dataPart.type === "data-agendaRefresh") {
+        toast({
+          type: "success",
+          description: `Stream data received: ${dataPart.type}`,
+        });
+      }
+
       if (dataPart.type === "data-usage") {
         setUsage(dataPart.data);
       }
@@ -154,6 +163,24 @@ export function Chat({
 
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
+
+  // DEBUG: Toast on component mount to check if data is fetched
+  useEffect(() => {
+    toast({
+      type: "success",
+      description: `Chat loaded! Initial messages: ${initialMessages.length}, Chat ID: ${id.slice(0, 8)}...`,
+    });
+  }, []);
+
+  // DEBUG: Toast when votes are fetched
+  useEffect(() => {
+    if (votes) {
+      toast({
+        type: "success",
+        description: `Votes fetched: ${votes.length} votes`,
+      });
+    }
+  }, [votes]);
 
   useAutoResume({
     autoResume,
