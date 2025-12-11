@@ -50,6 +50,9 @@ declare module "next-auth/jwt" {
   }
 }
 
+// Use secure cookies only in production with HTTPS
+const useSecureCookies = process.env.NODE_ENV === "production";
+
 export const {
   handlers: { GET, POST },
   auth,
@@ -59,6 +62,34 @@ export const {
   ...authConfig,
   trustHost: true,
   session: { strategy: "jwt" },
+  cookies: {
+    sessionToken: {
+      name: useSecureCookies ? "__Secure-authjs.session-token" : "authjs.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: useSecureCookies,
+      },
+    },
+    callbackUrl: {
+      name: useSecureCookies ? "__Secure-authjs.callback-url" : "authjs.callback-url",
+      options: {
+        sameSite: "lax",
+        path: "/",
+        secure: useSecureCookies,
+      },
+    },
+    csrfToken: {
+      name: useSecureCookies ? "__Host-authjs.csrf-token" : "authjs.csrf-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: useSecureCookies,
+      },
+    },
+  },
   providers: [
     Credentials({
       credentials: {},
