@@ -183,7 +183,7 @@ export function AgendaCard({
         }`}
       >
         <CardContent className="p-4">
-          <div className="flex h-full items-center gap-4">
+          <div className="flex h-28 md:h-full flex-start items-center gap-4">
             <div style={{ height: "-webkit-fill-available" }} className="flex flex-col items-center justify-between">
               <p className={`text-base sm:text-2xl font-normal ${isToday ? "text-white" : "text-foreground"}`}>
                 {day?.slice(0, 3).toUpperCase()}
