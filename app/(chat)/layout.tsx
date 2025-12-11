@@ -41,7 +41,6 @@ export default async function Layout({
           >
             {children}
           </ChatLayoutClient>
-
         </SidebarProvider>
       </DataStreamProvider>
     </>

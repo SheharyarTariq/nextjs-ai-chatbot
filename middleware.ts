@@ -17,10 +17,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  const isProduction = process.env.NODE_ENV === "production";
+  const cookieName = isProduction ? "__Secure-authjs.session-token" : "authjs.session-token";
+
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
-    secureCookie: process.env.NODE_ENV === "production",
+    secureCookie: isProduction,
+    cookieName: cookieName,
   });
 
   if (!process.env.AUTH_SECRET) {
