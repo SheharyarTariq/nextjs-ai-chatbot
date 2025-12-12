@@ -1,21 +1,22 @@
 "use client";
 
-import { useState } from "react";
 import { AgendaCard } from "@/components/agenda-card";
-import { X } from "lucide-react";
+import { X, CalendarDays } from "lucide-react";
 
 interface TodayAgendaFloatingWrapperProps {
     agenda: any;
     isVisible?: boolean;
+    isMinimized?: boolean;
+    onMinimize?: (minimized: boolean) => void;
 }
 
 export function TodayAgendaFloatingWrapper({
     agenda,
     isVisible = true,
+    isMinimized = false,
+    onMinimize,
 }: TodayAgendaFloatingWrapperProps) {
-    const [isDismissed, setIsDismissed] = useState(false);
-
-    if (!agenda || !isVisible || isDismissed) {
+    if (!agenda || !isVisible) {
         return null;
     }
 
@@ -38,12 +39,26 @@ export function TodayAgendaFloatingWrapper({
         return null;
     }
 
+    if (isMinimized) {
+        return (
+            <div className="fixed top-15 right-3 z-40 md:hidden">
+                <button
+                    onClick={() => onMinimize?.(false)}
+                    className="bg-primary-green/80 backdrop-blur-md border-white/20 rounded-full p-3 shadow-lg hover:bg-primary-green/90 transition-colors"
+                    aria-label="Expand today's agenda"
+                >
+                    <CalendarDays className="h-5 w-5 text-white" />
+                </button>
+            </div>
+        );
+    }
+
     return (
         <div className="fixed top-15 left-3 right-3 z-40 md:hidden">
             <button
-                onClick={() => setIsDismissed(true)}
+                onClick={() => onMinimize?.(true)}
                 className="absolute -top-2 -right-1 z-50 bg-background border rounded-full p-1 shadow-md hover:bg-muted transition-colors"
-                aria-label="Dismiss today's agenda"
+                aria-label="Minimize today's agenda"
             >
                 <X className="h-4 w-4 text-muted-foreground" />
             </button>
@@ -63,6 +78,7 @@ export function TodayAgendaFloatingWrapper({
                     meals={todaySession.meals}
                     sleep={todaySession.sleep}
                     notes={todaySession.notes}
+                    variant="floating"
                 />
             </div>
         </div>

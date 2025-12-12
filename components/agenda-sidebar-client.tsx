@@ -62,8 +62,7 @@ export function AgendaSidebarClient({ agenda }: AgendaSidebarClientProps) {
         <div className="p-4 border-b">
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1">
-              <h2 className="text-xl font-bold">Week {agenda.currentWeek} Schedule</h2>
-              <p className="text-sm text-muted-foreground mt-1">{agenda.userData?.goal || agenda.goal}</p>
+              <h2 className="text-md font-semibold text-foreground">{agenda.userData?.goal || agenda.goal}</h2>
             </div>
             <ResetAgendaButton />
           </div>
@@ -80,31 +79,9 @@ export function AgendaSidebarClient({ agenda }: AgendaSidebarClientProps) {
           <TabsContent value="today" className="h-full mt-0">
             <ScrollArea className="h-full p-4">
               <div className="space-y-4">
-                {todaySession ? (
-                  <div>
-                    <AgendaCard
-                      key={todaySession.day}
-                      day={todaySession.day}
-                      date={todaySession.date}
-                      completed={todaySession.completed || false}
-                      exerciseDetails={todaySession.exerciseDetails || "No exercise details"}
-                      mealDetails={todaySession.mealDetails}
-                      sleepDetails={todaySession.sleepDetails}
-                      weekNumber={agenda.currentWeek}
-                      isToday={true}
-                      rating={todaySession.rating}
-                      energy={todaySession.energy}
-                      meals={todaySession.meals}
-                      sleep={todaySession.sleep}
-                      notes={todaySession.notes}
-                    />
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p className="text-sm">No session pending/scheduled for today.</p>
-                    <p className="text-sm mt-2">Enjoy your rest day!</p>
-                  </div>
-                )}
+                <div className="text-center py-8 text-muted-foreground">
+                  <p className="text-sm">Coming soon...</p>
+                </div>
               </div>
             </ScrollArea>
           </TabsContent>

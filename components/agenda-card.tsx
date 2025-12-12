@@ -41,6 +41,7 @@ interface AgendaCardProps {
   meals?: boolean;
   sleep?: boolean;
   notes?: string;
+  variant?: "default" | "floating";
 }
 
 export function AgendaCard({
@@ -57,10 +58,11 @@ export function AgendaCard({
   meals: initialMeals,
   sleep: initialSleep,
   notes: initialNotes,
+  variant = "default",
 }: AgendaCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const [rating, setRating] = useState(initialRating?.toString() || "");
   const [energy, setEnergy] = useState(initialEnergy?.toString() || "");
   const [meals, setMeals] = useState(initialMeals || false);
@@ -90,7 +92,8 @@ export function AgendaCard({
       if (sessionDate > today) {
         toast({
           type: "error",
-          description: "You can not complete any future session till the day arrives."});
+          description: "You can not complete any future session till the day arrives."
+        });
         return;
       }
     }
@@ -107,7 +110,7 @@ export function AgendaCard({
 
   const handleConfirm = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    
+
     if (completed) {
       setIsDialogOpen(false);
       return;
@@ -178,23 +181,26 @@ export function AgendaCard({
   return (
     <>
       <Card
-        className={`w-full rounded-2xl border hover:shadow-md transition-shadow ${
-          isToday ? "bg-primary-green text-white" : "bg-secondary-green"
-        }`}
+        className={`w-full rounded-lg border hover:shadow-md transition-shadow ${variant === "floating" && isToday
+          ? "bg-primary-green/80 backdrop-blur-md border-white/20 text-black shadow-lg"
+          : isToday
+            ? "bg-primary-green text-white"
+            : "bg-secondary-green"
+          }`}
       >
-        <CardContent className="p-4">
-          <div className="flex h-28 md:h-full flex-start items-center gap-4">
-            <div style={{ height: "-webkit-fill-available" }} className="flex flex-col items-center justify-between">
-              <p className={`text-base sm:text-2xl font-normal ${isToday ? "text-white" : "text-foreground"}`}>
+        <CardContent className="p-3">
+          <div className="flex h-full items-center gap-4">
+            <div className="flex flex-col items-center justify-center gap-[3px]">
+              <p className={`text-xs sm:text-sm font-normal ${variant === "floating" && isToday ? "text-black" : isToday ? "text-white" : "text-foreground"}`}>
                 {day?.slice(0, 3).toUpperCase()}
               </p>
 
               {date && (
                 <>
-                  <p className={`text-lg sm:text-2xl font-bold ${isToday ? "text-white" : "text-foreground"}`}>
+                  <p className={`text-sm sm:text-base font-bold ${variant === "floating" && isToday ? "text-black" : isToday ? "text-white" : "text-foreground"}`}>
                     {new Date(date).getDate()}
                   </p>
-                  <p className={`text-lg sm:text-2xl font-normal ${isToday ? "text-white" : "text-foreground"}`}>
+                  <p className={`text-xs sm:text-sm font-normal ${variant === "floating" && isToday ? "text-black" : isToday ? "text-white" : "text-foreground"}`}>
                     {new Date(date).toLocaleDateString("en-US", { month: "short" })}
                   </p>
                 </>
@@ -203,17 +209,15 @@ export function AgendaCard({
 
             <div className="flex-1">
               <div className="flex items-start justify-between gap-2">
-                <h3 className={`text-sm sm:text-base break-all font-semibold leading-snug ${
-                  isToday ? "text-white" : "text-foreground"
-                }`}>
+                <h3 className={`text-[14px] break-all font-semibold leading-snug ${variant === "floating" && isToday ? "text-black" : isToday ? "text-white" : "text-foreground"
+                  }`}>
                   {exerciseDetails}
                 </h3>
 
                 <Badge
                   variant={completed && isToday ? "secondary" : completed ? "default" : "secondary"}
-                  className={`whitespace-nowrap cursor-pointer hover:opacity-80 ${
-                    isLoading ? "cursor-not-allowed" : ""
-                  }`}
+                  className={`whitespace-nowrap cursor-pointer hover:opacity-80 ${isLoading ? "cursor-not-allowed" : ""
+                    }`}
                   onClick={handleIconClick}
                 >
                   {isLoading ? (
@@ -229,16 +233,14 @@ export function AgendaCard({
                 </Badge>
               </div>
               {mealDetails && (
-                <p className={`mt-1 text-xs sm:text-sm ${
-                  isToday ? "text-white/90" : "text-muted-foreground"
-                }`}>
+                <p className={`mt-1 text-xs sm:text-sm ${variant === "floating" && isToday ? "text-black/80" : isToday ? "text-white/90" : "text-muted-foreground"
+                  }`}>
                   {mealDetails}
                 </p>
               )}
               {sleepDetails && (
-                <p className={`text-xs sm:text-sm ${
-                  isToday ? "text-white/90" : "text-muted-foreground"
-                }`}>
+                <p className={`text-xs sm:text-sm ${variant === "floating" && isToday ? "text-black/80" : isToday ? "text-white/90" : "text-muted-foreground"
+                  }`}>
                   {sleepDetails}
                 </p>
               )}
@@ -253,12 +255,12 @@ export function AgendaCard({
               {completed ? "Session Details" : "Mark Session as Completed"}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {completed 
-                ? "Here are the details you recorded for this session." 
+              {completed
+                ? "Here are the details you recorded for this session."
                 : "Please provide details about your session."}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          
+
           <div className="grid gap-4 py-4">
             <div className="grid sm:grid-cols-2 grid-cols-1 gap-4">
               <div className="space-y-2">
@@ -277,7 +279,7 @@ export function AgendaCard({
                   <p className="text-sm text-red-500">{errors.rating}</p>
                 )}
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="energy">Energy Level</Label>
                 <Select value={energy} onValueChange={setEnergy} disabled={completed}>
@@ -308,7 +310,7 @@ export function AgendaCard({
                 />
                 <Label htmlFor="meals" className={completed ? "cursor-not-allowed" : "cursor-pointer"}>Meals Completed</Label>
               </div>
-              
+
               <div className={`flex items-center space-x-2 border p-3 rounded-md ${completed ? "opacity-70" : ""}`}>
                 <input
                   type="checkbox"

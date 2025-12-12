@@ -282,98 +282,109 @@ export async function POST(request: Request) {
 
     const stream = createUIMessageStream({
       execute: async ({ writer: dataStream }) => {
-        const dbPromptContent = await getSystemPromptFromDB();
-        const basePrompt = dbPromptContent || regularPrompt;
+        try {
+          const dbPromptContent = await getSystemPromptFromDB();
+          const basePrompt = dbPromptContent || regularPrompt;
 
-        const requestPrompt = getRequestPromptFromHints(requestHints);
-        const profilePrompt = getUserProfilePrompt(userProfile);
+          const requestPrompt = getRequestPromptFromHints(requestHints);
+          const profilePrompt = getUserProfilePrompt(userProfile);
 
-        let fullSystemPrompt: string;
-        if (selectedChatModel === "chat-model-reasoning") {
-          fullSystemPrompt = `${basePrompt}\n\n${requestPrompt}${profilePrompt}`;
-        } else {
-          fullSystemPrompt = `${basePrompt}\n\n${requestPrompt}${profilePrompt}\n\n${artifactsPrompt}`;
-        }
+          let fullSystemPrompt: string;
+          if (selectedChatModel === "chat-model-reasoning") {
+            fullSystemPrompt = `${basePrompt}\n\n${requestPrompt}${profilePrompt}`;
+          } else {
+            fullSystemPrompt = `${basePrompt}\n\n${requestPrompt}${profilePrompt}\n\n${artifactsPrompt}`;
+          }
 
-        if (contextText) {
-          fullSystemPrompt += `\n\nIMPORTANT: You have access to the following content from the "Athlete Standards" book/knowledge base. Use this information to answer the user's questions, explain concepts, or provide quotes. This is your core knowledge source:\n\n${contextText}`;
-        }
+          if (contextText) {
+            fullSystemPrompt += `\n\nIMPORTANT: You have access to the following content from the "Athlete Standards" book/knowledge base. Use this information to answer the user's questions, explain concepts, or provide quotes. This is your core knowledge source:\n\n${contextText}`;
+          }
 
-        const result = streamText({
-          model: myProvider.languageModel(selectedChatModel),
-          temperature: 0.7,
-          system: fullSystemPrompt,
-          messages: convertToModelMessages(uiMessages),
-          stopWhen: stepCountIs(20),
-          experimental_activeTools:
-            selectedChatModel === "chat-model-reasoning"
-              ? []
-              : [
-                "createDocument",
-                "updateDocument",
-                "requestSuggestions",
-                "getAgenda",
-                "saveAgenda",
-                "updateAgenda",
-                "deleteAgenda",
-              ],
-          experimental_transform: smoothStream({ chunking: "word" }),
-          tools: {
-            getWeather,
-            createDocument: createDocument({ session, dataStream }),
-            updateDocument: updateDocument({ session, dataStream }),
-            requestSuggestions: requestSuggestions({
-              session,
-              dataStream,
-            }),
-            getAgenda: createGetAgendaTool({ session }),
-            saveAgenda: createSaveAgendaTool({ session, chatId: id, dataStream }),
-            updateAgenda: createUpdateAgendaTool({ session, dataStream }),
-            deleteAgenda: createDeleteAgendaTool({ session, dataStream }),
-          },
-          experimental_telemetry: {
-            isEnabled: isProductionEnvironment,
-            functionId: "stream-text",
-          },
-          onFinish: async ({ usage }) => {
-            try {
-              const providers = await getTokenlensCatalog();
-              const modelId =
-                myProvider.languageModel(selectedChatModel).modelId;
-              if (!modelId) {
+          const result = streamText({
+            model: myProvider.languageModel(selectedChatModel),
+            temperature: 0.7,
+            system: fullSystemPrompt,
+            messages: convertToModelMessages(uiMessages),
+            stopWhen: stepCountIs(20),
+            experimental_activeTools:
+              selectedChatModel === "chat-model-reasoning"
+                ? []
+                : [
+                  "createDocument",
+                  "updateDocument",
+                  "requestSuggestions",
+                  "getAgenda",
+                  "saveAgenda",
+                  "updateAgenda",
+                  "deleteAgenda",
+                ],
+            experimental_transform: smoothStream({ chunking: "word" }),
+            tools: {
+              getWeather,
+              createDocument: createDocument({ session, dataStream }),
+              updateDocument: updateDocument({ session, dataStream }),
+              requestSuggestions: requestSuggestions({
+                session,
+                dataStream,
+              }),
+              getAgenda: createGetAgendaTool({ session }),
+              saveAgenda: createSaveAgendaTool({ session, chatId: id, dataStream }),
+              updateAgenda: createUpdateAgendaTool({ session, dataStream }),
+              deleteAgenda: createDeleteAgendaTool({ session, dataStream }),
+            },
+            experimental_telemetry: {
+              isEnabled: isProductionEnvironment,
+              functionId: "stream-text",
+            },
+            onFinish: async ({ usage, text, finishReason }) => {
+              try {
+                // Log if no text was generated
+                if (!text || text.trim().length === 0) {
+                  console.warn(`[EMPTY RESPONSE] Stream finished with no text. Finish reason: ${finishReason}, Usage:`, usage);
+                }
+
+                const providers = await getTokenlensCatalog();
+                const modelId =
+                  myProvider.languageModel(selectedChatModel).modelId;
+                if (!modelId) {
+                  finalMergedUsage = usage;
+                  dataStream.write({
+                    type: "data-usage",
+                    data: finalMergedUsage,
+                  });
+                  return;
+                }
+
+                if (!providers) {
+                  finalMergedUsage = usage;
+                  dataStream.write({
+                    type: "data-usage",
+                    data: finalMergedUsage,
+                  });
+                  return;
+                }
+
+                const summary = getUsage({ modelId, usage, providers });
+                finalMergedUsage = { ...usage, ...summary, modelId } as AppUsage;
+                dataStream.write({ type: "data-usage", data: finalMergedUsage });
+              } catch (err) {
+                console.warn("TokenLens enrichment failed", err);
                 finalMergedUsage = usage;
-                dataStream.write({
-                  type: "data-usage",
-                  data: finalMergedUsage,
-                });
-                return;
+                dataStream.write({ type: "data-usage", data: finalMergedUsage });
               }
+            },
+          });
 
-              if (!providers) {
-                finalMergedUsage = usage;
-                dataStream.write({
-                  type: "data-usage",
-                  data: finalMergedUsage,
-                });
-                return;
-              }
-
-              const summary = getUsage({ modelId, usage, providers });
-              finalMergedUsage = { ...usage, ...summary, modelId } as AppUsage;
-              dataStream.write({ type: "data-usage", data: finalMergedUsage });
-            } catch (err) {
-              console.warn("TokenLens enrichment failed", err);
-              finalMergedUsage = usage;
-              dataStream.write({ type: "data-usage", data: finalMergedUsage });
-            }
-          },
-        });
-
-        dataStream.merge(
-          result.toUIMessageStream({
-            sendReasoning: true,
-          })
-        );
+          dataStream.merge(
+            result.toUIMessageStream({
+              sendReasoning: true,
+            })
+          );
+        } catch (error) {
+          console.error("[STREAM EXECUTE ERROR]", error);
+          // Error will be handled by onError callback
+          throw error;
+        }
       },
       generateId: generateUUID,
       onFinish: async ({ messages }) => {
