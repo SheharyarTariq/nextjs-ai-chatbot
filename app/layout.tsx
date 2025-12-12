@@ -84,7 +84,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Toaster position="top-center" />
-          <SessionProvider>{children}</SessionProvider>
+          <SessionProvider
+            refetchInterval={5 * 60}
+            refetchOnWindowFocus={true}
+          >
+            {children}
+          </SessionProvider>
         </ThemeProvider>
       </body>
     </html>
