@@ -18,8 +18,16 @@ interface ChatLayoutClientProps {
 
 export function ChatLayoutClient({ agendaSidebar, children, user, agenda }: ChatLayoutClientProps) {
   const [mobileActiveTab, setMobileActiveTab] = useState<"chat" | "agenda">("chat");
+  const [isAgendaMinimized, setIsAgendaMinimized] = useState(false);
   const pathname = usePathname();
   const isChatPage = pathname === "/" || pathname.startsWith("/chat/");
+
+  const handleTabChange = (tab: "chat" | "agenda") => {
+    setMobileActiveTab(tab);
+    if (tab === "agenda" && isAgendaMinimized) {
+      setIsAgendaMinimized(false);
+    }
+  };
 
   return (
     <div className="flex flex-col w-full h-screen">
@@ -48,12 +56,14 @@ export function ChatLayoutClient({ agendaSidebar, children, user, agenda }: Chat
         <TodayAgendaFloatingWrapper
           agenda={agenda}
           isVisible={mobileActiveTab === "chat"}
+          isMinimized={isAgendaMinimized}
+          onMinimize={setIsAgendaMinimized}
         />
       )}
 
       <MobileBottomNav
         activeTab={mobileActiveTab}
-        onTabChange={setMobileActiveTab}
+        onTabChange={handleTabChange}
       />
     </div>
   );
