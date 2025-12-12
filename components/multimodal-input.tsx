@@ -246,7 +246,7 @@ function PureMultimodalInput({
     },
     [setAttachments, uploadFile]
   );
-  
+
   const handlePaste = useCallback(
     async (event: ClipboardEvent) => {
       const items = event.clipboardData?.items;
@@ -386,9 +386,9 @@ function PureMultimodalInput({
           ) : (
             <PromptInputSubmit
               className="size-7 sm:size-8 shrink-0 rounded-full bg-primary-green text-primary-foreground transition-colors duration-200 hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground"
-              disabled={!input.trim() || uploadQueue.length > 0}
+              disabled={!input.trim() || uploadQueue.length > 0 || status !== "ready"}
               status={status}
-	            data-testid="send-button"
+              data-testid="send-button"
             >
               <ArrowUpIcon size={12} className="sm:w-[14px] sm:h-[14px]" />
             </PromptInputSubmit>
