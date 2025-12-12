@@ -26,6 +26,7 @@ import Link from "next/link";
 export function SidebarUserNav({ user }: { user: User }) {
   const { status } = useSession();
   const [forceReady, setForceReady] = useState(false);
+  const { setTheme, resolvedTheme } = useTheme();
 
   // Fallback for iOS Safari where useSession can get stuck in loading state
   useEffect(() => {
@@ -37,14 +38,17 @@ export function SidebarUserNav({ user }: { user: User }) {
       return () => clearTimeout(timer);
     }
   }, [user, status]);
-  const { setTheme, resolvedTheme } = useTheme();
+
+  // If we have user prop, treat as ready (important for iOS Safari)
+  // The user prop comes from server-side, so it's reliable
+  const isReady = user && (status !== "loading" || forceReady);
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            {status === "loading" && !forceReady ? (
+            {!isReady ? (
               <SidebarMenuButton className="h-10 justify-between bg-background data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
                 <div className="flex flex-row gap-2">
                   <div className="size-6 animate-pulse rounded-full bg-zinc-500/30" />
@@ -100,7 +104,7 @@ export function SidebarUserNav({ user }: { user: User }) {
               <button
                 className="w-full cursor-pointer"
                 onClick={() => {
-                  if (status === "loading" && !forceReady) {
+                  if (!isReady) {
                     toast({
                       type: "error",
                       description:
