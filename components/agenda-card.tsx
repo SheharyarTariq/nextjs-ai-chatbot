@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
 import * as yup from "yup";
 import { toast } from "./toast";
 
@@ -42,6 +41,7 @@ interface AgendaCardProps {
   sleep?: boolean;
   notes?: string;
   variant?: "default" | "floating";
+  onUpdate?: () => void;
 }
 
 export function AgendaCard({
@@ -59,6 +59,7 @@ export function AgendaCard({
   sleep: initialSleep,
   notes: initialNotes,
   variant = "default",
+  onUpdate,
 }: AgendaCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -77,8 +78,6 @@ export function AgendaCard({
     sleep: yup.boolean().required("Required"),
     notes: yup.string(),
   });
-
-  const router = useRouter();
 
   const handleIconClick = () => {
     if (isLoading) return;
@@ -166,7 +165,13 @@ export function AgendaCard({
         description: "Status updated successfully",
       });
       setIsDialogOpen(false);
-      router.refresh();
+      // Trigger agenda refresh without page reload
+      if (onUpdate) {
+        onUpdate();
+      } else {
+        // Fallback: dispatch custom event for components that listen to it
+        window.dispatchEvent(new CustomEvent("agenda-refresh"));
+      }
     } catch (error: any) {
       console.error("Error updating agenda:", error);
       toast({

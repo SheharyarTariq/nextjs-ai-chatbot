@@ -1,21 +1,61 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import { AgendaCard } from "@/components/agenda-card";
 import { X, CalendarDays } from "lucide-react";
 
 interface TodayAgendaFloatingWrapperProps {
-    agenda: any;
+    initialAgenda?: any;
     isVisible?: boolean;
     isMinimized?: boolean;
     onMinimize?: (minimized: boolean) => void;
 }
 
 export function TodayAgendaFloatingWrapper({
-    agenda,
+    initialAgenda,
     isVisible = true,
     isMinimized = false,
     onMinimize,
 }: TodayAgendaFloatingWrapperProps) {
+    const [agenda, setAgenda] = useState(initialAgenda);
+
+    const fetchAgenda = useCallback(async () => {
+        try {
+            const response = await fetch("/api/agenda");
+            if (!response.ok) {
+                if (response.status === 404) {
+                    setAgenda(null);
+                    return;
+                }
+                throw new Error("Failed to fetch agenda");
+            }
+            const data = await response.json();
+            if (data.success && data.agenda) {
+                setAgenda(data.agenda);
+            } else {
+                setAgenda(null);
+            }
+        } catch (error) {
+            console.error("Error fetching agenda:", error);
+        }
+    }, []);
+
+    useEffect(() => {
+        // Listen for agenda refresh events
+        const handleAgendaRefresh = () => {
+            fetchAgenda();
+        };
+
+        window.addEventListener("agenda-refresh", handleAgendaRefresh);
+        return () => {
+            window.removeEventListener("agenda-refresh", handleAgendaRefresh);
+        };
+    }, [fetchAgenda]);
+
+    const handleAgendaUpdate = useCallback(() => {
+        fetchAgenda();
+    }, [fetchAgenda]);
+
     if (!agenda || !isVisible) {
         return null;
     }
@@ -79,6 +119,7 @@ export function TodayAgendaFloatingWrapper({
                     sleep={todaySession.sleep}
                     notes={todaySession.notes}
                     variant="floating"
+                    onUpdate={handleAgendaUpdate}
                 />
             </div>
         </div>

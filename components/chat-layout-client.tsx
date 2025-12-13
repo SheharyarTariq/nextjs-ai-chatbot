@@ -32,7 +32,7 @@ export function ChatLayoutClient({ agendaSidebar, children, user, agenda }: Chat
   return (
     <div className="flex flex-col w-full h-screen">
       {user?.gender && (
-        <div className="sticky top-0 z-50">
+        <div className="sticky top-0 z-50 w-full bg-[#F5F5F5]">
           <ChatHeader user={user} />
         </div>
       )}
@@ -54,7 +54,7 @@ export function ChatLayoutClient({ agendaSidebar, children, user, agenda }: Chat
 
       {isChatPage && (
         <TodayAgendaFloatingWrapper
-          agenda={agenda}
+          initialAgenda={agenda}
           isVisible={mobileActiveTab === "chat"}
           isMinimized={isAgendaMinimized}
           onMinimize={setIsAgendaMinimized}
