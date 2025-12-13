@@ -30,7 +30,7 @@ export function ChatLayoutClient({ agendaSidebar, children, user, agenda }: Chat
   };
 
   return (
-    <div className="flex flex-col w-full h-screen">
+    <div className="flex flex-col w-full h-screen max-md:h-dvh overflow-hidden">
       {user?.gender && (
         <div className="sticky top-0 z-50 w-full bg-[#F5F5F5]">
           <ChatHeader user={user} />
