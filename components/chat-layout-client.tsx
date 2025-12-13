@@ -44,7 +44,7 @@ export function ChatLayoutClient({ agendaSidebar, children, user, agenda }: Chat
 
         <SidebarInset
           className={cn(
-            "flex-1 overflow-y-auto",
+            "flex-1 overflow-hidden",
             isChatPage && mobileActiveTab === "agenda" && "max-md:hidden"
           )}
         >
