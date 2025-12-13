@@ -18,7 +18,7 @@ export function MobileBottomNav({ activeTab, onTabChange }: MobileBottomNavProps
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t md:hidden">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t md:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       <div className="grid grid-cols-2 h-16">
         <button
           onClick={() => onTabChange("agenda")}

@@ -215,12 +215,12 @@
 
   body {
     @apply bg-background text-foreground;
-    overflow-x: hidden;
+    overflow: hidden;
     position: relative;
   }
 
   html {
-    overflow-x: hidden;
+    overflow: hidden;
   }
 }
 

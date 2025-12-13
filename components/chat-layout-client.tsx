@@ -21,6 +21,7 @@ export function ChatLayoutClient({ agendaSidebar, children, user, agenda }: Chat
   const [isAgendaMinimized, setIsAgendaMinimized] = useState(false);
   const pathname = usePathname();
   const isChatPage = pathname === "/" || pathname.startsWith("/chat/");
+  const isAdminPage = pathname.startsWith("/admin");
 
   const handleTabChange = (tab: "chat" | "agenda") => {
     setMobileActiveTab(tab);
@@ -30,7 +31,7 @@ export function ChatLayoutClient({ agendaSidebar, children, user, agenda }: Chat
   };
 
   return (
-    <div className="flex flex-col w-full h-screen">
+    <div className="flex flex-col w-full h-screen max-md:h-dvh overflow-hidden">
       {user?.gender && (
         <div className="sticky top-0 z-50 w-full bg-[#F5F5F5]">
           <ChatHeader user={user} />
@@ -44,7 +45,8 @@ export function ChatLayoutClient({ agendaSidebar, children, user, agenda }: Chat
 
         <SidebarInset
           className={cn(
-            "flex-1 overflow-y-auto",
+            "flex-1",
+            isAdminPage ? "overflow-y-auto" : "overflow-hidden",
             isChatPage && mobileActiveTab === "agenda" && "max-md:hidden"
           )}
         >
