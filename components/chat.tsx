@@ -106,8 +106,8 @@ export function Chat({
         setUsage(dataPart.data);
       }
       if (dataPart.type === "data-agendaRefresh") {
-        router.push("/");
-        router.refresh();
+        // Dispatch custom event to refresh agenda without page reload
+        window.dispatchEvent(new CustomEvent("agenda-refresh"));
       }
     },
     onFinish: () => {

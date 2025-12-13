@@ -30,8 +30,10 @@ export function ResetAgendaButton() {
         description: "Agenda and conversation reset successfully!"});
       setIsDialogOpen(false);
 
+      // Dispatch event to refresh agenda components
+      window.dispatchEvent(new CustomEvent("agenda-refresh"));
+      // Navigate to home without full page reload
       router.push("/");
-      router.refresh();
     } catch (error: any) {
       console.error("Error resetting agenda:", error);
       toast({

@@ -1,43 +1,66 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { AgendaCard } from "@/components/agenda-card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResetAgendaButton } from "@/components/reset-agenda-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EmptyAgendaState } from "@/components/empty-agenda-state";
 
 interface AgendaSidebarClientProps {
-  agenda: any;
+  initialAgenda?: any;
 }
 
-export function AgendaSidebarClient({ agenda }: AgendaSidebarClientProps) {
+export function AgendaSidebarClient({ initialAgenda }: AgendaSidebarClientProps) {
+  const [agenda, setAgenda] = useState(initialAgenda);
   const [activeTab, setActiveTab] = useState("week");
+  const [isLoading, setIsLoading] = useState(false);
   const todaySessionRef = useRef<HTMLDivElement>(null);
+
+  const fetchAgenda = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/agenda");
+      if (!response.ok) {
+        if (response.status === 404) {
+          setAgenda(null);
+          return;
+        }
+        throw new Error("Failed to fetch agenda");
+      }
+      const data = await response.json();
+      if (data.success && data.agenda) {
+        setAgenda(data.agenda);
+      } else {
+        setAgenda(null);
+      }
+    } catch (error) {
+      console.error("Error fetching agenda:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Listen for agenda refresh events from the window
+    const handleAgendaRefresh = () => {
+      fetchAgenda();
+    };
+
+    window.addEventListener("agenda-refresh", handleAgendaRefresh);
+    return () => {
+      window.removeEventListener("agenda-refresh", handleAgendaRefresh);
+    };
+  }, [fetchAgenda]);
+
+  const handleAgendaUpdate = useCallback(() => {
+    fetchAgenda();
+  }, [fetchAgenda]);
 
   const today = new Date();
   const todayDateString = today.toISOString().split('T')[0];
   const daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
   const todayName = daysOfWeek[today.getDay()];
-
-  const allWeeksData = agenda.weeklyData
-    ?.filter((week: any) => week.weekNumber <= agenda.currentWeek)
-    ?.sort((a: any, b: any) => a.weekNumber - b.weekNumber) || [];
-
-  const currentWeekData = agenda.weeklyData.find(
-    (week: any) => week.weekNumber === agenda.currentWeek
-  );
-
-  const currentWeekSortedSessions = currentWeekData?.sessions
-    ? [...currentWeekData.sessions].sort((a: any, b: any) => {
-      const dateA = new Date(a.date).getTime();
-      const dateB = new Date(b.date).getTime();
-      return dateA - dateB;
-    })
-    : [];
-
-  const todaySession = currentWeekSortedSessions.find(
-    (session: any) => session.date === todayDateString
-  );
 
   useEffect(() => {
     if (activeTab === "week" && todaySessionRef.current) {
@@ -51,14 +74,48 @@ export function AgendaSidebarClient({ agenda }: AgendaSidebarClientProps) {
     }
   }, [activeTab]);
 
+  // Show loading state only on initial load when there's no agenda data at all
+  if (!agenda && isLoading) {
+    return (
+      <div className="p-5 h-full flex items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  // Show empty state if there's no agenda data
+  if (!agenda || !agenda.weeklyData || agenda.weeklyData.length === 0) {
+    return <EmptyAgendaState />;
+  }
+
+  const allWeeksData = agenda.weeklyData
+    ?.filter((week: any) => week.weekNumber <= agenda.currentWeek)
+    ?.sort((a: any, b: any) => a.weekNumber - b.weekNumber) || [];
+
+  const currentWeekData = agenda.weeklyData.find(
+    (week: any) => week.weekNumber === agenda.currentWeek
+  );
+
   if (!currentWeekData || !currentWeekData.sessions) {
     return null;
   }
 
+  const currentWeekSortedSessions = currentWeekData.sessions
+    ? [...currentWeekData.sessions].sort((a: any, b: any) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return dateA - dateB;
+    })
+    : [];
+
+  const todaySession = currentWeekSortedSessions.find(
+    (session: any) => session.date === todayDateString
+  );
+
 
   return (
     <div className="p-5 h-full">
-      <div className="w-full md:w-88 border rounded-lg bg-background h-full flex flex-col">
+      <div className={`w-full md:w-88 border rounded-lg bg-background h-full flex flex-col ${isLoading ? "opacity-60 pointer-events-none" : ""}`}>
         <div className="p-4 border-b">
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1">
@@ -124,6 +181,7 @@ export function AgendaSidebarClient({ agenda }: AgendaSidebarClientProps) {
                                 meals={session.meals}
                                 sleep={session.sleep}
                                 notes={session.notes}
+                                onUpdate={handleAgendaUpdate}
                               />
                             </div>
                           );

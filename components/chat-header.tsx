@@ -16,7 +16,7 @@ function PureChatHeader({
   const showBackButton = pathname === "/profile" || pathname.startsWith("/admin/");
 
   return (
-    <header className="sticky top-0 w-full bg-[#F5F5F5]! flex items-center gap-2 bg-background px-2 py-1.5 md:px-2">
+    <header className="w-full bg-[#F5F5F5] flex items-center gap-2 px-2 py-1.5 md:px-2">
       {showBackButton ? (
         <button
           onClick={() => router.back()}

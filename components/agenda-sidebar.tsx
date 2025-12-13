@@ -11,10 +11,6 @@ export async function AgendaSidebar() {
   }
 
   const agenda = await getAgendaByUserId({ userId: session.user.id });
-  
-  if (!agenda || !agenda.weeklyData || agenda.weeklyData.length === 0) {
-    return <EmptyAgendaState />;
-  }
 
-  return <AgendaSidebarClient agenda={agenda} />;
+  return <AgendaSidebarClient initialAgenda={agenda} />;
 }
