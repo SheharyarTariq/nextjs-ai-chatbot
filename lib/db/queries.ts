@@ -868,7 +868,14 @@ export async function updateAgenda({
             if (existingWeekIndex !== -1) {
               for (const providedSession of providedWeek.sessions) {
                 const existingSessionIndex = mergedWeeklyData[existingWeekIndex].sessions.findIndex(
-                  (session: any) => session.day === providedSession.day
+                  (session: any) => {
+                    // Match by date first if both have dates
+                    if (providedSession.date && session.date) {
+                      return session.date === providedSession.date;
+                    }
+                    // Fall back to day matching
+                    return session.day === providedSession.day;
+                  }
                 );
 
                 if (existingSessionIndex !== -1) {
