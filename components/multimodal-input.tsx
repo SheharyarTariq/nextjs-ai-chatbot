@@ -382,10 +382,10 @@ function PureMultimodalInput({
           </button>
           <button
             type="button"
-            onClick={() => handlePromptClick("Increase Load")}
+            onClick={() => handlePromptClick("Increase load today")}
             className="rounded-full bg-[#f0f0f0] px-4 py-2 text-xs font-medium text-black hover:bg-accent transition-colors duration-200 cursor-pointer"
           >
-            Increase Load
+            Increase load today
           </button>
         </div>
       )}
