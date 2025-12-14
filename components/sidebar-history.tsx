@@ -121,6 +121,8 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
       method: "DELETE",
     });
 
+    const isCurrentChat = deleteId === id;
+
     toast.promise(deletePromise, {
       loading: "Deleting chat...",
       success: () => {
@@ -133,22 +135,23 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
           }
         });
 
+        // Redirect if we're deleting the current chat
+        if (isCurrentChat) {
+          router.replace("/");
+        }
+
         return "Chat deleted successfully";
       },
       error: "Failed to delete chat",
     });
 
     try {
-        await deletePromise;
+      await deletePromise;
     } catch (error) {
-        // Error handled by toast
+      // Error handled by toast
     } finally {
-        setIsDeleting(false);
-        setShowDeleteDialog(false);
-    }
-
-    if (deleteId === id) {
-      router.push("/");
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
     }
   };
 
