@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import * as yup from "yup";
 import { toast } from "./toast";
 
@@ -37,8 +38,8 @@ interface AgendaCardProps {
   isToday?: boolean;
   rating?: number;
   energy?: number;
-  meals?: boolean;
-  sleep?: boolean;
+  meals?: number | boolean;
+  sleep?: number | boolean;
   notes?: string;
   variant?: "default" | "floating";
   onUpdate?: () => void;
@@ -66,16 +67,27 @@ export function AgendaCard({
 
   const [rating, setRating] = useState(initialRating?.toString() || "");
   const [energy, setEnergy] = useState(initialEnergy?.toString() || "");
-  const [meals, setMeals] = useState(initialMeals || false);
-  const [sleep, setSleep] = useState(initialSleep || false);
+  // Convert boolean to number for backward compatibility: true -> 3, false -> 1
+  const getInitialMealsValue = () => {
+    if (initialMeals === undefined) return 1;
+    if (typeof initialMeals === "boolean") return initialMeals ? 3 : 1;
+    return initialMeals;
+  };
+  const getInitialSleepValue = () => {
+    if (initialSleep === undefined) return 1;
+    if (typeof initialSleep === "boolean") return initialSleep ? 3 : 1;
+    return initialSleep;
+  };
+  const [meals, setMeals] = useState<number[]>([getInitialMealsValue()]);
+  const [sleep, setSleep] = useState<number[]>([getInitialSleepValue()]);
   const [notes, setNotes] = useState(initialNotes || "");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validationSchema = yup.object().shape({
     rating: yup.string().required("Required"),
     energy: yup.string().required("Required"),
-    meals: yup.boolean().required("Required"),
-    sleep: yup.boolean().required("Required"),
+    meals: yup.number().min(1).max(3).required("Required"),
+    sleep: yup.number().min(1).max(3).required("Required"),
     notes: yup.string(),
   });
 
@@ -99,8 +111,8 @@ export function AgendaCard({
 
     setRating(initialRating?.toString() || "");
     setEnergy(initialEnergy?.toString() || "");
-    setMeals(initialMeals || false);
-    setSleep(initialSleep || false);
+    setMeals([getInitialMealsValue()]);
+    setSleep([getInitialSleepValue()]);
     setNotes(initialNotes || "");
     setErrors({});
 
@@ -117,7 +129,7 @@ export function AgendaCard({
 
     try {
       await validationSchema.validate(
-        { rating, energy, meals, sleep, notes },
+        { rating, energy, meals: meals[0], sleep: sleep[0], notes },
         { abortEarly: false }
       );
       setErrors({});
@@ -148,8 +160,8 @@ export function AgendaCard({
           completed: true,
           rating: parseInt(rating),
           energy: parseInt(energy),
-          meals,
-          sleep,
+          meals: meals[0],
+          sleep: sleep[0],
           notes,
         }),
       });
@@ -304,28 +316,36 @@ export function AgendaCard({
             </div>
 
             <div className="grid sm:grid-cols-2 grid-cols-1 gap-4">
-              <div className={`flex items-center space-x-2 border p-3 rounded-md ${completed ? "opacity-70" : ""}`}>
-                <input
-                  type="checkbox"
+              <div className={`space-y-2 border-0 ${completed ? "opacity-70" : ""}`}>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="meals" className={completed ? "cursor-not-allowed" : "cursor-pointer"}>Meals</Label>
+                  <span className="text-sm text-muted-foreground">{meals[0]}/3</span>
+                </div>
+                <Slider
                   id="meals"
-                  checked={meals}
-                  onChange={(e) => setMeals(e.target.checked)}
+                  value={meals}
+                  onValueChange={setMeals}
+                  min={1}
+                  max={3}
+                  step={1}
                   disabled={completed}
-                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary disabled:cursor-not-allowed"
                 />
-                <Label htmlFor="meals" className={completed ? "cursor-not-allowed" : "cursor-pointer"}>Meals Completed</Label>
               </div>
 
-              <div className={`flex items-center space-x-2 border p-3 rounded-md ${completed ? "opacity-70" : ""}`}>
-                <input
-                  type="checkbox"
+              <div className={`space-y-2 border-0 ${completed ? "opacity-70" : ""}`}>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="sleep" className={completed ? "cursor-not-allowed" : "cursor-pointer"}>Sleep</Label>
+                  <span className="text-sm text-muted-foreground">{sleep[0]}/3</span>
+                </div>
+                <Slider
                   id="sleep"
-                  checked={sleep}
-                  onChange={(e) => setSleep(e.target.checked)}
+                  value={sleep}
+                  onValueChange={setSleep}
+                  min={1}
+                  max={3}
+                  step={1}
                   disabled={completed}
-                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary disabled:cursor-not-allowed"
                 />
-                <Label htmlFor="sleep" className={completed ? "cursor-not-allowed" : "cursor-pointer"}>Sleep Completed</Label>
               </div>
             </div>
 

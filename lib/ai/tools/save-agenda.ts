@@ -67,8 +67,8 @@ export const createSaveAgendaTool = ({
                   .default(false)
                   .describe("Whether the session was completed (default: false)"),
                 rating: z.number().min(1).max(3).optional().describe("Session rating"),
-                meals: z.boolean().optional().describe("Meals completed"),
-                sleep: z.boolean().optional().describe("Sleep completed"),
+                meals: z.number().min(1).max(3).optional().describe("Meals rating (1-3)"),
+                sleep: z.number().min(1).max(3).optional().describe("Sleep rating (1-3)"),
                 energy: z.number().min(1).max(3).optional().describe("Energy level"),
                 notes: z.string().optional().describe("Session notes"),
                 currentDayNumber: z

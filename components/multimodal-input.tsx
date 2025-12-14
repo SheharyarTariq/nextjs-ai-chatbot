@@ -301,8 +301,57 @@ function PureMultimodalInput({
     return () => textarea.removeEventListener('paste', handlePaste);
   }, [handlePaste]);
 
+  const handlePromptClick = useCallback(
+    (promptText: string) => {
+      if (status !== "ready") {
+        toast.error("Please wait for the model to finish its response!");
+        return;
+      }
+
+      window.history.pushState({}, "", `/chat/${chatId}`);
+
+      sendMessage({
+        role: "user",
+        parts: [
+          ...attachments.map((attachment) => ({
+            type: "file" as const,
+            url: attachment.url,
+            name: attachment.name,
+            mediaType: attachment.contentType,
+          })),
+          {
+            type: "text",
+            text: promptText,
+          },
+        ],
+      });
+
+      setAttachments([]);
+      setLocalStorageInput("");
+      resetHeight();
+      setInput("");
+
+      if (width && width > 768) {
+        textareaRef.current?.focus();
+      }
+    },
+    [
+      status,
+      chatId,
+      sendMessage,
+      attachments,
+      setAttachments,
+      setLocalStorageInput,
+      resetHeight,
+      setInput,
+      width,
+    ]
+  );
+
+  const showFloatingPrompts = !input.trim() && status === "ready";
+
   return (
-    <div className={cn("relative flex w-full flex-col gap-4", className)}>
+    <div className={cn("relative flex w-full flex-col", className)}>
       {/* {messages.length === 0 &&
         attachments.length === 0 &&
         uploadQueue.length === 0 && (
@@ -321,6 +370,25 @@ function PureMultimodalInput({
         tabIndex={-1}
         type="file"
       />
+
+      {showFloatingPrompts && (
+        <div className="flex flex-row items-center gap-2 px-1 mb-2">
+          <button
+            type="button"
+            onClick={() => handlePromptClick("Update agenda")}
+            className="rounded-full bg-[#f0f0f0] px-4 py-2 text-xs font-medium text-black hover:bg-accent transition-colors duration-200 cursor-pointer"
+          >
+            Update agenda
+          </button>
+          <button
+            type="button"
+            onClick={() => handlePromptClick("Increase Load")}
+            className="rounded-full bg-[#f0f0f0] px-4 py-2 text-xs font-medium text-black hover:bg-accent transition-colors duration-200 cursor-pointer"
+          >
+            Increase Load
+          </button>
+        </div>
+      )}
 
       <PromptInput
         className="rounded-full border border-border bg-background py-2 sm:py-3 px-4 sm:px-6 shadow-xs transition-all duration-200 focus-within:border-border hover:border-muted-foreground/50"

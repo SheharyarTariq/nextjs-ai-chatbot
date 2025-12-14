@@ -740,8 +740,8 @@ export async function saveAgenda({
       date: string;
       completed: boolean;
       rating?: number;
-      meals?: boolean;
-      sleep?: boolean;
+      meals?: number;
+      sleep?: number;
       energy?: number;
       notes?: string;
       currentDayNumber?: number;
@@ -828,8 +828,8 @@ export async function updateAgenda({
       date: string;
       completed: boolean;
       rating?: number;
-      meals?: boolean;
-      sleep?: boolean;
+      meals?: number;
+      sleep?: number;
       energy?: number;
       notes?: string;
       currentDayNumber?: number;
@@ -880,7 +880,7 @@ export async function updateAgenda({
                   mergedWeeklyData[existingWeekIndex].sessions.push(providedSession);
                 }
               }
-              
+
               mergedWeeklyData[existingWeekIndex].sessions.sort((a: any, b: any) => {
                 const dateA = new Date(a.date).getTime();
                 const dateB = new Date(b.date).getTime();

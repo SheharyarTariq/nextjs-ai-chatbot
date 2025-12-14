@@ -43,13 +43,17 @@ export const createUpdateAgendaTool = ({ session, dataStream }: UpdateAgendaProp
                   .optional()
                   .describe("Session rating (1-3)"),
                 meals: z
-                  .boolean()
+                  .number()
+                  .min(1)
+                  .max(3)
                   .optional()
-                  .describe("Proper meals and hydration"),
+                  .describe("Meals rating (1-3)"),
                 sleep: z
-                  .boolean()
+                  .number()
+                  .min(1)
+                  .max(3)
                   .optional()
-                  .describe("Did the athlete rest well"),
+                  .describe("Sleep rating (1-3)"),
                 energy: z
                   .number()
                   .min(1)
