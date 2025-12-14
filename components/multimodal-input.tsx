@@ -372,11 +372,11 @@ function PureMultimodalInput({
       />
 
       {showFloatingPrompts && (
-        <div className="flex flex-row items-center gap-2 px-1 mb-2">
+        <div className="flex flex-row flex-wrap items-center gap-2 px-1 mb-2">
           <button
             type="button"
             onClick={() => handlePromptClick("Update agenda")}
-            className="rounded-full bg-[#f0f0f0] px-4 py-2 text-xs font-medium text-black hover:bg-accent transition-colors duration-200 cursor-pointer"
+            className="rounded-full bg-[#f0f0f0] px-3 py-2 text-xs font-medium text-black hover:bg-accent transition-colors duration-200 cursor-pointer w-fit"
           >
             Update agenda
           </button>
@@ -386,6 +386,13 @@ function PureMultimodalInput({
             className="rounded-full bg-[#f0f0f0] px-4 py-2 text-xs font-medium text-black hover:bg-accent transition-colors duration-200 cursor-pointer"
           >
             Increase load today
+          </button>
+          <button
+            type="button"
+            onClick={() => handlePromptClick("Reduce the load today")}
+            className="rounded-full bg-[#f0f0f0] px-4 py-2 text-xs font-medium text-black hover:bg-accent transition-colors duration-200 cursor-pointer"
+          >
+            Reduce the load today
           </button>
         </div>
       )}
