@@ -449,5 +449,42 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  return new ChatSDKError("forbidden:chat").toResponse();
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return new ChatSDKError(
+        "bad_request:api",
+        "Parameter id is required."
+      ).toResponse();
+    }
+
+    const session = await auth();
+
+    if (!session?.user) {
+      return new ChatSDKError("unauthorized:chat").toResponse();
+    }
+
+    const chat = await getChatById({ id });
+
+    if (!chat) {
+      return new ChatSDKError("not_found:chat", "Chat not found").toResponse();
+    }
+
+    if (chat.userId !== session.user.id) {
+      return new ChatSDKError("forbidden:chat").toResponse();
+    }
+
+    const deletedChat = await deleteChatById({ id });
+
+    return Response.json(deletedChat, { status: 200 });
+  } catch (error) {
+    if (error instanceof ChatSDKError) {
+      return error.toResponse();
+    }
+
+    console.error("Error deleting chat:", error);
+    return new ChatSDKError("offline:chat").toResponse();
+  }
 }

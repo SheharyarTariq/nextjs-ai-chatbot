@@ -63,17 +63,24 @@ export function TodayAgendaFloatingWrapper({
     const today = new Date();
     const todayDateString = today.toISOString().split("T")[0];
 
-    const currentWeekData = agenda.weeklyData?.find(
-        (week: any) => week.weekNumber === agenda.currentWeek
-    );
+    // Search across all weeks to find today's session
+    let todaySession: any = null;
+    let todayWeekNumber: number | null = null;
 
-    if (!currentWeekData || !currentWeekData.sessions) {
-        return null;
+    if (agenda.weeklyData && Array.isArray(agenda.weeklyData)) {
+        for (const week of agenda.weeklyData) {
+            if (week.sessions && Array.isArray(week.sessions)) {
+                const session = week.sessions.find(
+                    (session: any) => session.date === todayDateString
+                );
+                if (session) {
+                    todaySession = session;
+                    todayWeekNumber = week.weekNumber;
+                    break;
+                }
+            }
+        }
     }
-
-    const todaySession = currentWeekData.sessions.find(
-        (session: any) => session.date === todayDateString
-    );
 
     if (!todaySession) {
         return null;
@@ -111,7 +118,7 @@ export function TodayAgendaFloatingWrapper({
                     exerciseDetails={todaySession.exerciseDetails || "No exercise details"}
                     mealDetails={todaySession.mealDetails}
                     sleepDetails={todaySession.sleepDetails}
-                    weekNumber={agenda.currentWeek}
+                    weekNumber={todayWeekNumber || agenda.currentWeek}
                     isToday={true}
                     rating={todaySession.rating}
                     energy={todaySession.energy}

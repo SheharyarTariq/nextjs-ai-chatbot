@@ -212,8 +212,8 @@ export const agenda = pgTable("Agenda", {
       date: string;
       completed: boolean;
       rating?: number;
-      meals?: boolean;
-      sleep?: boolean;
+      meals?: number;
+      sleep?: number;
       energy?: number;
       notes?: string;
       currentDayNumber?: number;

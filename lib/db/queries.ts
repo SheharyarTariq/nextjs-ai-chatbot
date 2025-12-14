@@ -740,8 +740,8 @@ export async function saveAgenda({
       date: string;
       completed: boolean;
       rating?: number;
-      meals?: boolean;
-      sleep?: boolean;
+      meals?: number;
+      sleep?: number;
       energy?: number;
       notes?: string;
       currentDayNumber?: number;
@@ -828,8 +828,8 @@ export async function updateAgenda({
       date: string;
       completed: boolean;
       rating?: number;
-      meals?: boolean;
-      sleep?: boolean;
+      meals?: number;
+      sleep?: number;
       energy?: number;
       notes?: string;
       currentDayNumber?: number;
@@ -868,7 +868,14 @@ export async function updateAgenda({
             if (existingWeekIndex !== -1) {
               for (const providedSession of providedWeek.sessions) {
                 const existingSessionIndex = mergedWeeklyData[existingWeekIndex].sessions.findIndex(
-                  (session: any) => session.day === providedSession.day
+                  (session: any) => {
+                    // Match by date first if both have dates
+                    if (providedSession.date && session.date) {
+                      return session.date === providedSession.date;
+                    }
+                    // Fall back to day matching
+                    return session.day === providedSession.day;
+                  }
                 );
 
                 if (existingSessionIndex !== -1) {
@@ -880,7 +887,7 @@ export async function updateAgenda({
                   mergedWeeklyData[existingWeekIndex].sessions.push(providedSession);
                 }
               }
-              
+
               mergedWeeklyData[existingWeekIndex].sessions.sort((a: any, b: any) => {
                 const dateA = new Date(a.date).getTime();
                 const dateB = new Date(b.date).getTime();
