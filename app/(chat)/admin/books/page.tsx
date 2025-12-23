@@ -10,8 +10,9 @@ import { Book as BookType, Prompt as PromptType } from "@/lib/db/schema";
 import { DeleteModal } from "@/components/delete-modal";
 import { promptSchema } from "@/lib/validations/prompt";
 import { toast } from "@/components/toast";
+import UserManagement from "@/components/page/user-management";
 
-type TabType = "knowledge" | "prompts";
+type TabType = "knowledge" | "prompts" | "users";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -315,6 +316,15 @@ export default function AdminPage() {
           >
             System Prompt
           </button>
+          <button
+            onClick={() => setActiveTab("users")}
+            className={`pb-3 px-2 hover:cursor-pointer font-medium transition-colors ${activeTab === "users"
+              ? "text-primary-green border-b-2 border-primary-green"
+              : "text-gray-500 hover:text-gray-700"
+              }`}
+          >
+            Users
+          </button>
         </div>
       </div>
 
@@ -409,88 +419,88 @@ export default function AdminPage() {
           </div>
 
           {
-          // isLoadingPrompt ? (
-          //   <div className="p-8 text-center">
-          //     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          //   </div>
-          // ) : 
-          isEditingPrompt || !systemPrompt ? (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  value={promptFormData.name}
-                  onChange={(e) =>
-                    setPromptFormData({ ...promptFormData, name: e.target.value })
-                  }
-                  className={`w-full px-3 py-2 border rounded-md text-gray-900 ${promptErrors.name ? "border-red-500" : ""
-                    }`}
-                  placeholder="System Prompt"
-                />
-                {promptErrors.name && (
-                  <p className="text-red-500 text-sm mt-1">{promptErrors.name}</p>
-                )}
-              </div>
+            // isLoadingPrompt ? (
+            //   <div className="p-8 text-center">
+            //     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+            //   </div>
+            // ) : 
+            isEditingPrompt || !systemPrompt ? (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    value={promptFormData.name}
+                    onChange={(e) =>
+                      setPromptFormData({ ...promptFormData, name: e.target.value })
+                    }
+                    className={`w-full px-3 py-2 border rounded-md text-gray-900 ${promptErrors.name ? "border-red-500" : ""
+                      }`}
+                    placeholder="System Prompt"
+                  />
+                  {promptErrors.name && (
+                    <p className="text-red-500 text-sm mt-1">{promptErrors.name}</p>
+                  )}
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Prompt Content
-                </label>
-                <textarea
-                  value={promptFormData.content}
-                  onChange={(e) =>
-                    setPromptFormData({ ...promptFormData, content: e.target.value })
-                  }
-                  className={"w-full px-3 py-2 border rounded-md font-mono text-sm text-gray-900 "}
-                  rows={20}
-                  placeholder="Enter the system prompt content here..."
-                />
-                {promptErrors.content && (
-                  <p className="text-red-500 text-sm mt-1">{promptErrors.content}</p>
-                )}
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Prompt Content
+                  </label>
+                  <textarea
+                    value={promptFormData.content}
+                    onChange={(e) =>
+                      setPromptFormData({ ...promptFormData, content: e.target.value })
+                    }
+                    className={"w-full px-3 py-2 border rounded-md font-mono text-sm text-gray-900 "}
+                    rows={20}
+                    placeholder="Enter the system prompt content here..."
+                  />
+                  {promptErrors.content && (
+                    <p className="text-red-500 text-sm mt-1">{promptErrors.content}</p>
+                  )}
+                </div>
 
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleSavePrompt}
-                  className="cursor-pointer"
-                  disabled={isSavingPrompt}
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  {isSavingPrompt ? "Saving..." : "Save Prompt"}
-                </Button>
-                {systemPrompt && (
+                <div className="flex gap-2">
                   <Button
-                    variant="outline"
-                    onClick={handleCancelEdit}
+                    onClick={handleSavePrompt}
                     className="cursor-pointer"
                     disabled={isSavingPrompt}
                   >
-                    <X className="h-4 w-4 mr-2" />
-                    Cancel
+                    <Save className="h-4 w-4 mr-2" />
+                    {isSavingPrompt ? "Saving..." : "Save Prompt"}
                   </Button>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-1">Name</h3>
-                <p className="text-gray-900">{systemPrompt.name}</p>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-1">Status</h3>
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-green-100 text-green-800">Active</Badge>
-                  <Badge className="bg-purple-100 text-purple-800">SYSTEM</Badge>
+                  {systemPrompt && (
+                    <Button
+                      variant="outline"
+                      onClick={handleCancelEdit}
+                      className="cursor-pointer"
+                      disabled={isSavingPrompt}
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Cancel
+                    </Button>
+                  )}
                 </div>
               </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-1">Name</h3>
+                  <p className="text-gray-900">{systemPrompt.name}</p>
+                </div>
 
-              {/* <div className="text-xs text-gray-500 space-y-1">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-1">Status</h3>
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-green-100 text-green-800">Active</Badge>
+                    <Badge className="bg-purple-100 text-purple-800">SYSTEM</Badge>
+                  </div>
+                </div>
+
+                {/* <div className="text-xs text-gray-500 space-y-1">
                 <div>
                   Created: {new Date(systemPrompt.createdAt).toLocaleDateString()}{" "}
                   {new Date(systemPrompt.createdAt).toLocaleTimeString()}
@@ -502,15 +512,20 @@ export default function AdminPage() {
                 <div>Version: {systemPrompt.version}</div>
               </div> */}
 
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">Content Preview</h3>
-                <div className="font-mono bg-gray-50 p-4 rounded border text-sm max-h-96 overflow-y-auto text-gray-900 whitespace-pre-wrap">
-                  {systemPrompt.content}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">Content Preview</h3>
+                  <div className="font-mono bg-gray-50 p-4 rounded border text-sm max-h-96 overflow-y-auto text-gray-900 whitespace-pre-wrap">
+                    {systemPrompt.content}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
+      )}
+
+      {/* Users Tab */}
+      {activeTab === "users" && (
+        <UserManagement />
       )}
 
       <DeleteModal
