@@ -1,0 +1,200 @@
+"use client";
+
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Calendar, Clock, MapPin, Activity, Zap, Trash2, Pencil } from "lucide-react";
+import { format } from "date-fns";
+import { toast } from "sonner";
+import { DeleteModal } from "@/components/delete-modal";
+import type { EventType, EventIntensity } from "@/lib/db/schema";
+
+interface EventCardProps {
+	event: {
+		id: string;
+		title: string;
+		location?: string;
+		locationLat: string;
+		locationLng: string;
+		city: string;
+		date?: string;
+		time?: string;
+		duration?: number;
+		type: EventType;
+		intensity: EventIntensity;
+	};
+	userRole?: string;
+	onDelete?: () => void;
+	onEdit?: (event: any) => void;
+}
+
+const typeColors: Record<EventType, string> = {
+	Run: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+	Yoga: "bg-purple-500/10 text-purple-500 border-purple-500/20",
+	Strength: "bg-red-500/10 text-red-500 border-red-500/20",
+	Mobility: "bg-green-500/10 text-green-500 border-green-500/20",
+	HIIT: "bg-orange-500/10 text-orange-500 border-orange-500/20",
+	Recovery: "bg-cyan-500/10 text-cyan-500 border-cyan-500/20",
+	Others: "bg-gray-500/10 text-gray-500 border-gray-500/20",
+};
+
+const intensityColors: Record<EventIntensity, string> = {
+	High: "bg-red-500/10 text-red-500 border-red-500/20",
+	Medium: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
+	Low: "bg-green-500/10 text-green-500 border-green-500/20",
+};
+
+export function EventCard({ event, userRole, onDelete, onEdit }: EventCardProps) {
+	const [isDeleting, setIsDeleting] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+	let eventDate: Date | null = null;
+	let isUpcoming = false;
+
+	if (event.date) {
+		const dateTimeString = event.time
+			? `${event.date}T${event.time}`
+			: `${event.date}T00:00`;
+		eventDate = new Date(dateTimeString);
+		isUpcoming = eventDate > new Date();
+	}
+
+	const handleDeleteClick = () => {
+		setShowDeleteModal(true);
+	};
+
+	const confirmDelete = async () => {
+		setIsDeleting(true);
+		try {
+			const response = await fetch(`/api/events/${event.id}`, {
+				method: "DELETE",
+			});
+
+			if (!response.ok) {
+				const error = await response.json();
+				throw new Error(error.message || "Failed to delete event");
+			}
+
+			toast.success("Event deleted successfully!");
+			setShowDeleteModal(false);
+			onDelete?.();
+		} catch (error: any) {
+			toast.error(error.message || "Failed to delete event");
+		} finally {
+			setIsDeleting(false);
+		}
+	};
+
+	return (
+		<Card className={`p-4 space-y-3 transition-all hover:shadow-md`} >
+			<div className="flex items-start justify-between gap-2">
+				<h3 className="font-semibold text-base line-clamp-1 flex-1">{event.title}</h3>
+				<div className="flex items-center gap-1 flex-shrink-0">
+					{/* {isUpcoming && (
+						<Badge variant="outline" className="bg-primary-green/10 text-primary-green border-primary-green/20 mr-1">
+							Upcoming
+						</Badge>
+					)} */}
+					{userRole === "admin" && (
+						<>
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={() => onEdit?.(event)}
+								className="h-8 w-8 hover:cursor-pointer text-muted-foreground hover:text-primary hover:bg-primary/10"
+								title="Edit event"
+							>
+								<Pencil className="h-4 w-4" />
+							</Button>
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={handleDeleteClick}
+								disabled={isDeleting}
+								className="h-8 w-8 hover:cursor-pointer text-destructive hover:text-destructive hover:bg-destructive/10"
+								title="Delete event"
+							>
+								<Trash2 className="h-4 w-4" />
+							</Button>
+						</>
+					)}
+				</div>
+			</div>
+
+			{/* Date & Time */}
+			{eventDate && (
+				<div className="flex items-center gap-2 text-sm text-muted-foreground">
+					<Calendar className="h-4 w-4" />
+					<span>{format(eventDate, "MMM dd, yyyy")}</span>
+					{event.time && (
+						<>
+							<span>•</span>
+							<Clock className="h-4 w-4" />
+							<span>{format(eventDate, "hh:mm a")}</span>
+						</>
+					)}
+				</div>
+			)}
+
+			{/* Location */}
+			<div
+				className="flex items-start gap-2 text-sm text-muted-foreground hover:text-primary cursor-pointer transition-colors group"
+				onClick={() => {
+					if (event.locationLat && event.locationLng) {
+						window.open(
+							`https://www.google.com/maps/dir/?api=1&destination=${event.locationLat},${event.locationLng}`,
+							"_blank"
+						);
+					}
+				}}
+				title="View directions on Google Maps"
+			>
+				<MapPin className="h-4 w-4 mt-0.5 flex-shrink-0 group-hover:text-primary" />
+				<div className="flex-1 min-w-0">
+					{event.location ? (
+						<p className="line-clamp-1">{event.location}</p>
+					) : (
+						<p>{event.city}</p>
+					)}
+				</div>
+			</div>
+
+			{/* Duration, Type, and Intensity */}
+			<div className="flex flex-wrap items-center gap-2">
+				{event.duration && (
+					<Badge variant="outline" className="bg-muted">
+						{event.duration} min
+					</Badge>
+				)}
+				{event.type && (
+					<Badge
+						variant="outline"
+						className={typeColors[event.type] || typeColors.Others}
+					>
+						<Activity className="h-3 w-3 mr-1" />
+						{event.type}
+					</Badge>
+				)}
+				{event.intensity && (
+					<Badge
+						variant="outline"
+						className={intensityColors[event.intensity] || intensityColors.Medium}
+					>
+						<Zap className="h-3 w-3 mr-1" />
+						{event.intensity}
+					</Badge>
+				)}
+			</div>
+
+			<DeleteModal
+				open={showDeleteModal}
+				onOpenChange={setShowDeleteModal}
+				onConfirm={confirmDelete}
+				loading={isDeleting}
+				title="Delete Event"
+				description={`Are you sure you want to delete "${event.title}"? This action cannot be undone.`}
+			/>
+		</Card>
+	);
+}

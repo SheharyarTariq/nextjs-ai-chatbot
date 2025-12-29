@@ -5,6 +5,7 @@ import {
   integer,
   json,
   jsonb,
+  pgEnum,
   pgTable,
   primaryKey,
   text,
@@ -14,6 +15,24 @@ import {
   vector,
 } from "drizzle-orm/pg-core";
 import type { AppUsage } from "../usage";
+
+// Event enums
+export const eventTypeEnum = pgEnum("event_type", [
+  "Run",
+  "Yoga",
+  "Strength",
+  "Mobility",
+  "HIIT",
+  "Recovery",
+  "Others",
+]);
+
+export const eventIntensityEnum = pgEnum("event_intensity", [
+  "High",
+  "Medium",
+  "Low",
+]);
+
 
 export const user = pgTable("User", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
@@ -27,6 +46,7 @@ export const user = pgTable("User", {
   birthDay: integer("birthDay"),
   birthMonth: integer("birthMonth"),
   birthYear: integer("birthYear"),
+  country: varchar("country", { length: 30 }),
 });
 
 export type User = InferSelectModel<typeof user>;
@@ -260,6 +280,30 @@ export const embeddings = pgTable("embeddings", {
 });
 
 export type Embedding = InferSelectModel<typeof embeddings>;
+
+export const event = pgTable("Event", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => user.id),
+  title: varchar("title", { length: 50 }).notNull(),
+  location: text("location").notNull(),
+  locationLat: varchar("locationLat", { length: 50 }).notNull(),
+  locationLng: varchar("locationLng", { length: 50 }).notNull(),
+  city: varchar("city", { length: 100 }).notNull(),
+  date: varchar("date", { length: 20 }).notNull(),
+  time: varchar("time", { length: 10 }).notNull(),
+  duration: integer("duration").notNull(),
+  type: eventTypeEnum("type").notNull(),
+  intensity: eventIntensityEnum("intensity").notNull(),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+export type Event = InferSelectModel<typeof event>;
+
+export type EventType = "Run" | "Yoga" | "Strength" | "Mobility" | "HIIT" | "Recovery" | "Others";
+export type EventIntensity = "High" | "Medium" | "Low";
 
 export const prompt = pgTable("Prompt", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),

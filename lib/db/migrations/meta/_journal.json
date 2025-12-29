@@ -134,6 +134,48 @@
       "when": 1765121763595,
       "tag": "0018_square_wind_dancer",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1766571658032,
+      "tag": "0019_married_stephen_strange",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1766586155427,
+      "tag": "0020_shallow_shocker",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1766991719918,
+      "tag": "0021_productive_vampiro",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1766992253775,
+      "tag": "0022_giant_gladiator",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1766993421329,
+      "tag": "0023_gorgeous_zarek",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1766995605962,
+      "tag": "0024_lean_tomorrow_man",
+      "breakpoints": true
     }
   ]
 }

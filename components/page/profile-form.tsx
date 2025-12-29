@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { cn, validateFormWithYup } from "@/lib/utils";
 import { updateProfile } from "../../app/(chat)/profile/actions";
 import { Eye, EyeOff } from "lucide-react";
 import { profileUpdateSchema } from "@/lib/validations/auth";
@@ -35,6 +35,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
     day: user.birthDay?.toString() || "",
     month: user.birthMonth?.toString() || "",
     year: user.birthYear?.toString() || "",
+    country: user.country || "",
     password: "",
     confirm_password: "",
   });
@@ -46,6 +47,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
     day: user.birthDay?.toString() || "",
     month: user.birthMonth?.toString() || "",
     year: user.birthYear?.toString() || "",
+    country: user.country || "",
     password: "",
     confirm_password: "",
   };
@@ -77,37 +79,38 @@ export function ProfileForm({ user }: ProfileFormProps) {
       day: formDataObj.get("day") as string,
       month: formDataObj.get("month") as string,
       year: formDataObj.get("year") as string,
+      country: formDataObj.get("country") as string,
       password: formDataObj.get("password") as string,
       confirm_password: formDataObj.get("confirm_password") as string,
     };
 
-    try {
-      await profileUpdateSchema.validate(data, { abortEarly: false });
-      setErrors({});
+    const { isValid, errors: validationErrors } = await validateFormWithYup(
+      profileUpdateSchema,
+      data as any
+    );
 
-      const result = await updateProfile(formDataObj);
-
-      if (result.status === "success") {
-        toast({
-          type: "success",
-          description: "Profile updated successfully!",
-        });
-        setFormData((prev) => ({ ...prev, password: "", confirm_password: "" }));
-        router.push("/");
-        router.refresh();
-      } 
-    } catch (error: any) {
-      const validationErrors: Record<string, string> = {};
-      error.inner?.forEach((err: any) => {
-        if (err.path) {
-          validationErrors[err.path] = err.message;
-        }
-      });
+    if (!isValid) {
       setErrors(validationErrors);
       toast({
         type: "error",
-        description: "Please fix the validation errorss",
+        description: "Please fix the validation errors",
       });
+      setIsSubmitting(false);
+      return;
+    }
+
+    setErrors({});
+
+    const result = await updateProfile(formDataObj);
+
+    if (result.status === "success") {
+      toast({
+        type: "success",
+        description: "Profile updated successfully!",
+      });
+      setFormData((prev) => ({ ...prev, password: "", confirm_password: "" }));
+      router.push("/");
+      router.refresh();
     }
 
     setIsSubmitting(false);
@@ -275,6 +278,38 @@ export function ProfileForm({ user }: ProfileFormProps) {
           </div>
         </div>
       </div>
+
+      <div className="flex flex-col gap-2">
+        <Label
+          className="font-normal text-zinc-600 dark:text-zinc-400"
+          htmlFor="country"
+        >
+          Country
+        </Label>
+        <Select
+          value={formData.country}
+          onValueChange={(value) => handleSelectChange("country", value)}
+        >
+          <SelectTrigger
+            className={cn(
+              "bg-muted text-md md:text-sm",
+              errors.country && "border-red-500"
+            )}
+          >
+            <SelectValue placeholder="Select country" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Pakistan">Pakistan</SelectItem>
+            <SelectItem value="United Arab Emirates">United Arab Emirates</SelectItem>
+            <SelectItem value="Spain">Spain</SelectItem>
+          </SelectContent>
+        </Select>
+        <input type="hidden" name="country" value={formData.country} />
+        {errors.country && (
+          <p className="text-red-500 text-sm">{errors.country}</p>
+        )}
+      </div>
+
 
       <div className="flex flex-col gap-2">
         <Label
