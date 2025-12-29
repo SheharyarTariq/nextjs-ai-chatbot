@@ -70,6 +70,10 @@ export const profileUpdateSchema = yup.object().shape({
   year: yup
     .string()
     .required("Required"),
+  country: yup
+    .string()
+    .oneOf(["Pakistan", "United Arab Emirates", "Spain"], "Required")
+    .required("Required"),
   password: yup
     .string()
     .min(6, "Password must be 6 characters long")

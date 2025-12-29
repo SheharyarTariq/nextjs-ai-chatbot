@@ -10,6 +10,7 @@ import { twMerge } from 'tailwind-merge';
 import type { DBMessage, Document } from '@/lib/db/schema';
 import { ChatSDKError, type ErrorCode } from './errors';
 import type { ChatMessage, ChatTools, CustomUIDataTypes } from './types';
+import * as Yup from 'yup';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -111,6 +112,37 @@ export function convertToUIMessages(messages: DBMessage[]): ChatMessage[] {
 export function getTextFromMessage(message: ChatMessage | UIMessage): string {
   return message.parts
     .filter((part) => part.type === 'text')
-    .map((part) => (part as { type: 'text'; text: string}).text)
+    .map((part) => (part as { type: 'text'; text: string }).text)
     .join('');
 }
+
+export async function validateFormWithYup<T>(
+  schema: Yup.Schema<T>,
+  formData: T
+): Promise<{
+  isValid: boolean;
+  errors: Record<string, string>;
+}> {
+  try {
+    await schema.validate(formData, { abortEarly: false });
+    return {
+      isValid: true,
+      errors: {},
+    };
+  } catch (error) {
+    if (error instanceof Yup.ValidationError) {
+      const validationErrors: Record<string, string> = {};
+      error.inner.forEach((err) => {
+        if (err.path) {
+          validationErrors[err.path] = err.message;
+        }
+      });
+      return {
+        isValid: false,
+        errors: validationErrors,
+      };
+    }
+    throw error;
+  }
+}
+

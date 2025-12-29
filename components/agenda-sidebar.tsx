@@ -12,5 +12,5 @@ export async function AgendaSidebar() {
 
   const agenda = await getAgendaByUserId({ userId: session.user.id });
 
-  return <AgendaSidebarClient initialAgenda={agenda} />;
+  return <AgendaSidebarClient initialAgenda={agenda} userRole={session.user.role} />;
 }

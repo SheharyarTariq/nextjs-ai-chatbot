@@ -10,6 +10,7 @@ import { AuthForm } from "@/components/auth-form";
 import { SubmitButton } from "@/components/submit-button";
 import { toast } from "@/components/toast";
 import { registerSchema } from "@/lib/validations/auth";
+import { validateFormWithYup } from "@/lib/utils";
 import { type RegisterActionState, register } from "../actions";
 
 export default function Page() {
@@ -64,25 +65,24 @@ export default function Page() {
 
     setFormData(data);
 
-    try {
-      await registerSchema.validate(data, { abortEarly: false });
-      setValidationErrors({});
-      startTransition(() => {
-        formAction(submittedFormData);
-      });
-    } catch (error: any) {
-      const errors: Record<string, string> = {};
-      error.inner?.forEach((err: any) => {
-        if (err.path) {
-          errors[err.path] = err.message;
-        }
-      });
-      setValidationErrors(errors);
+    const { isValid, errors: validationErrors } = await validateFormWithYup(
+      registerSchema,
+      data
+    );
+
+    if (!isValid) {
+      setValidationErrors(validationErrors);
       toast({
         type: "error",
         description: "Please fix the validation errors",
       });
+      return;
     }
+
+    setValidationErrors({});
+    startTransition(() => {
+      formAction(submittedFormData);
+    });
   };
 
   return (

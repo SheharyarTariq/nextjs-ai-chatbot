@@ -10,6 +10,7 @@ import { Book as BookType, Prompt as PromptType } from "@/lib/db/schema";
 import { DeleteModal } from "@/components/delete-modal";
 import { promptSchema } from "@/lib/validations/prompt";
 import { toast } from "@/components/toast";
+import { validateFormWithYup } from "@/lib/utils";
 import UserManagement from "@/components/page/user-management";
 
 type TabType = "knowledge" | "prompts" | "users";
@@ -190,11 +191,19 @@ export default function AdminPage() {
   };
 
   const handleSavePrompt = async () => {
+    setPromptErrors({});
+
+    const { isValid, errors: validationErrors } = await validateFormWithYup(
+      promptSchema,
+      promptFormData
+    );
+
+    if (!isValid) {
+      setPromptErrors(validationErrors);
+      return;
+    }
+
     try {
-      setPromptErrors({});
-
-      await promptSchema.validate(promptFormData, { abortEarly: false });
-
       setIsSavingPrompt(true);
       const method = systemPrompt ? "PUT" : "POST";
       const body = systemPrompt
@@ -222,22 +231,11 @@ export default function AdminPage() {
         });
       }
     } catch (error: any) {
-      if (error.name === "ValidationError") {
-        const errors: Record<string, string> = {};
-        error.inner.forEach((err: any) => {
-          if (err.path) {
-            errors[err.path] = err.message;
-          }
-        });
-        setPromptErrors(errors);
-
-      } else {
-        console.error("Error saving prompt:", error);
-        toast({
-          type: "error",
-          description: "Failed to save prompt",
-        });
-      }
+      console.error("Error saving prompt:", error);
+      toast({
+        type: "error",
+        description: "Failed to save prompt",
+      });
     } finally {
       setIsSavingPrompt(false);
     }

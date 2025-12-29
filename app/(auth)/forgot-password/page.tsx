@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState, useTransition } from "react";
-import { cn } from "@/lib/utils";
+import { cn, validateFormWithYup } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/submit-button";
@@ -71,26 +71,25 @@ export default function Page() {
       email: formData.get("email") as string,
     };
 
-    try {
-      await forgotPasswordSchema.validate(data, { abortEarly: false });
-      setValidationErrors({});
-      setEmail(data.email);
-      startTransition(() => {
-        formAction(formData);
-      });
-    } catch (error: any) {
-      const errors: Record<string, string> = {};
-      error.inner?.forEach((err: any) => {
-        if (err.path) {
-          errors[err.path] = err.message;
-        }
-      });
-      setValidationErrors(errors);
+    const { isValid, errors: validationErrors } = await validateFormWithYup(
+      forgotPasswordSchema,
+      data
+    );
+
+    if (!isValid) {
+      setValidationErrors(validationErrors);
       toast({
         type: "error",
         description: "Please fix the validation errors",
       });
+      return;
     }
+
+    setValidationErrors({});
+    setEmail(data.email);
+    startTransition(() => {
+      formAction(formData);
+    });
   };
 
   return (

@@ -6,15 +6,22 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResetAgendaButton } from "@/components/reset-agenda-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyAgendaState } from "@/components/empty-agenda-state";
+import { Button } from "@/components/ui/button";
+import { EventCard } from "@/components/event-card";
+import { CreateEventModal } from "@/components/create-event-modal";
 
 interface AgendaSidebarClientProps {
   initialAgenda?: any;
+  userRole?: string;
 }
 
-export function AgendaSidebarClient({ initialAgenda }: AgendaSidebarClientProps) {
+export function AgendaSidebarClient({ initialAgenda, userRole }: AgendaSidebarClientProps) {
   const [agenda, setAgenda] = useState(initialAgenda);
   const [activeTab, setActiveTab] = useState("week");
   const [isLoading, setIsLoading] = useState(false);
+  const [events, setEvents] = useState<any[]>([]);
+  const [isEventsLoading, setIsEventsLoading] = useState(false);
+  const [isCreateEventModalOpen, setIsCreateEventModalOpen] = useState(false);
   const todaySessionRef = useRef<HTMLDivElement>(null);
 
   const fetchAgenda = useCallback(async () => {
@@ -56,6 +63,32 @@ export function AgendaSidebarClient({ initialAgenda }: AgendaSidebarClientProps)
   const handleAgendaUpdate = useCallback(() => {
     fetchAgenda();
   }, [fetchAgenda]);
+
+  const fetchEvents = useCallback(async () => {
+    setIsEventsLoading(true);
+    try {
+      const response = await fetch("/api/events");
+      if (!response.ok) {
+        throw new Error("Failed to fetch events");
+      }
+      const data = await response.json();
+      if (data.success && data.events) {
+        setEvents(data.events);
+      }
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    } finally {
+      setIsEventsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
+
+  const handleEventCreated = () => {
+    fetchEvents();
+  };
 
   const today = new Date();
   const todayDateString = today.toISOString().split('T')[0];
@@ -124,7 +157,7 @@ export function AgendaSidebarClient({ initialAgenda }: AgendaSidebarClientProps)
             <ResetAgendaButton />
           </div>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full ">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="week" className="data-[state=active]:bg-primary-green data-[state=active]:text-white hover:cursor-pointer">My Agenda</TabsTrigger>
               <TabsTrigger value="today" className="data-[state=active]:bg-primary-green data-[state=active]:text-white hover:cursor-pointer">Event</TabsTrigger>
@@ -136,8 +169,28 @@ export function AgendaSidebarClient({ initialAgenda }: AgendaSidebarClientProps)
           <TabsContent value="today" className="h-full mt-0">
             <ScrollArea className="h-full p-4">
               <div className="space-y-4">
-                <div className="text-center py-8 text-muted-foreground">
-                  <p className="text-sm">Coming soon...</p>
+                {/* Create Event Button - Only for Admin */}
+                {userRole === "admin" && (
+                  <Button
+                    className="w-full bg-primary-green hover:bg-primary-green/90 text-white"
+                    onClick={() => setIsCreateEventModalOpen(true)}
+                  >
+                    + Create Event
+                  </Button>
+                )}
+
+                {/* Events List */}
+                <div className="space-y-3">
+                  {events.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p className="text-sm">No events yet</p>
+                      <p className="text-xs mt-1">Create your first event to get started</p>
+                    </div>
+                  ) : (
+                    events.map((event) => (
+                      <EventCard key={event.id} event={event} />
+                    ))
+                  )}
                 </div>
               </div>
             </ScrollArea>
@@ -195,6 +248,15 @@ export function AgendaSidebarClient({ initialAgenda }: AgendaSidebarClientProps)
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Create Event Modal - Only for Admin */}
+      {userRole === "admin" && (
+        <CreateEventModal
+          open={isCreateEventModalOpen}
+          onOpenChange={setIsCreateEventModalOpen}
+          onEventCreated={handleEventCreated}
+        />
+      )}
     </div>
   );
 }

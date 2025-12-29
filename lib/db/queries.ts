@@ -25,6 +25,10 @@ import {
   chat,
   type DBMessage,
   document,
+  type Event,
+  type EventType,
+  type EventIntensity,
+  event,
   message,
   type Suggestion,
   stream,
@@ -142,6 +146,7 @@ export async function updateUserProfile({
   birthDay,
   birthMonth,
   birthYear,
+  country,
   password,
 }: {
   userId: string;
@@ -150,6 +155,7 @@ export async function updateUserProfile({
   birthDay?: number;
   birthMonth?: number;
   birthYear?: number;
+  country?: string;
   password?: string;
 }) {
   try {
@@ -160,6 +166,7 @@ export async function updateUserProfile({
     if (birthDay !== undefined) updateData.birthDay = birthDay;
     if (birthMonth !== undefined) updateData.birthMonth = birthMonth;
     if (birthYear !== undefined) updateData.birthYear = birthYear;
+    if (country !== undefined) updateData.country = country;
     if (password) {
       updateData.password = generateHashedPassword(password);
     }
@@ -976,4 +983,154 @@ export async function deleteAgendaAndChatByUserId({ userId }: { userId: string }
   }
 }
 
+export async function createEvent({
+  userId,
+  title,
+  location,
+  locationLat,
+  locationLng,
+  city,
+  date,
+  time,
+  duration,
+  type,
+  intensity,
+}: {
+  userId: string;
+  title: string;
+  location: string;
+  locationLat: string;
+  locationLng: string;
+  city: string;
+  date: string;
+  time: string;
+  duration: number;
+  type: EventType;
+  intensity: EventIntensity;
+}) {
+  try {
+    const now = new Date();
 
+    return await db
+      .insert(event)
+      .values({
+        userId,
+        title,
+        location,
+        locationLat,
+        locationLng,
+        city,
+        date,
+        time,
+        duration,
+        type,
+        intensity,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning();
+  } catch (_error) {
+    throw new ChatSDKError("bad_request:database", "Failed to create event");
+  }
+}
+
+export async function getAllEvents() {
+  try {
+    return await db
+      .select()
+      .from(event)
+      .orderBy(desc(event.date));
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get all events"
+    );
+  }
+}
+
+export async function getEventsByUserId({ userId }: { userId: string }) {
+  try {
+    return await db
+      .select()
+      .from(event)
+      .where(eq(event.userId, userId))
+      .orderBy(desc(event.date));
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get events by user id"
+    );
+  }
+}
+
+export async function getEventById({ id }: { id: string }) {
+  try {
+    const [selectedEvent] = await db
+      .select()
+      .from(event)
+      .where(eq(event.id, id));
+    return selectedEvent || null;
+  } catch (_error) {
+    throw new ChatSDKError("bad_request:database", "Failed to get event by id");
+  }
+}
+
+export async function updateEvent({
+  id,
+  title,
+  location,
+  locationLat,
+  locationLng,
+  city,
+  date,
+  time,
+  duration,
+  type,
+  intensity,
+}: {
+  id: string;
+  title: string;
+  location: string;
+  locationLat: string;
+  locationLng: string;
+  city: string;
+  date: string;
+  time: string;
+  duration: number;
+  type: EventType;
+  intensity: EventIntensity;
+}) {
+  try {
+    return await db
+      .update(event)
+      .set({
+        title,
+        location,
+        locationLat,
+        locationLng,
+        city,
+        date,
+        time,
+        duration,
+        type,
+        intensity,
+        updatedAt: new Date(),
+      })
+      .where(eq(event.id, id))
+      .returning();
+  } catch (_error) {
+    throw new ChatSDKError("bad_request:database", "Failed to update event");
+  }
+}
+
+export async function deleteEvent({ id }: { id: string }) {
+  try {
+    const [deletedEvent] = await db
+      .delete(event)
+      .where(eq(event.id, id))
+      .returning();
+    return deletedEvent;
+  } catch (_error) {
+    throw new ChatSDKError("bad_request:database", "Failed to delete event");
+  }
+}

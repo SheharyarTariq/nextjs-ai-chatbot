@@ -26,6 +26,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import * as yup from "yup";
 import { toast } from "./toast";
+import { validateFormWithYup } from "@/lib/utils";
 
 interface AgendaCardProps {
   day: string;
@@ -127,24 +128,17 @@ export function AgendaCard({
       return;
     }
 
-    try {
-      await validationSchema.validate(
-        { rating, energy, meals: meals[0], sleep: sleep[0], notes },
-        { abortEarly: false }
-      );
-      setErrors({});
-    } catch (err) {
-      if (err instanceof yup.ValidationError) {
-        const newErrors: Record<string, string> = {};
-        err.inner.forEach((error) => {
-          if (error.path) {
-            newErrors[error.path] = error.message;
-          }
-        });
-        setErrors(newErrors);
-        return;
-      }
+    const { isValid, errors: validationErrors } = await validateFormWithYup(
+      validationSchema,
+      { rating, energy, meals: meals[0], sleep: sleep[0], notes }
+    );
+
+    if (!isValid) {
+      setErrors(validationErrors);
+      return;
     }
+
+    setErrors({});
 
     setIsLoading(true);
     try {

@@ -5,7 +5,7 @@ import Form from "next/form";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useActionState, useEffect, useState, useTransition } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, validateFormWithYup } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/submit-button";
@@ -88,25 +88,24 @@ export function ResetPasswordForm() {
     setPassword(data.password);
     setConfirmPassword(data.confirm_password);
 
-    try {
-      await resetPasswordSchema.validate(data, { abortEarly: false });
-      setValidationErrors({});
-      startTransition(() => {
-        formAction(formData);
-      });
-    } catch (error: any) {
-      const errors: Record<string, string> = {};
-      error.inner?.forEach((err: any) => {
-        if (err.path) {
-          errors[err.path] = err.message;
-        }
-      });
-      setValidationErrors(errors);
+    const { isValid, errors: validationErrors } = await validateFormWithYup(
+      resetPasswordSchema,
+      data
+    );
+
+    if (!isValid) {
+      setValidationErrors(validationErrors);
       toast({
         type: "error",
         description: "Please fix the validation errors",
       });
+      return;
     }
+
+    setValidationErrors({});
+    startTransition(() => {
+      formAction(formData);
+    });
   };
 
   if (!token) {

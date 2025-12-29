@@ -10,13 +10,14 @@ import { AuthForm } from "@/components/auth-form";
 import { SubmitButton } from "@/components/submit-button";
 import { toast } from "@/components/toast";
 import { loginSchema } from "@/lib/validations/auth";
+import { validateFormWithYup } from "@/lib/utils";
 import { type LoginActionState, login } from "../../app/(auth)/actions";
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { update: updateSession } = useSession();
-  
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -24,11 +25,11 @@ export function LoginForm() {
   const [isSuccessful, setIsSuccessful] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [, startTransition] = useTransition();
-  
+
   const [state, formAction] = useActionState<LoginActionState, FormData>(login, {
     status: "idle",
   });
-  
+
   useEffect(() => {
     if (state.status === "failed") {
       toast({
@@ -46,21 +47,21 @@ export function LoginForm() {
         description: "Login Successful",
       });
       setIsSuccessful(true);
-      
+
       const performNavigation = async () => {
         await updateSession();
-        
+
         const isProfileIncomplete = !state.user?.gender ||
-        !state.user?.birthDay ||
-        !state.user?.birthMonth ||
-        !state.user?.birthYear;
-        
+          !state.user?.birthDay ||
+          !state.user?.birthMonth ||
+          !state.user?.birthYear;
+
         if (isProfileIncomplete) {
           router.push("/profile");
           router.refresh();
           return;
         }
-        
+
         const redirectUrl = searchParams.get("redirectUrl");
         if (redirectUrl) {
           try {
@@ -75,39 +76,38 @@ export function LoginForm() {
         router.push("/");
         router.refresh();
       };
-      
+
       performNavigation();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, searchParams, state]);
-  
+
   const handleSubmit = async (submittedFormData: FormData) => {
     const data = {
       email: submittedFormData.get("email") as string,
       password: submittedFormData.get("password") as string,
     };
-    
+
     setFormData(data);
-    
-    try {
-      await loginSchema.validate(data, { abortEarly: false });
-      setValidationErrors({});
-      startTransition(() => {
-        formAction(submittedFormData);
-      });
-    } catch (error: any) {
-      const errors: Record<string, string> = {};
-      error.inner?.forEach((err: any) => {
-        if (err.path) {
-          errors[err.path] = err.message;
-        }
-      });
-      setValidationErrors(errors);
+
+    const { isValid, errors: validationErrors } = await validateFormWithYup(
+      loginSchema,
+      data
+    );
+
+    if (!isValid) {
+      setValidationErrors(validationErrors);
       toast({
         type: "error",
         description: "Please fix the validation errors",
       });
+      return;
     }
+
+    setValidationErrors({});
+    startTransition(() => {
+      formAction(submittedFormData);
+    });
   };
   return (
     <div className="flex min-h-dvh w-screen items-center justify-center bg-background">
