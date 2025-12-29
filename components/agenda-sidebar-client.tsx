@@ -22,6 +22,7 @@ export function AgendaSidebarClient({ initialAgenda, userRole }: AgendaSidebarCl
   const [events, setEvents] = useState<any[]>([]);
   const [isEventsLoading, setIsEventsLoading] = useState(false);
   const [isCreateEventModalOpen, setIsCreateEventModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<any>(null);
   const todaySessionRef = useRef<HTMLDivElement>(null);
 
   const fetchAgenda = useCallback(async () => {
@@ -88,6 +89,18 @@ export function AgendaSidebarClient({ initialAgenda, userRole }: AgendaSidebarCl
 
   const handleEventCreated = () => {
     fetchEvents();
+  };
+
+  const handleEditEvent = (event: any) => {
+    setEditingEvent(event);
+    setIsCreateEventModalOpen(true);
+  };
+
+  const handleModalOpenChange = (open: boolean) => {
+    setIsCreateEventModalOpen(open);
+    if (!open) {
+      setEditingEvent(null);
+    }
   };
 
   const today = new Date();
@@ -169,26 +182,32 @@ export function AgendaSidebarClient({ initialAgenda, userRole }: AgendaSidebarCl
           <TabsContent value="today" className="h-full mt-0">
             <ScrollArea className="h-full p-4">
               <div className="space-y-4">
-                {/* Create Event Button - Only for Admin */}
                 {userRole === "admin" && (
                   <Button
                     className="w-full bg-primary-green hover:bg-primary-green/90 text-white"
-                    onClick={() => setIsCreateEventModalOpen(true)}
+                    onClick={() => {
+                      setEditingEvent(null);
+                      setIsCreateEventModalOpen(true);
+                    }}
                   >
                     + Create Event
                   </Button>
                 )}
 
-                {/* Events List */}
                 <div className="space-y-3">
                   {events.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       <p className="text-sm">No events yet</p>
-                      <p className="text-xs mt-1">Create your first event to get started</p>
                     </div>
                   ) : (
                     events.map((event) => (
-                      <EventCard key={event.id} event={event} />
+                      <EventCard
+                        key={event.id}
+                        event={event}
+                        userRole={userRole}
+                        onDelete={fetchEvents}
+                        onEdit={handleEditEvent}
+                      />
                     ))
                   )}
                 </div>
@@ -249,12 +268,12 @@ export function AgendaSidebarClient({ initialAgenda, userRole }: AgendaSidebarCl
         </Tabs>
       </div>
 
-      {/* Create Event Modal - Only for Admin */}
       {userRole === "admin" && (
         <CreateEventModal
           open={isCreateEventModalOpen}
-          onOpenChange={setIsCreateEventModalOpen}
+          onOpenChange={handleModalOpenChange}
           onEventCreated={handleEventCreated}
+          initialData={editingEvent}
         />
       )}
     </div>

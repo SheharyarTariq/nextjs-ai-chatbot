@@ -12,6 +12,8 @@ interface LocationPickerProps {
 		lng: number;
 	}) => void;
 	initialLocation?: string;
+	initialLat?: number;
+	initialLng?: number;
 }
 
 declare global {
@@ -22,7 +24,12 @@ declare global {
 	}
 }
 
-export function LocationPicker({ onLocationSelect, initialLocation }: LocationPickerProps) {
+export function LocationPicker({
+	onLocationSelect,
+	initialLocation,
+	initialLat,
+	initialLng
+}: LocationPickerProps) {
 	const mapRef = useRef<HTMLDivElement>(null);
 	const searchInputRef = useRef<HTMLInputElement>(null);
 	const [scriptLoaded, setScriptLoaded] = useState(false);
@@ -31,13 +38,11 @@ export function LocationPicker({ onLocationSelect, initialLocation }: LocationPi
 	const markerRef = useRef<any>(null);
 	const onLocationSelectRef = useRef(onLocationSelect);
 
-	// Update ref when callback changes
 	useEffect(() => {
 		onLocationSelectRef.current = onLocationSelect;
 	}, [onLocationSelect]);
 
 	useEffect(() => {
-		// script already loaded
 		if (window.google && window.google.maps) {
 			setScriptLoaded(true);
 			return;
@@ -101,14 +106,24 @@ export function LocationPicker({ onLocationSelect, initialLocation }: LocationPi
 
 		const google = window.google;
 
+		const hasInitialCoords = typeof initialLat === "number" &&
+			typeof initialLng === "number" &&
+			Number.isFinite(initialLat) &&
+			Number.isFinite(initialLng);
+
+		const initialCenter = hasInitialCoords
+			? { lat: initialLat, lng: initialLng }
+			: { lat: 25.2048, lng: 55.2708 }; // Dubai as default
+
 		const map = new google.maps.Map(mapRef.current, {
-			center: { lat: 25.2048, lng: 55.2708 }, // Dubai as default
-			zoom: 12,
+			center: initialCenter,
+			zoom: hasInitialCoords ? 15 : 12,
 		});
 		mapInstanceRef.current = map;
 
 		const marker = new google.maps.Marker({
 			map: map,
+			position: hasInitialCoords ? initialCenter : null,
 			draggable: true,
 		});
 		markerRef.current = marker;
@@ -233,7 +248,7 @@ export function LocationPicker({ onLocationSelect, initialLocation }: LocationPi
 			/>
 			<div
 				ref={mapRef}
-				className="w-full h-64 rounded-md border"
+				className="w-full h-64 rounded-md border relative z-0"
 				style={{ minHeight: "16rem" }}
 			/>
 			<p className="text-xs text-muted-foreground">

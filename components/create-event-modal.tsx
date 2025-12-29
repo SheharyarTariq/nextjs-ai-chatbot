@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -28,12 +28,53 @@ interface CreateEventModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onEventCreated: () => void;
+  initialData?: any;
 }
+const initialEventFormData: {
+  title: string;
+  location: string;
+  locationLat: string;
+  locationLng: string;
+  city: string;
+  date: string;
+  time: string;
+  duration: string;
+  type: EventType | "";
+  intensity: EventIntensity | "";
+} = {
+  title: "",
+  location: "",
+  locationLat: "",
+  locationLng: "",
+  city: "",
+  date: "",
+  time: "",
+  duration: "",
+  type: "",
+  intensity: "",
+};
+
+const EVENT_TYPES = [
+  { value: "Run" as EventType, label: "Run" },
+  { value: "Yoga" as EventType, label: "Yoga" },
+  { value: "Strength" as EventType, label: "Strength" },
+  { value: "Mobility" as EventType, label: "Mobility" },
+  { value: "HIIT" as EventType, label: "HIIT" },
+  { value: "Recovery" as EventType, label: "Recovery" },
+  { value: "Others" as EventType, label: "Others" },
+];
+
+const INTENSITY_LEVELS = [
+  { value: "High" as EventIntensity, label: "High" },
+  { value: "Medium" as EventIntensity, label: "Medium" },
+  { value: "Low" as EventIntensity, label: "Low" },
+];
 
 export function CreateEventModal({
   open,
   onOpenChange,
   onEventCreated,
+  initialData,
 }: CreateEventModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<{
@@ -47,18 +88,26 @@ export function CreateEventModal({
     duration: string;
     type: EventType | "";
     intensity: EventIntensity | "";
-  }>({
-    title: "",
-    location: "",
-    locationLat: "",
-    locationLng: "",
-    city: "",
-    date: "",
-    time: "",
-    duration: "",
-    type: "",
-    intensity: "",
-  });
+  }>(initialEventFormData);
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        title: initialData.title || "",
+        location: initialData.location || "",
+        locationLat: initialData.locationLat || "",
+        locationLng: initialData.locationLng || "",
+        city: initialData.city || "",
+        date: initialData.date || "",
+        time: initialData.time || "",
+        duration: initialData.duration?.toString() || "",
+        type: initialData.type || "",
+        intensity: initialData.intensity || "",
+      });
+    } else {
+      setFormData(initialEventFormData);
+    }
+  }, [initialData, open]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -75,7 +124,8 @@ export function CreateEventModal({
       locationLat: location.lat.toString(),
       locationLng: location.lng.toString(),
     }));
-    // Clear location-related errors
+
+    // remove  location-related errors
     setErrors((prev) => {
       const newErrors = { ...prev };
       delete newErrors.location;
@@ -106,8 +156,11 @@ export function CreateEventModal({
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/events", {
-        method: "POST",
+      const url = initialData ? `/api/events/${initialData.id}` : "/api/events";
+      const method = initialData ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
@@ -127,57 +180,50 @@ export function CreateEventModal({
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to create event");
+        throw new Error(error.message || `Failed to ${initialData ? "update" : "create"} event`);
       }
 
-      toast.success("Event created successfully!");
+      toast.success(`Event ${initialData ? "updated" : "created"} successfully!`);
 
-      // Reset form
-      setFormData({
-        title: "",
-        location: "",
-        locationLat: "",
-        locationLng: "",
-        city: "",
-        date: "",
-        time: "",
-        duration: "",
-        type: "",
-        intensity: "",
-      });
+      setFormData(initialEventFormData);
       setErrors({});
 
       onEventCreated();
       onOpenChange(false);
     } catch (error: any) {
-      toast.error(error.message || "Failed to create event");
+      toast.error(error.message || `Failed to ${initialData ? "update" : "create"} event`);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleCancel = () => {
-    setFormData({
-      title: "",
-      location: "",
-      locationLat: "",
-      locationLng: "",
-      city: "",
-      date: "",
-      time: "",
-      duration: "",
-      type: "",
-      intensity: "",
-    });
+    setFormData(initialEventFormData);
     setErrors({});
     onOpenChange(false);
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setFormData(initialEventFormData);
+      setErrors({});
+    }
+    onOpenChange(open);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent
+        className="max-w-2xl max-h-[90vh] overflow-y-auto"
+        onInteractOutside={(e) => {
+          const target = e.target as HTMLElement;
+          if (target?.closest(".pac-container")) {
+            e.preventDefault();
+          }
+        }}
+      >
         <DialogHeader>
-          <DialogTitle>Create Event</DialogTitle>
+          <DialogTitle>{initialData ? "Edit Event" : "Create Event"}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -203,6 +249,8 @@ export function CreateEventModal({
           <LocationPicker
             onLocationSelect={handleLocationSelect}
             initialLocation={formData.location}
+            initialLat={formData.locationLat ? parseFloat(formData.locationLat) : undefined}
+            initialLng={formData.locationLng ? parseFloat(formData.locationLng) : undefined}
           />
 
           {/* City */}
@@ -287,13 +335,11 @@ export function CreateEventModal({
                 <SelectValue placeholder="Select event type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Run">Run</SelectItem>
-                <SelectItem value="Yoga">Yoga</SelectItem>
-                <SelectItem value="Strength">Strength</SelectItem>
-                <SelectItem value="Mobility">Mobility</SelectItem>
-                <SelectItem value="HIIT">HIIT</SelectItem>
-                <SelectItem value="Recovery">Recovery</SelectItem>
-                <SelectItem value="Others">Others</SelectItem>
+                {EVENT_TYPES.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             {errors.type && (
@@ -315,9 +361,11 @@ export function CreateEventModal({
                 <SelectValue placeholder="Select intensity level" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="High">High</SelectItem>
-                <SelectItem value="Medium">Medium</SelectItem>
-                <SelectItem value="Low">Low</SelectItem>
+                {INTENSITY_LEVELS.map((level) => (
+                  <SelectItem key={level.value} value={level.value}>
+                    {level.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             {errors.intensity && (
@@ -335,7 +383,7 @@ export function CreateEventModal({
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Creating..." : "Create"}
+              {isLoading ? (initialData ? "Updating..." : "Creating...") : (initialData ? "Update" : "Create")}
             </Button>
           </DialogFooter>
         </form>

@@ -4,10 +4,11 @@ import { NextResponse } from "next/server";
 
 export async function GET(
 	request: Request,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
-		const event = await getEventById({ id: params.id });
+		const { id } = await params;
+		const event = await getEventById({ id });
 
 		if (!event) {
 			return NextResponse.json(
@@ -31,9 +32,10 @@ export async function GET(
 
 export async function PUT(
 	request: Request,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
+		const { id } = await params;
 		const session = await auth();
 
 		if (!session?.user?.id) {
@@ -136,7 +138,7 @@ export async function PUT(
 		}
 
 		const updatedEvent = await updateEvent({
-			id: params.id,
+			id,
 			title,
 			location,
 			locationLat,
@@ -164,9 +166,10 @@ export async function PUT(
 
 export async function DELETE(
 	request: Request,
-	{ params }: { params: { id: string } }
+	{ params }: { params: Promise<{ id: string }> }
 ) {
 	try {
+		const { id } = await params;
 		const session = await auth();
 
 		if (!session?.user?.id) {
@@ -183,7 +186,7 @@ export async function DELETE(
 			);
 		}
 
-		await deleteEvent({ id: params.id });
+		await deleteEvent({ id });
 
 		return NextResponse.json({
 			success: true,
