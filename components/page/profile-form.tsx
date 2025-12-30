@@ -20,6 +20,9 @@ import { profileUpdateSchema } from "@/lib/validations/auth";
 import { toast } from "@/components/toast";
 import { dayOptions, monthOptions, yearOptions } from "./constants";
 import { ProfileFormProps } from "./types";
+import { Country, City } from "country-state-city";
+import { Combobox } from "@/components/ui/combobox";
+import { useMemo } from "react";
 
 export function ProfileForm({ user }: ProfileFormProps) {
   const router = useRouter();
@@ -36,6 +39,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
     month: user.birthMonth?.toString() || "",
     year: user.birthYear?.toString() || "",
     country: user.country || "",
+    city: user.city || "",
     password: "",
     confirm_password: "",
   });
@@ -48,9 +52,28 @@ export function ProfileForm({ user }: ProfileFormProps) {
     month: user.birthMonth?.toString() || "",
     year: user.birthYear?.toString() || "",
     country: user.country || "",
+    city: user.city || "",
     password: "",
     confirm_password: "",
   };
+
+  const countries = useMemo(() => Country.getAllCountries(), []);
+  const countryOptions = useMemo(() =>
+    countries.map(c => ({ label: c.name, value: c.name })),
+    [countries]
+  );
+
+  const selectedCountryCode = useMemo(() => {
+    return countries.find(c => c.name === formData.country)?.isoCode;
+  }, [countries, formData.country]);
+
+  const cityOptions = useMemo(() => {
+    if (!selectedCountryCode) return [];
+    return City.getCitiesOfCountry(selectedCountryCode)?.map(c => ({
+      label: c.name,
+      value: c.name
+    })) || [];
+  }, [selectedCountryCode]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -60,7 +83,13 @@ export function ProfileForm({ user }: ProfileFormProps) {
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => {
+      const newData = { ...prev, [name]: value };
+      if (name === "country") {
+        newData.city = ""; // Reset city when country changes
+      }
+      return newData;
+    });
   };
 
   const handleCancel = () => {
@@ -80,6 +109,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
       month: formDataObj.get("month") as string,
       year: formDataObj.get("year") as string,
       country: formDataObj.get("country") as string,
+      city: formDataObj.get("city") as string,
       password: formDataObj.get("password") as string,
       confirm_password: formDataObj.get("confirm_password") as string,
     };
@@ -279,35 +309,45 @@ export function ProfileForm({ user }: ProfileFormProps) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label
-          className="font-normal text-zinc-600 dark:text-zinc-400"
-          htmlFor="country"
-        >
-          Country
-        </Label>
-        <Select
-          value={formData.country}
-          onValueChange={(value) => handleSelectChange("country", value)}
-        >
-          <SelectTrigger
-            className={cn(
-              "bg-muted text-md md:text-sm",
-              errors.country && "border-red-500"
-            )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex flex-col gap-2">
+          <Label
+            className="font-normal text-zinc-600 dark:text-zinc-400"
+            htmlFor="country"
           >
-            <SelectValue placeholder="Select country" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Pakistan">Pakistan</SelectItem>
-            <SelectItem value="United Arab Emirates">United Arab Emirates</SelectItem>
-            <SelectItem value="Spain">Spain</SelectItem>
-          </SelectContent>
-        </Select>
-        <input type="hidden" name="country" value={formData.country} />
-        {errors.country && (
-          <p className="text-red-500 text-sm">{errors.country}</p>
-        )}
+            Country
+          </Label>
+          <Combobox
+            options={countryOptions}
+            value={formData.country}
+            onChange={(value) => handleSelectChange("country", value)}
+            placeholder="Select country"
+          />
+          <input type="hidden" name="country" value={formData.country} />
+          {errors.country && (
+            <p className="text-red-500 text-sm">{errors.country}</p>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label
+            className="font-normal text-zinc-600 dark:text-zinc-400"
+            htmlFor="city"
+          >
+            City
+          </Label>
+          <Combobox
+            options={cityOptions}
+            value={formData.city}
+            onChange={(value) => handleSelectChange("city", value)}
+            placeholder="Select city"
+            disabled={!formData.country}
+          />
+          <input type="hidden" name="city" value={formData.city} />
+          {errors.city && (
+            <p className="text-red-500 text-sm">{errors.city}</p>
+          )}
+        </div>
       </div>
 
 

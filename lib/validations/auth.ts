@@ -72,7 +72,9 @@ export const profileUpdateSchema = yup.object().shape({
     .required("Required"),
   country: yup
     .string()
-    .oneOf(["Pakistan", "United Arab Emirates", "Spain"], "Required")
+    .required("Required"),
+  city: yup
+    .string()
     .required("Required"),
   password: yup
     .string()

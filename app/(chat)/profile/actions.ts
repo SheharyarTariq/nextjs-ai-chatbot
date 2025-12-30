@@ -32,6 +32,7 @@ export async function updateProfile(
     const month = formData.get("month") as string;
     const year = formData.get("year") as string;
     const country = formData.get("country") as string;
+    const city = formData.get("city") as string;
     const password = formData.get("password") as string;
 
     await updateUserProfile({
@@ -42,6 +43,7 @@ export async function updateProfile(
       birthMonth: month ? Number(month) : undefined,
       birthYear: year ? Number(year) : undefined,
       country: country || undefined,
+      city: city || undefined,
       password: password || undefined,
     });
 
