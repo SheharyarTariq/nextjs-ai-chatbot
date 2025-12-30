@@ -1,6 +1,8 @@
 import { auth } from "@/app/(auth)/auth";
-import { createEvent, getAllEvents } from "@/lib/db/queries";
+import { createEvent, db } from "@/lib/db/queries";
 import { NextResponse } from "next/server";
+import { event, userEvent } from "@/lib/db/schema";
+import { desc, eq } from "drizzle-orm";
 
 export async function GET() {
 	try {
@@ -13,11 +15,32 @@ export async function GET() {
 			);
 		}
 
-		const events = await getAllEvents();
+		const userId = session.user.id;
+
+		const allEvents = await db
+			.select()
+			.from(event)
+			.orderBy(desc(event.date));
+
+		// Get all event user join
+		const userJoinedEvents = await db
+			.select({ eventId: userEvent.eventId })
+			.from(userEvent)
+			.where(eq(userEvent.userId, userId));
+
+		const joinedEventIds = new Set(
+			userJoinedEvents.map((ue: { eventId: string }) => ue.eventId)
+		);
+
+		// Add hasJoined flag to each event
+		const eventsWithJoinStatus = allEvents.map((evt: any) => ({
+			...evt,
+			hasJoined: joinedEventIds.has(evt.id),
+		}));
 
 		return NextResponse.json({
 			success: true,
-			events,
+			events: eventsWithJoinStatus,
 		});
 	} catch (error: any) {
 		console.error("Error fetching events:", error);
@@ -60,7 +83,6 @@ export async function POST(request: Request) {
 			intensity,
 		} = body;
 
-		// Validation
 		if (!title || title.length > 50) {
 			return NextResponse.json(
 				{ error: "Title is required and must be 50 characters or less" },

@@ -1,4 +1,4 @@
-// "use client";
+// "use client"; //Todo: Remove this component
 
 // import { CalendarDays } from "lucide-react";
 
