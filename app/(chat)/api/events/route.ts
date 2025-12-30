@@ -125,6 +125,16 @@ export async function POST(request: Request) {
 			);
 		}
 
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const selectedDate = new Date(date);
+		if (selectedDate < today) {
+			return NextResponse.json(
+				{ error: "Event date cannot be in the past" },
+				{ status: 400 }
+			);
+		}
+
 		if (!time) {
 			return NextResponse.json(
 				{ error: "Time is required" },
