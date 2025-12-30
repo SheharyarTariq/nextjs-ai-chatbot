@@ -183,6 +183,13 @@
       "when": 1767090010486,
       "tag": "0025_magical_dreaming_celestial",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1767104447942,
+      "tag": "0026_sweet_bucky",
+      "breakpoints": true
     }
   ]
 }

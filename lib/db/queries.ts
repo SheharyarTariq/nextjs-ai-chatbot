@@ -147,6 +147,7 @@ export async function updateUserProfile({
   birthMonth,
   birthYear,
   country,
+  city,
   password,
 }: {
   userId: string;
@@ -156,6 +157,7 @@ export async function updateUserProfile({
   birthMonth?: number;
   birthYear?: number;
   country?: string;
+  city?: string;
   password?: string;
 }) {
   try {
@@ -167,6 +169,7 @@ export async function updateUserProfile({
     if (birthMonth !== undefined) updateData.birthMonth = birthMonth;
     if (birthYear !== undefined) updateData.birthYear = birthYear;
     if (country !== undefined) updateData.country = country;
+    if (city !== undefined) updateData.city = city;
     if (password) {
       updateData.password = generateHashedPassword(password);
     }

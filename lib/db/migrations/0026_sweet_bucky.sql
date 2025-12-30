@@ -1,0 +1,1 @@
+ALTER TABLE "User" ADD COLUMN "city" varchar(100) DEFAULT 'Dubai';

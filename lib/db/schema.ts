@@ -47,6 +47,7 @@ export const user = pgTable("User", {
   birthMonth: integer("birthMonth"),
   birthYear: integer("birthYear"),
   country: varchar("country", { length: 30 }),
+  city: varchar("city", { length: 100 }).default("Dubai"),
 });
 
 export type User = InferSelectModel<typeof user>;

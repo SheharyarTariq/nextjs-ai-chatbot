@@ -149,7 +149,7 @@ export function EventCard({ event, userRole, onDelete, onEdit, onJoinChange }: E
 	return (
 		<Card className={`p-4 space-y-1.5 transition-all hover:shadow-md`} >
 			<div className="flex items-start justify-between gap-2">
-				<h3 className="font-semibold text-base line-clamp-1 flex-1">{event.title}</h3>
+				<h3 className="font-semibold text-base line-clamp-1 flex-1 truncate max-w-48" title={event.title}>{event.title}</h3>
 				<div className="flex items-center gap-1 flex-shrink-0">
 					{userRole !== "admin" && (
 						<Badge
