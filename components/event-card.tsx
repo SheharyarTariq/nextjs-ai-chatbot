@@ -4,11 +4,12 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, MapPin, Activity, Zap, Trash2, Pencil, Loader2 } from "lucide-react";
+import { Calendar, Clock, MapPin, Activity, Zap, Trash2, Pencil, Loader2, Share2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { DeleteModal } from "@/components/delete-modal";
 import type { EventType, EventIntensity } from "@/lib/db/schema";
+import { typeColors, intensityColors } from "@/components/page/constants";
 
 interface EventCardProps {
 	event: {
@@ -31,22 +32,6 @@ interface EventCardProps {
 	onEdit?: (event: any) => void;
 	onJoinChange?: () => void;
 }
-
-const typeColors: Record<EventType, string> = {
-	Run: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-	Yoga: "bg-purple-500/10 text-purple-500 border-purple-500/20",
-	Strength: "bg-red-500/10 text-red-500 border-red-500/20",
-	Mobility: "bg-green-500/10 text-green-500 border-green-500/20",
-	HIIT: "bg-orange-500/10 text-orange-500 border-orange-500/20",
-	Recovery: "bg-cyan-500/10 text-cyan-500 border-cyan-500/20",
-	Others: "bg-gray-500/10 text-gray-500 border-gray-500/20",
-};
-
-const intensityColors: Record<EventIntensity, string> = {
-	High: "bg-red-500/10 text-red-500 border-red-500/20",
-	Medium: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
-	Low: "bg-green-500/10 text-green-500 border-green-500/20",
-};
 
 export function EventCard({ event, userRole, onDelete, onEdit, onJoinChange }: EventCardProps) {
 	const [isDeleting, setIsDeleting] = useState(false);
@@ -146,10 +131,15 @@ export function EventCard({ event, userRole, onDelete, onEdit, onJoinChange }: E
 		}
 	};
 
+	const handleShare = () => {
+		const url = `${window.location.origin}/events/${event.id}`;
+		window.open(url, "_blank");
+	};
+
 	return (
 		<Card className={`p-4 space-y-1.5 transition-all hover:shadow-md`} >
 			<div className="flex items-start justify-between gap-2">
-				<h3 className="font-semibold text-base line-clamp-1 flex-1 truncate max-w-48" title={event.title}>{event.title}</h3>
+				<h3 className="font-semibold text-base line-clamp-1 flex-1 truncate sm:max-w-40 max-w-32" title={event.title}>{event.title}</h3>
 				<div className="flex items-center gap-1 shrink-0">
 					{userRole !== "admin" && (
 						<Badge
@@ -176,46 +166,60 @@ export function EventCard({ event, userRole, onDelete, onEdit, onJoinChange }: E
 							)}
 						</Badge>
 					)}
-					{userRole === "admin" && (
-						<>
-							<Button
-								variant="ghost"
-								size="icon"
-								onClick={() => onEdit?.(event)}
-								className="h-8 w-8 hover:cursor-pointer text-muted-foreground hover:text-primary hover:bg-primary/10"
-								title="Edit event"
-							>
-								<Pencil className="h-4 w-4" />
-							</Button>
-							<Button
-								variant="ghost"
-								size="icon"
-								onClick={handleDeleteClick}
-								disabled={isDeleting}
-								className="h-8 w-8 hover:cursor-pointer text-destructive hover:text-destructive hover:bg-destructive/10"
-								title="Delete event"
-							>
-								<Trash2 className="h-4 w-4" />
-							</Button>
-						</>
-					)}
+					<div className="flex items-center gap-0.5">
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={handleShare}
+							className="h-8 w-8 hover:cursor-pointer text-muted-foreground hover:text-primary hover:bg-primary/10"
+							title="Share event"
+						>
+							<Share2 className="h-4 w-4" />
+						</Button>
+
+						{userRole === "admin" && (
+							<>
+								<Button
+									variant="ghost"
+									size="icon"
+									onClick={() => onEdit?.(event)}
+									className="h-8 w-8 hover:cursor-pointer text-muted-foreground hover:text-primary hover:bg-primary/10"
+									title="Edit event"
+								>
+									<Pencil className="h-4 w-4" />
+								</Button>
+								<Button
+									variant="ghost"
+									size="icon"
+									onClick={handleDeleteClick}
+									disabled={isDeleting}
+									className="h-8 w-8 hover:cursor-pointer text-destructive hover:text-destructive hover:bg-destructive/10"
+									title="Delete event"
+								>
+									<Trash2 className="h-4 w-4" />
+								</Button>
+							</>
+						)}
+					</div>
 				</div>
 			</div>
 
 			{/* Date & Time */}
-			{eventDate && (
-				<div className="flex items-center gap-2 text-sm text-muted-foreground">
-					<Calendar className="h-4 w-4" />
-					<span>{format(eventDate, "MMM dd, yyyy")}</span>
-					{event.time && (
-						<>
-							<span>•</span>
-							<Clock className="h-4 w-4" />
-							<span>{format(eventDate, "hh:mm a")}</span>
-						</>
-					)}
-				</div>
-			)}
+			{
+				eventDate && (
+					<div className="flex items-center gap-2 text-sm text-muted-foreground">
+						<Calendar className="h-4 w-4" />
+						<span>{format(eventDate, "MMM dd, yyyy")}</span>
+						{event.time && (
+							<>
+								<span>•</span>
+								<Clock className="h-4 w-4" />
+								<span>{format(eventDate, "hh:mm a")}</span>
+							</>
+						)}
+					</div>
+				)
+			}
 
 			{/* Location */}
 			<div
@@ -299,6 +303,6 @@ export function EventCard({ event, userRole, onDelete, onEdit, onJoinChange }: E
 				confirmText="Leave"
 				loadingText="Leaving..."
 			/>
-		</Card>
+		</Card >
 	);
 }

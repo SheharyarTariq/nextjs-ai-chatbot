@@ -35,8 +35,7 @@ interface AgendaSidebarClientProps {
   initialAgenda?: any;
   user: any;
 }
-
-const EVENT_TYPES = ["Run", "Yoga", "Strength", "Mobility", "HIIT", "Recovery", "Others"];
+import { EVENT_TYPE_NAMES as EVENT_TYPES } from "@/components/page/constants";
 
 export function AgendaSidebarClient({ initialAgenda, user }: AgendaSidebarClientProps) {
   const userRole = user?.role;

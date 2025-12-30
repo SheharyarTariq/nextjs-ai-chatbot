@@ -28,7 +28,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (!token) {
-    if (["/login", "/register", "/forgot-password", "/reset-password"].includes(pathname)) {
+    if (["/login", "/register", "/forgot-password", "/reset-password"].includes(pathname) || pathname.startsWith("/events/")) {
       return NextResponse.next();
     }
     const redirectUrl = encodeURIComponent(request.url);
@@ -39,6 +39,16 @@ export async function middleware(request: NextRequest) {
 
   if (token && ["/login", "/register", "/forgot-password", "/reset-password"].includes(pathname)) {
     return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  if (token && !token.gender) {
+    const isProfilePage = pathname === "/profile";
+    const isEventsPage = pathname.startsWith("/events");
+    const isApiRequest = pathname.startsWith("/api");
+
+    if (!isProfilePage && !isEventsPage && !isApiRequest) {
+      return NextResponse.redirect(new URL("/profile", request.url));
+    }
   }
 
   if (pathname.startsWith("/admin")) {
