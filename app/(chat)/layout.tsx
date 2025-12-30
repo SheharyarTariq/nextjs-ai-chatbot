@@ -16,14 +16,17 @@ export default async function Layout({
 }) {
   const [session, cookieStore] = await Promise.all([auth(), cookies()]);
   const isCollapsed = cookieStore.get("sidebar_state")?.value !== "true";
-  const user = await getUserById(session!.user.id);
-  const userWithSessionFields = {
-    ...user!,
-    type: session!.user.type,
-    role: session!.user.role as "admin" | "user",
-  };
 
-  const agenda = await getAgendaByUserId({ userId: session!.user.id });
+  const userId = session?.user?.id;
+  const user = userId ? await getUserById(userId) : null;
+
+  const userWithSessionFields = user ? {
+    ...user,
+    type: session?.user?.type,
+    role: session?.user?.role as "admin" | "user",
+  } : null;
+
+  const agenda = userId ? await getAgendaByUserId({ userId }) : null;
 
   return (
     <>

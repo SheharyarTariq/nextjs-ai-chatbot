@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import type { EventType, EventIntensity } from "@/lib/db/schema";
 import { eventSchema } from "@/lib/validations/event";
 import { validateFormWithYup } from "@/lib/utils";
+import { EVENT_TYPES, INTENSITY_LEVELS } from "@/components/page/constants";
 
 interface CreateEventModalProps {
   open: boolean;
@@ -55,22 +56,6 @@ const initialEventFormData: {
   type: "",
   intensity: "",
 };
-
-const EVENT_TYPES = [
-  { value: "Run" as EventType, label: "Run" },
-  { value: "Yoga" as EventType, label: "Yoga" },
-  { value: "Strength" as EventType, label: "Strength" },
-  { value: "Mobility" as EventType, label: "Mobility" },
-  { value: "HIIT" as EventType, label: "HIIT" },
-  { value: "Recovery" as EventType, label: "Recovery" },
-  { value: "Others" as EventType, label: "Others" },
-];
-
-const INTENSITY_LEVELS = [
-  { value: "High" as EventIntensity, label: "High" },
-  { value: "Medium" as EventIntensity, label: "Medium" },
-  { value: "Low" as EventIntensity, label: "Low" },
-];
 
 export function CreateEventModal({
   open,

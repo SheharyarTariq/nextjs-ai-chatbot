@@ -35,6 +35,7 @@ import {
   suggestion,
   type User,
   user,
+  userEvent,
   vote,
 } from "./schema";
 import { generateHashedPassword } from "./utils";
@@ -1073,8 +1074,9 @@ export async function getEventById({ id }: { id: string }) {
       .from(event)
       .where(eq(event.id, id));
     return selectedEvent || null;
-  } catch (_error) {
-    throw new ChatSDKError("bad_request:database", "Failed to get event by id");
+  } catch (_error: any) {
+    console.error("Database error in getEventById:", _error);
+    throw _error;
   }
 }
 
@@ -1137,3 +1139,27 @@ export async function deleteEvent({ id }: { id: string }) {
     throw new ChatSDKError("bad_request:database", "Failed to delete event");
   }
 }
+
+export async function isUserJoinedToEvent({
+  userId,
+  eventId,
+}: {
+  userId: string;
+  eventId: string;
+}) {
+  try {
+    const [existingJoin] = await db
+      .select()
+      .from(userEvent)
+      .where(and(eq(userEvent.userId, userId), eq(userEvent.eventId, eventId)))
+      .limit(1);
+    return !!existingJoin;
+  } catch (_error: any) {
+    console.error("Database error in isUserJoinedToEvent:", _error);
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to check if user joined event"
+    );
+  }
+}
+
