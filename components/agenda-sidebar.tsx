@@ -1,5 +1,5 @@
 import { auth } from "@/app/(auth)/auth";
-import { getAgendaByUserId } from "@/lib/db/queries";
+import { getAgendaByUserId, getUserById } from "@/lib/db/queries";
 import { AgendaSidebarClient } from "@/components/agenda-sidebar-client";
 
 export async function AgendaSidebar() {
@@ -9,7 +9,10 @@ export async function AgendaSidebar() {
     return null;
   }
 
-  const agenda = await getAgendaByUserId({ userId: session.user.id });
+  const [agenda, user] = await Promise.all([
+    getAgendaByUserId({ userId: session.user.id }),
+    getUserById(session.user.id),
+  ]);
 
-  return <AgendaSidebarClient initialAgenda={agenda} userRole={session.user.role} />;
+  return <AgendaSidebarClient initialAgenda={agenda} user={user} />;
 }

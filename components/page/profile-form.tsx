@@ -58,9 +58,10 @@ export function ProfileForm({ user }: ProfileFormProps) {
   };
 
   const countries = useMemo(() => Country.getAllCountries(), []);
-  const countryOptions = useMemo(() =>
-    countries.map(c => ({ label: c.name, value: c.name })),
-    [countries]
+  const countryOptions = useMemo(() => {
+    const uniqueCountryNames = Array.from(new Set(countries.map(c => c.name)));
+    return uniqueCountryNames.map(name => ({ label: name, value: name }));
+  }, [countries]
   );
 
   const selectedCountryCode = useMemo(() => {
@@ -69,10 +70,12 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
   const cityOptions = useMemo(() => {
     if (!selectedCountryCode) return [];
-    return City.getCitiesOfCountry(selectedCountryCode)?.map(c => ({
-      label: c.name,
-      value: c.name
-    })) || [];
+    const allCities = City.getCitiesOfCountry(selectedCountryCode) || [];
+    const uniqueCityNames = Array.from(new Set(allCities.map(c => c.name)));
+    return uniqueCityNames.map(name => ({
+      label: name,
+      value: name
+    }));
   }, [selectedCountryCode]);
 
   const handleInputChange = (
