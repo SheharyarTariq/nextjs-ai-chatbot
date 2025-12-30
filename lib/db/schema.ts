@@ -296,11 +296,28 @@ export const event = pgTable("Event", {
   duration: integer("duration").notNull(),
   type: eventTypeEnum("type").notNull(),
   intensity: eventIntensityEnum("intensity").notNull(),
+  participantCount: integer("participantCount").notNull().default(0),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
 
 export type Event = InferSelectModel<typeof event>;
+
+export const userEvent = pgTable(
+  "UserEvent",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    userId: uuid("userId")
+      .notNull()
+      .references(() => user.id),
+    eventId: uuid("eventId")
+      .notNull()
+      .references(() => event.id, { onDelete: 'cascade' }),
+    joinedAt: timestamp("joinedAt").notNull().defaultNow(),
+  }
+);
+
+export type UserEvent = InferSelectModel<typeof userEvent>;
 
 export type EventType = "Run" | "Yoga" | "Strength" | "Mobility" | "HIIT" | "Recovery" | "Others";
 export type EventIntensity = "High" | "Medium" | "Low";

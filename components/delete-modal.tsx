@@ -21,6 +21,7 @@ interface DeleteModalProps {
   description: string;
   confirmText?: string;
   cancelText?: string;
+  loadingText?: string;
 }
 
 export function DeleteModal({
@@ -32,6 +33,7 @@ export function DeleteModal({
   description,
   confirmText = "Delete",
   cancelText = "Cancel",
+  loadingText,
 }: DeleteModalProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -53,7 +55,7 @@ export function DeleteModal({
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Deleting...
+                {loadingText || `${confirmText}...`}
               </>
             ) : (
               confirmText

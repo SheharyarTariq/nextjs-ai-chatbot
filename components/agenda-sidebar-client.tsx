@@ -5,7 +5,6 @@ import { AgendaCard } from "@/components/agenda-card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResetAgendaButton } from "@/components/reset-agenda-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EmptyAgendaState } from "@/components/empty-agenda-state";
 import { Button } from "@/components/ui/button";
 import { EventCard } from "@/components/event-card";
 import { CreateEventModal } from "@/components/create-event-modal";
@@ -20,6 +19,7 @@ export function AgendaSidebarClient({ initialAgenda, userRole }: AgendaSidebarCl
   const [activeTab, setActiveTab] = useState("week");
   const [isLoading, setIsLoading] = useState(false);
   const [events, setEvents] = useState<any[]>([]);
+  const [joinedEvents, setJoinedEvents] = useState<any[]>([]);
   const [isEventsLoading, setIsEventsLoading] = useState(false);
   const [isCreateEventModalOpen, setIsCreateEventModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
@@ -83,12 +83,38 @@ export function AgendaSidebarClient({ initialAgenda, userRole }: AgendaSidebarCl
     }
   }, []);
 
+  const fetchJoinedEvents = useCallback(async () => {
+    try {
+      const response = await fetch("/api/events/my-events");
+      if (!response.ok) {
+        throw new Error("Failed to fetch joined events");
+      }
+      const data = await response.json();
+      if (data.success && data.events) {
+        setJoinedEvents(data.events);
+      }
+    } catch (error) {
+      console.error("Error fetching joined events:", error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchEvents();
-  }, [fetchEvents]);
+    if (userRole !== "admin") {
+      fetchJoinedEvents();
+    }
+  }, [fetchEvents, fetchJoinedEvents, userRole]);
 
   const handleEventCreated = () => {
     fetchEvents();
+    if (userRole !== "admin") {
+      fetchJoinedEvents();
+    }
+  };
+
+  const handleJoinChange = () => {
+    fetchEvents();
+    fetchJoinedEvents();
   };
 
   const handleEditEvent = (event: any) => {
@@ -129,24 +155,15 @@ export function AgendaSidebarClient({ initialAgenda, userRole }: AgendaSidebarCl
     );
   }
 
-  // Show empty state if there's no agenda data
-  if (!agenda || !agenda.weeklyData || agenda.weeklyData.length === 0) {
-    return <EmptyAgendaState />;
-  }
-
-  const allWeeksData = agenda.weeklyData
+  const allWeeksData = agenda?.weeklyData
     ?.filter((week: any) => week.weekNumber <= agenda.currentWeek)
     ?.sort((a: any, b: any) => a.weekNumber - b.weekNumber) || [];
 
-  const currentWeekData = agenda.weeklyData.find(
-    (week: any) => week.weekNumber === agenda.currentWeek
+  const currentWeekData = agenda?.weeklyData?.find(
+    (week: any) => week.weekNumber === agenda?.currentWeek
   );
 
-  if (!currentWeekData || !currentWeekData.sessions) {
-    return null;
-  }
-
-  const currentWeekSortedSessions = currentWeekData.sessions
+  const currentWeekSortedSessions = currentWeekData?.sessions
     ? [...currentWeekData.sessions].sort((a: any, b: any) => {
       const dateA = new Date(a.date).getTime();
       const dateB = new Date(b.date).getTime();
@@ -165,7 +182,7 @@ export function AgendaSidebarClient({ initialAgenda, userRole }: AgendaSidebarCl
         <div className="p-4 border-b">
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1">
-              <h2 className="text-md font-semibold text-foreground">{agenda.userData?.goal || agenda.goal}</h2>
+              <h2 className="text-md font-semibold text-foreground">{agenda?.userData?.goal || agenda?.goal || "Agenda & Events"}</h2>
             </div>
             <ResetAgendaButton />
           </div>
@@ -173,7 +190,7 @@ export function AgendaSidebarClient({ initialAgenda, userRole }: AgendaSidebarCl
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="week" className="data-[state=active]:bg-primary-green data-[state=active]:text-white hover:cursor-pointer">My Agenda</TabsTrigger>
-              <TabsTrigger value="today" className="data-[state=active]:bg-primary-green data-[state=active]:text-white hover:cursor-pointer">Event</TabsTrigger>
+              <TabsTrigger value="today" className="data-[state=active]:bg-primary-green data-[state=active]:text-white hover:cursor-pointer">All Events</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -207,6 +224,7 @@ export function AgendaSidebarClient({ initialAgenda, userRole }: AgendaSidebarCl
                         userRole={userRole}
                         onDelete={fetchEvents}
                         onEdit={handleEditEvent}
+                        onJoinChange={handleJoinChange}
                       />
                     ))
                   )}
@@ -217,51 +235,93 @@ export function AgendaSidebarClient({ initialAgenda, userRole }: AgendaSidebarCl
 
           <TabsContent value="week" className="h-full mt-0">
             <ScrollArea className="h-full p-4">
-              <div className="space-y-6">
-                {allWeeksData.map((weekData: any) => {
-                  const sortedSessions = weekData.sessions
-                    ? [...weekData.sessions].sort((a: any, b: any) => {
-                      const dateA = new Date(a.date).getTime();
-                      const dateB = new Date(b.date).getTime();
-                      return dateA - dateB;
-                    })
-                    : [];
+              <div className="space-y-3">
+                {(() => {
+                  // Combine agenda sessions and joined events
+                  const items: Array<{
+                    type: 'session' | 'event';
+                    date: string;
+                    data: any;
+                  }> = [];
 
-                  const isCurrentWeek = weekData.weekNumber === agenda.currentWeek;
+                  if (allWeeksData && allWeeksData.length > 0) {  // Add agenda sessions to items
+                    allWeeksData.forEach((weekData: any) => {
+                      if (weekData.sessions && weekData.sessions.length > 0) {
+                        weekData.sessions.forEach((session: any) => {
+                          items.push({
+                            type: 'session',
+                            date: session.date,
+                            data: { ...session, weekNumber: weekData.weekNumber }
+                          });
+                        });
+                      }
+                    });
+                  }
+                 
+                  if (joinedEvents && joinedEvents.length > 0) {  // Add joined events to items 
+                    joinedEvents.forEach((event: any) => {
+                      items.push({
+                        type: 'event',
+                        date: event.date,
+                        data: event
+                      });
+                    });
+                  }
 
-                  return (
-                    <div key={weekData.weekNumber} className="space-y-3">
-                      <div className="space-y-3">
-                        {sortedSessions.map((session: any, index: number) => {
-                          const isToday = session.date === todayDateString;
-                          return (
-                            <div
-                              key={`week-${weekData.weekNumber}-${session.day}-${index}`}
-                              ref={isToday ? todaySessionRef : null}
-                            >
-                              <AgendaCard
-                                day={session.day}
-                                date={session.date}
-                                completed={session.completed || false}
-                                exerciseDetails={session.exerciseDetails || "No exercise details"}
-                                mealDetails={session.mealDetails}
-                                sleepDetails={session.sleepDetails}
-                                weekNumber={weekData.weekNumber}
-                                isToday={isToday}
-                                rating={session.rating}
-                                energy={session.energy}
-                                meals={session.meals}
-                                sleep={session.sleep}
-                                notes={session.notes}
-                                onUpdate={handleAgendaUpdate}
-                              />
-                            </div>
-                          );
-                        })}
+                  items.sort((a, b) => {
+                    const dateA = new Date(a.date).getTime();
+                    const dateB = new Date(b.date).getTime();
+                    return dateA - dateB;
+                  });
+
+                  if (items.length === 0) {
+                    return (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p className="text-sm">No agenda or events yet</p>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  }
+
+                  return items.map((item, index) => {
+                    if (item.type === 'session') {
+                      const session = item.data;
+                      const isToday = session.date === todayDateString;
+                      return (
+                        <div
+                          key={`session-${session.weekNumber}-${session.day}-${index}`}
+                          ref={isToday ? todaySessionRef : null}
+                        >
+                          <AgendaCard
+                            day={session.day}
+                            date={session.date}
+                            completed={session.completed || false}
+                            exerciseDetails={session.exerciseDetails || "No exercise details"}
+                            mealDetails={session.mealDetails}
+                            sleepDetails={session.sleepDetails}
+                            weekNumber={session.weekNumber}
+                            isToday={isToday}
+                            rating={session.rating}
+                            energy={session.energy}
+                            meals={session.meals}
+                            sleep={session.sleep}
+                            notes={session.notes}
+                            onUpdate={handleAgendaUpdate}
+                          />
+                        </div>
+                      );
+                    } else {
+                      const event = item.data;
+                      return (
+                        <EventCard
+                          key={`event-${event.id}-${index}`}
+                          event={{ ...event, hasJoined: true }}
+                          userRole={userRole}
+                          onJoinChange={handleJoinChange}
+                        />
+                      );
+                    }
+                  });
+                })()}
               </div>
             </ScrollArea>
           </TabsContent>

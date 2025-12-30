@@ -176,6 +176,13 @@
       "when": 1766995605962,
       "tag": "0024_lean_tomorrow_man",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1767090010486,
+      "tag": "0025_magical_dreaming_celestial",
+      "breakpoints": true
     }
   ]
 }

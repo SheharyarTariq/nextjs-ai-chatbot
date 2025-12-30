@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, MapPin, Activity, Zap, Trash2, Pencil } from "lucide-react";
+import { Calendar, Clock, MapPin, Activity, Zap, Trash2, Pencil, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { DeleteModal } from "@/components/delete-modal";
@@ -23,10 +23,13 @@ interface EventCardProps {
 		duration?: number;
 		type: EventType;
 		intensity: EventIntensity;
+		participantCount?: number;
+		hasJoined?: boolean;
 	};
 	userRole?: string;
 	onDelete?: () => void;
 	onEdit?: (event: any) => void;
+	onJoinChange?: () => void;
 }
 
 const typeColors: Record<EventType, string> = {
@@ -45,9 +48,12 @@ const intensityColors: Record<EventIntensity, string> = {
 	Low: "bg-green-500/10 text-green-500 border-green-500/20",
 };
 
-export function EventCard({ event, userRole, onDelete, onEdit }: EventCardProps) {
+export function EventCard({ event, userRole, onDelete, onEdit, onJoinChange }: EventCardProps) {
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [isJoining, setIsJoining] = useState(false);
+	const [showJoinModal, setShowJoinModal] = useState(false);
+	const [showLeaveModal, setShowLeaveModal] = useState(false);
 
 	let eventDate: Date | null = null;
 	let isUpcoming = false;
@@ -86,16 +92,90 @@ export function EventCard({ event, userRole, onDelete, onEdit }: EventCardProps)
 		}
 	};
 
+	const handleJoinToggle = () => {
+		if (event.hasJoined) {
+			setShowLeaveModal(true);
+		} else {
+			setShowJoinModal(true);
+		}
+	};
+
+	const confirmJoin = async () => {
+		setIsJoining(true);
+		try {
+			const response = await fetch(`/api/events/${event.id}/join`, {
+				method: "POST",
+			});
+
+			if (!response.ok) {
+				const error = await response.json();
+				throw new Error(error.error || "Failed to join event");
+			}
+
+			const data = await response.json();
+			toast.success(data.message || "Successfully joined the event!");
+			setShowJoinModal(false);
+			onJoinChange?.();
+		} catch (error: any) {
+			toast.error(error.message || "Failed to join event");
+		} finally {
+			setIsJoining(false);
+		}
+	};
+
+	const confirmLeave = async () => {
+		setIsJoining(true);
+		try {
+			const response = await fetch(`/api/events/${event.id}/join`, {
+				method: "DELETE",
+			});
+
+			if (!response.ok) {
+				const error = await response.json();
+				throw new Error(error.error || "Failed to leave event");
+			}
+
+			const data = await response.json();
+			toast.success(data.message || "Successfully left the event!");
+			setShowLeaveModal(false);
+			onJoinChange?.();
+		} catch (error: any) {
+			toast.error(error.message || "Failed to leave event");
+		} finally {
+			setIsJoining(false);
+		}
+	};
+
 	return (
-		<Card className={`p-4 space-y-3 transition-all hover:shadow-md`} >
+		<Card className={`p-4 space-y-1.5 transition-all hover:shadow-md`} >
 			<div className="flex items-start justify-between gap-2">
 				<h3 className="font-semibold text-base line-clamp-1 flex-1">{event.title}</h3>
 				<div className="flex items-center gap-1 flex-shrink-0">
-					{/* {isUpcoming && (
-						<Badge variant="outline" className="bg-primary-green/10 text-primary-green border-primary-green/20 mr-1">
-							Upcoming
+					{userRole !== "admin" && (
+						<Badge
+							variant={event.hasJoined ? "destructive" : "secondary"}
+							className={`whitespace-nowrap cursor-pointer hover:opacity-80 ${isJoining ? "cursor-not-allowed" : ""
+								} ${event.hasJoined
+									? "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20"
+									: "bg-primary-green/10 text-primary-green border-primary-green/20 hover:bg-primary-green/20"
+								}`}
+							onClick={isJoining ? undefined : handleJoinToggle}
+						>
+							{isJoining ? (
+								<>
+									<Loader2 className="mr-1 h-3 w-3 animate-spin" />
+									{event.hasJoined ? "Leaving..." : "Joining..."}
+								</>
+							) : (
+								<>
+									{event.hasJoined ? "Leave" : "Join"}
+									{typeof event.participantCount === 'number' && event.participantCount > 0 && (
+										<span className="ml-1">({event.participantCount})</span>
+									)}
+								</>
+							)}
 						</Badge>
-					)} */}
+					)}
 					{userRole === "admin" && (
 						<>
 							<Button
@@ -194,6 +274,30 @@ export function EventCard({ event, userRole, onDelete, onEdit }: EventCardProps)
 				loading={isDeleting}
 				title="Delete Event"
 				description={`Are you sure you want to delete "${event.title}"? This action cannot be undone.`}
+				confirmText="Delete"
+				loadingText="Deleting..."
+			/>
+
+			<DeleteModal
+				open={showJoinModal}
+				onOpenChange={setShowJoinModal}
+				onConfirm={confirmJoin}
+				loading={isJoining}
+				title="Join Event"
+				description={`Are you sure you want to join "${event.title}"?${event.date ? ` This event is scheduled for ${format(new Date(event.date), "MMM dd, yyyy")}${event.time ? ` at ${format(new Date(`${event.date}T${event.time}`), "hh:mm a")}` : ""}.` : ""}`}
+				confirmText="Join"
+				loadingText="Joining..."
+			/>
+
+			<DeleteModal
+				open={showLeaveModal}
+				onOpenChange={setShowLeaveModal}
+				onConfirm={confirmLeave}
+				loading={isJoining}
+				title="Leave Event"
+				description={`Are you sure you want to leave "${event.title}"? You can always rejoin later.`}
+				confirmText="Leave"
+				loadingText="Leaving..."
 			/>
 		</Card>
 	);
