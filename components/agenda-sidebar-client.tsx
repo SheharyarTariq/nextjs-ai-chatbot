@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { AgendaCard } from "@/components/agenda-card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResetAgendaButton } from "@/components/reset-agenda-button";
@@ -8,13 +8,38 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { EventCard } from "@/components/event-card";
 import { CreateEventModal } from "@/components/create-event-modal";
+import { SearchIcon, ChevronDownIcon, CheckIcon, FilterIcon } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { Country, City } from "country-state-city";
 
 interface AgendaSidebarClientProps {
   initialAgenda?: any;
-  userRole?: string;
+  user: any;
 }
 
-export function AgendaSidebarClient({ initialAgenda, userRole }: AgendaSidebarClientProps) {
+const EVENT_TYPES = ["Run", "Yoga", "Strength", "Mobility", "HIIT", "Recovery", "Others"];
+
+export function AgendaSidebarClient({ initialAgenda, user }: AgendaSidebarClientProps) {
+  const userRole = user?.role;
   const [agenda, setAgenda] = useState(initialAgenda);
   const [activeTab, setActiveTab] = useState("week");
   const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +48,27 @@ export function AgendaSidebarClient({ initialAgenda, userRole }: AgendaSidebarCl
   const [isEventsLoading, setIsEventsLoading] = useState(false);
   const [isCreateEventModalOpen, setIsCreateEventModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
+
+  // Filter states
+  const [selectedCities, setSelectedCities] = useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+
+  const cities = useMemo(() => {
+    if (!user?.country) return [];
+    const country = Country.getAllCountries().find(c => c.name === user.country);
+    if (!country) return [];
+    return City.getCitiesOfCountry(country.isoCode)?.map(c => c.name) || [];
+  }, [user?.country]);
+
+  const uniqueCities = useMemo(() => Array.from(new Set(cities)), [cities]);
+
+  const filteredEvents = useMemo(() => {
+    return events.filter(event => {
+      const cityMatch = selectedCities.length === 0 || selectedCities.includes(event.city);
+      const typeMatch = selectedTypes.length === 0 || selectedTypes.includes(event.type);
+      return cityMatch && typeMatch;
+    });
+  }, [events, selectedCities, selectedTypes]);
   const todaySessionRef = useRef<HTMLDivElement>(null);
 
   const fetchAgenda = useCallback(async () => {
@@ -211,13 +257,103 @@ export function AgendaSidebarClient({ initialAgenda, userRole }: AgendaSidebarCl
                   </Button>
                 )}
 
+                <div className="flex gap-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="flex-1 justify-between h-9 text-xs">
+                        <span className="truncate">
+                          {selectedCities.length === 0 ? "City" : `${selectedCities.length} Cities`}
+                        </span>
+                        <ChevronDownIcon className="h-3 w-3 opacity-50 ml-1 shrink-0" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-56 p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="Search city..." className="h-9" />
+                        <CommandList className="max-h-[300px]">
+                          <CommandEmpty>No city found.</CommandEmpty>
+                          <CommandGroup>
+                            {uniqueCities.length === 0 ? (
+                              <div className="p-2 text-xs text-muted-foreground text-center">
+                                {user?.country ? "No cities found" : "Select country in profile"}
+                              </div>
+                            ) : (
+                              uniqueCities.map(city => (
+                                <CommandItem
+                                  key={city}
+                                  value={city}
+                                  onSelect={() => {
+                                    setSelectedCities(prev =>
+                                      prev.includes(city)
+                                        ? prev.filter(c => c !== city)
+                                        : [...prev, city]
+                                    );
+                                  }}
+                                >
+                                  <div className={cn(
+                                    "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                                    selectedCities.includes(city)
+                                      ? "bg-primary text-primary-foreground"
+                                      : "opacity-50 [&_svg]:invisible"
+                                  )}>
+                                    <CheckIcon className="h-3 w-3" />
+                                  </div>
+                                  {city}
+                                </CommandItem>
+                              ))
+                            )}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="flex-1 justify-between h-9 text-xs">
+                        <span className="truncate">
+                          {selectedTypes.length === 0 ? "Type" : `${selectedTypes.length} Types`}
+                        </span>
+                        <ChevronDownIcon className="h-3 w-3 opacity-50 ml-1 shrink-0" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                      {EVENT_TYPES.map(type => (
+                        <DropdownMenuCheckboxItem
+                          key={type}
+                          checked={selectedTypes.includes(type)}
+                          onCheckedChange={(checked) => {
+                            setSelectedTypes(prev =>
+                              checked ? [...prev, type] : prev.filter(t => t !== type)
+                            );
+                          }}
+                        >
+                          {type}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
                 <div className="space-y-3">
-                  {events.length === 0 ? (
+                  {filteredEvents.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
-                      <p className="text-sm">No events yet</p>
+                      <p className="text-sm">No events found matching filters</p>
+                      {(selectedCities.length > 0 || selectedTypes.length > 0) && (
+                        <Button
+                          variant="link"
+                          className="text-xs mt-2 h-auto p-0 text-primary-green"
+                          onClick={() => {
+                            setSelectedCities([]);
+                            setSelectedTypes([]);
+                          }}
+                        >
+                          Clear all filters
+                        </Button>
+                      )}
                     </div>
                   ) : (
-                    events.map((event) => (
+                    filteredEvents.map((event) => (
                       <EventCard
                         key={event.id}
                         event={event}
@@ -257,7 +393,7 @@ export function AgendaSidebarClient({ initialAgenda, userRole }: AgendaSidebarCl
                       }
                     });
                   }
-                 
+
                   if (joinedEvents && joinedEvents.length > 0) {  // Add joined events to items 
                     joinedEvents.forEach((event: any) => {
                       items.push({
