@@ -490,6 +490,7 @@ export function AgendaSidebarClient({ initialAgenda, user }: AgendaSidebarClient
                           key={`event-${event.id}-${index}`}
                           event={{ ...event, hasJoined: true }}
                           userRole={userRole}
+                          showAdminActions={false}
                           onJoinChange={handleJoinChange}
                         />
                       );

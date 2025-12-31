@@ -29,12 +29,13 @@ interface EventCardProps {
     hasJoined?: boolean;
   };
   userRole?: string;
+  showAdminActions?: boolean;
   onDelete?: () => void;
   onEdit?: (event: any) => void;
   onJoinChange?: () => void;
 }
 
-export function EventCard({ event, userRole, onDelete, onEdit, onJoinChange }: EventCardProps) {
+export function EventCard({ event, userRole, showAdminActions = true, onDelete, onEdit, onJoinChange }: EventCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
@@ -276,7 +277,7 @@ export function EventCard({ event, userRole, onDelete, onEdit, onJoinChange }: E
           )}
         </div>
 
-        {userRole === "admin" && (
+        {userRole === "admin" && showAdminActions && (
           <div className="flex items-center gap-0.5 shrink-0">
             <Button
               variant="ghost"
