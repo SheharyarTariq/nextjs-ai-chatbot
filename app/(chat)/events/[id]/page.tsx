@@ -60,6 +60,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 							</Badge>
 						</div>
 						<CardTitle className="text-3xl md:text-4xl font-extrabold tracking-tight">{event.title}</CardTitle>
+						<p className="text-lg text-muted-foreground font-medium">Hosted by {event.host}</p>
 					</CardHeader>
 					<CardContent className="space-y-6">
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">

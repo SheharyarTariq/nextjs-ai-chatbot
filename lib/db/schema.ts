@@ -298,6 +298,7 @@ export const event = pgTable("Event", {
   type: eventTypeEnum("type").notNull(),
   intensity: eventIntensityEnum("intensity").notNull(),
   participantCount: integer("participantCount").notNull().default(0),
+  host: varchar("host", { length: 255 }).notNull(),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
