@@ -182,7 +182,7 @@ export async function POST(request: Request) {
 			duration,
 			type,
 			intensity,
-			host: session.user.name //|| "Admin", // Fallback to Admin if name is missing
+			host: session.user.name || "Admin",
 		});
 
 		return NextResponse.json({
