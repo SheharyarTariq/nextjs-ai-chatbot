@@ -999,6 +999,7 @@ export async function createEvent({
   duration,
   type,
   intensity,
+  host,
 }: {
   userId: string;
   title: string;
@@ -1011,6 +1012,7 @@ export async function createEvent({
   duration: number;
   type: EventType;
   intensity: EventIntensity;
+  host: string;
 }) {
   try {
     const now = new Date();
@@ -1029,6 +1031,7 @@ export async function createEvent({
         duration,
         type,
         intensity,
+        host,
         createdAt: now,
         updatedAt: now,
       })

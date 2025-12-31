@@ -1,0 +1,1 @@
+ALTER TABLE "Event" ADD COLUMN "host" varchar(255) DEFAULT 'Admin' NOT NULL;

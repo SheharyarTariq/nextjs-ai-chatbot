@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { EventCard } from "@/components/event-card";
 import { CreateEventModal } from "@/components/create-event-modal";
-import { SearchIcon, ChevronDownIcon, CheckIcon, FilterIcon } from "lucide-react";
+import { SearchIcon, ChevronDownIcon, CheckIcon, FilterIcon, X } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -28,6 +28,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Country, City } from "country-state-city";
 
@@ -145,16 +146,12 @@ export function AgendaSidebarClient({ initialAgenda, user }: AgendaSidebarClient
 
   useEffect(() => {
     fetchEvents();
-    if (userRole !== "admin") {
-      fetchJoinedEvents();
-    }
-  }, [fetchEvents, fetchJoinedEvents, userRole]);
+    fetchJoinedEvents();
+  }, [fetchEvents, fetchJoinedEvents]);
 
   const handleEventCreated = () => {
     fetchEvents();
-    if (userRole !== "admin") {
-      fetchJoinedEvents();
-    }
+    fetchJoinedEvents();
   };
 
   const handleJoinChange = () => {
@@ -333,6 +330,48 @@ export function AgendaSidebarClient({ initialAgenda, user }: AgendaSidebarClient
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
+
+                {/* Selected Filters */}
+                {(selectedCities.length > 0 || selectedTypes.length > 0) && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {selectedCities.map((city) => (
+                      <Badge
+                        key={city}
+                        variant="secondary"
+                        className="bg-primary-green/10 text-primary-green hover:bg-primary-green/20 border-none px-2 py-1 text-[10px] flex items-center gap-1.5"
+                      >
+                        {city}
+                        <X
+                          className="h-3 w-3 cursor-pointer hover:text-primary-green/70 transition-colors"
+                          onClick={() => setSelectedCities(prev => prev.filter(c => c !== city))}
+                        />
+                      </Badge>
+                    ))}
+                    {selectedTypes.map((type) => (
+                      <Badge
+                        key={type}
+                        variant="secondary"
+                        className="bg-primary-mustard/10 text-primary-mustard-foreground hover:bg-primary-mustard/20 border-none px-2 py-1 text-[10px] flex items-center gap-1.5"
+                      >
+                        {type}
+                        <X
+                          className="h-3 w-3 cursor-pointer hover:opacity-70 transition-opacity"
+                          onClick={() => setSelectedTypes(prev => prev.filter(t => t !== type))}
+                        />
+                      </Badge>
+                    ))}
+                    <Button
+                      variant="ghost"
+                      className="h-7 px-2 text-[10px] text-muted-foreground hover:text-primary-green hover:bg-transparent"
+                      onClick={() => {
+                        setSelectedCities([]);
+                        setSelectedTypes([]);
+                      }}
+                    >
+                      Clear all
+                    </Button>
+                  </div>
+                )}
 
                 <div className="space-y-3">
                   {filteredEvents.length === 0 ? (

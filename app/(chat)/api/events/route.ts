@@ -163,6 +163,13 @@ export async function POST(request: Request) {
 			);
 		}
 
+		console.log("Creating event - Session user:", {
+			session: session,
+			id: session.user.id,
+			name: session.user.name,
+			role: session.user.role
+		});
+
 		const [newEvent] = await createEvent({
 			userId: session.user.id,
 			title,
@@ -175,6 +182,7 @@ export async function POST(request: Request) {
 			duration,
 			type,
 			intensity,
+			host: session.user.name || "Admin",
 		});
 
 		return NextResponse.json({
