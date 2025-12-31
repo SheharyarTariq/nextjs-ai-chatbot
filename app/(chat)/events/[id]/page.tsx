@@ -106,6 +106,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 								isLoggedIn={!!session?.user}
 								initialJoined={isJoined}
 								userRole={session?.user?.role}
+								eventDate={event.date}
+								eventTitle={event.title}
 							/>
 							<p className="text-sm text-center text-muted-foreground italic">
 								Join our community to participate in this and other exciting events!

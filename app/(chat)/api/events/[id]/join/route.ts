@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db/queries";
-import { event, userEvent } from "@/lib/db/schema";
+import { event, userEvent, agenda } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { auth } from "@/app/(auth)/auth";
 
@@ -20,6 +20,8 @@ export async function POST(
 
 		const { id: eventId } = await params;
 		const userId = session.user.id;
+		const body = await request.json().catch(() => ({}));
+		const { resolution } = body;
 
 		const existingEvent = await db
 			.select()
@@ -32,6 +34,74 @@ export async function POST(
 				{ error: "Event not found" },
 				{ status: 404 }
 			);
+		}
+
+		const eventData = existingEvent[0];
+
+		if (resolution && resolution !== "add") {
+			const [userAgenda] = await db
+				.select()
+				.from(agenda)
+				.where(eq(agenda.userId, userId))
+				.limit(1);
+
+			if (userAgenda && userAgenda.weeklyData) {
+				let updatedWeeklyData = JSON.parse(JSON.stringify(userAgenda.weeklyData));
+				let sessionToMove = null;
+				let targetWeekIndex = -1;
+				let targetSessionIndex = -1;
+
+				// Find the conflicting session
+				for (let w = 0; w < updatedWeeklyData.length; w++) {
+					for (let s = 0; s < updatedWeeklyData[w].sessions.length; s++) {
+						if (updatedWeeklyData[w].sessions[s].date === eventData.date) {
+							sessionToMove = updatedWeeklyData[w].sessions[s];
+							targetWeekIndex = w;
+							targetSessionIndex = s;
+							break;
+						}
+					}
+					if (sessionToMove) break;
+				}
+
+				if (sessionToMove) {
+					if (resolution === "replace") {
+						// Replace
+						updatedWeeklyData[targetWeekIndex].sessions[targetSessionIndex].exerciseDetails = `Rest Day (Replaced by: ${eventData.title})`;
+						updatedWeeklyData[targetWeekIndex].sessions[targetSessionIndex].notes = `Originally: ${sessionToMove.exerciseDetails}`;
+					} else if (resolution === "move") {
+						// Move
+						const weekSessions = updatedWeeklyData[targetWeekIndex].sessions;
+						let lowLoadDayIndex = -1;
+
+						// Look for a Rest day in the same week
+						for (let i = 0; i < weekSessions.length; i++) {
+							const isRest = !weekSessions[i].exerciseDetails ||
+								weekSessions[i].exerciseDetails.toLowerCase().includes("rest") ||
+								weekSessions[i].exerciseDetails.toLowerCase().includes("no workout");
+
+							if (isRest && i !== targetSessionIndex) {
+								lowLoadDayIndex = i;
+								break;
+							}
+						}
+
+						if (lowLoadDayIndex !== -1) {
+							// Swap or Move
+							const originalDetails = sessionToMove.exerciseDetails;
+							// Mark current day as Replaced
+							updatedWeeklyData[targetWeekIndex].sessions[targetSessionIndex].exerciseDetails = `Rest Day (Moved to ${updatedWeeklyData[targetWeekIndex].sessions[lowLoadDayIndex].day})`;
+							// Move original workout to low load day
+							updatedWeeklyData[targetWeekIndex].sessions[lowLoadDayIndex].exerciseDetails = originalDetails;
+							updatedWeeklyData[targetWeekIndex].sessions[lowLoadDayIndex].notes = `Moved from ${sessionToMove.day} because of event: ${eventData.title}`;
+						}
+					}
+
+					await db.update(agenda)
+						.set({ weeklyData: updatedWeeklyData, updatedAt: new Date() })
+						.where(eq(agenda.id, userAgenda.id));
+				}
+			}
 		}
 
 		const existingUserEvent = await db
