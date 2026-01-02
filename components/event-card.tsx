@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import { DeleteModal } from "@/components/delete-modal";
 import type { EventType, EventIntensity } from "@/lib/db/schema";
 import { typeColors, intensityColors } from "@/components/page/constants";
-import { ConflictModal } from "@/components/conflict-modal";
 
 interface EventCardProps {
   event: {
@@ -41,8 +40,6 @@ export function EventCard({ event, userRole, showAdminActions = true, onDelete, 
   const [isJoining, setIsJoining] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
-  const [showConflictModal, setShowConflictModal] = useState(false);
-  const [conflictingSession, setConflictingSession] = useState<any>(null);
 
   let eventDate: Date | null = null;
   let isUpcoming = false;
@@ -85,29 +82,11 @@ export function EventCard({ event, userRole, showAdminActions = true, onDelete, 
     if (event.hasJoined) {
       setShowLeaveModal(true);
     } else {
-      // Check for conflict
-      setIsJoining(true);
-      try {
-        const response = await fetch(`/api/events/${event.id}/join/check`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.hasConflict) {
-            setConflictingSession(data.conflictingSession);
-            setShowConflictModal(true);
-            return;
-          }
-        }
-        setShowJoinModal(true);
-      } catch (error) {
-        console.error("Conflict check failed:", error);
-        setShowJoinModal(true);
-      } finally {
-        setIsJoining(false);
-      }
+      setShowJoinModal(true);
     }
   };
 
-  const confirmJoin = async (resolution?: string) => {
+  const confirmJoin = async () => {
     setIsJoining(true);
     try {
       const response = await fetch(`/api/events/${event.id}/join`, {
@@ -115,7 +94,6 @@ export function EventCard({ event, userRole, showAdminActions = true, onDelete, 
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ resolution }),
       });
 
       if (!response.ok) {
@@ -126,12 +104,10 @@ export function EventCard({ event, userRole, showAdminActions = true, onDelete, 
       const data = await response.json();
       toast.success(data.message || "Successfully joined the event!");
       setShowJoinModal(false);
-      setShowConflictModal(false);
       onJoinChange?.();
 
-      if (resolution && resolution !== "add") {
-        window.dispatchEvent(new CustomEvent("agenda-refresh"));
-      }
+      // Always refresh agenda after joining as AI might have adjusted it
+      window.dispatchEvent(new CustomEvent("agenda-refresh"));
     } catch (error: any) {
       toast.error(error.message || "Failed to join event");
     } finally {
@@ -335,13 +311,6 @@ export function EventCard({ event, userRole, showAdminActions = true, onDelete, 
         loadingText="Leaving..."
       />
 
-      <ConflictModal
-        open={showConflictModal}
-        onOpenChange={setShowConflictModal}
-        onResolve={confirmJoin}
-        eventTitle={event.title}
-        eventDate={event.date || ""}
-      />
     </Card >
   );
 }
