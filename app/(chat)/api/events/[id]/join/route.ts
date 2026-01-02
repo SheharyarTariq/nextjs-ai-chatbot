@@ -22,8 +22,6 @@ export async function POST(
 
     const { id: eventId } = await params;
     const userId = session.user.id;
-    const body = await request.json().catch(() => ({}));
-    const { resolution } = body;
 
     const existingEvent = await db
       .select()
@@ -40,88 +38,7 @@ export async function POST(
 
     const eventData = existingEvent[0];
 
-    if (resolution && resolution !== "add") {
-      const [userAgenda] = await db
-        .select()
-        .from(agenda)
-        .where(eq(agenda.userId, userId))
-        .limit(1);
-
-      if (userAgenda && userAgenda.weeklyData) {
-        let updatedWeeklyData = JSON.parse(JSON.stringify(userAgenda.weeklyData));
-        let sessionToMove = null;
-        let targetWeekIndex = -1;
-        let targetSessionIndex = -1;
-
-        // Find conflict with agenda
-        for (let w = 0; w < updatedWeeklyData.length; w++) {
-          for (let s = 0; s < updatedWeeklyData[w].sessions.length; s++) {
-            if (updatedWeeklyData[w].sessions[s].date === eventData.date) {
-              sessionToMove = updatedWeeklyData[w].sessions[s];
-              targetWeekIndex = w;
-              targetSessionIndex = s;
-              break;
-            }
-          }
-          if (sessionToMove) break;
-        }
-
-        if (sessionToMove) {
-          if (resolution === "replace") {
-            // Replace-case1 Remove the session for this day
-            updatedWeeklyData[targetWeekIndex].sessions = updatedWeeklyData[targetWeekIndex].sessions.filter(
-              (s: any) => s.date !== eventData.date
-            );
-          } else if (resolution === "rebalance") {
-            // Rebalance-case4 Ask AI to reduce the load
-            try {
-              const { text: reducedExerciseDetails } = await generateText({
-                model: myProvider.languageModel("chat-model"),
-                system: "You are an expert athletic coach for 'Athlete Standards'. Your job is to adjust a training session to reduce its intensity ('rebalance') because the user has a conflicting event on the same day. Keep the workout structure but scale it down significantly. Provide ONLY the new exercise details as a concise string (max 60 characters).",
-                prompt: `Original workout: '${sessionToMove.exerciseDetails}'. Conflicting event: '${eventData.title}'. Please provide a reduced-intensity version of the workout.`,
-              });
-
-              updatedWeeklyData[targetWeekIndex].sessions[targetSessionIndex].exerciseDetails = reducedExerciseDetails.trim();
-              updatedWeeklyData[targetWeekIndex].sessions[targetSessionIndex].notes = `Intensity reduced to accommodate event: ${eventData.title}`;
-            } catch (error) {
-              console.error("AI rebalance failed, falling back to simple reduction:", error);
-              updatedWeeklyData[targetWeekIndex].sessions[targetSessionIndex].exerciseDetails = `[Reduced Load] ${sessionToMove.exerciseDetails}`;
-            }
-          } else if (resolution === "move") {
-            // Move-case2
-            const weekSessions = updatedWeeklyData[targetWeekIndex].sessions;
-            let lowLoadDayIndex = -1;
-
-            // Look for a Rest day in the same week
-            for (let i = 0; i < weekSessions.length; i++) {
-              const isRest = !weekSessions[i].exerciseDetails ||
-                weekSessions[i].exerciseDetails.toLowerCase().includes("rest") ||
-                weekSessions[i].exerciseDetails.toLowerCase().includes("no workout");
-
-              if (isRest && i !== targetSessionIndex) {
-                lowLoadDayIndex = i;
-                break;
-              }
-            }
-
-            if (lowLoadDayIndex !== -1) {
-              // Swap or Move
-              const originalDetails = sessionToMove.exerciseDetails;
-              // Mark current day as Replaced
-              updatedWeeklyData[targetWeekIndex].sessions[targetSessionIndex].exerciseDetails = `Rest Day (Moved to ${updatedWeeklyData[targetWeekIndex].sessions[lowLoadDayIndex].day})`;
-              // Move original workout to low load day
-              updatedWeeklyData[targetWeekIndex].sessions[lowLoadDayIndex].exerciseDetails = originalDetails;
-              updatedWeeklyData[targetWeekIndex].sessions[lowLoadDayIndex].notes = `Moved from ${sessionToMove.day} because of event: ${eventData.title}`;
-            }
-          }
-
-          await db.update(agenda)
-            .set({ weeklyData: updatedWeeklyData, updatedAt: new Date() })
-            .where(eq(agenda.id, userAgenda.id));
-        }
-      }
-    }
-
+    // Check if already joined
     const existingUserEvent = await db
       .select()
       .from(userEvent)
@@ -140,6 +57,97 @@ export async function POST(
       );
     }
 
+    // --- AUTOMATIC AI CONFLICT RESOLUTION ---
+    const [userAgenda] = await db
+      .select()
+      .from(agenda)
+      .where(eq(agenda.userId, userId))
+      .limit(1);
+
+    if (userAgenda && userAgenda.weeklyData) {
+      let updatedWeeklyData = JSON.parse(JSON.stringify(userAgenda.weeklyData));
+      let conflictingSession = null;
+      let targetWeekIndex = -1;
+      let targetSessionIndex = -1;
+
+      // Find conflict with agenda
+      for (let w = 0; w < updatedWeeklyData.length; w++) {
+        for (let s = 0; s < updatedWeeklyData[w].sessions.length; s++) {
+          if (updatedWeeklyData[w].sessions[s].date === eventData.date) {
+            // Check if it's a workout (not rest)
+            const isWorkout = updatedWeeklyData[w].sessions[s].exerciseDetails &&
+              !updatedWeeklyData[w].sessions[s].exerciseDetails.toLowerCase().includes("rest") &&
+              !updatedWeeklyData[w].sessions[s].exerciseDetails.toLowerCase().includes("no workout");
+
+            if (isWorkout) {
+              conflictingSession = updatedWeeklyData[w].sessions[s];
+              targetWeekIndex = w;
+              targetSessionIndex = s;
+              break;
+            }
+          }
+        }
+        if (conflictingSession) break;
+      }
+
+      if (conflictingSession) {
+        // Prepare AI prompting for automatic resolution
+        try {
+          // Rule 1: check if types match
+          const eventType = eventData.type.toLowerCase();
+          const agendaDetails = conflictingSession.exerciseDetails.toLowerCase();
+          const isSameType = agendaDetails.includes(eventType) || (eventType === 'run' && agendaDetails.includes('running'));
+
+          const resolutionMode = isSameType ? "REPLACE" : "REDUCE_LOAD";
+
+          const { text: newWeeklyDataJson } = await generateText({
+            model: myProvider.languageModel("chat-model"),
+            system: `You are an expert athletic coach for 'Athlete Standards'. 
+            The user wants to join an event: "${eventData.title}" (${eventData.type}) on ${eventData.date}.
+            This conflicts with their agenda session: "${conflictingSession.exerciseDetails}".
+            
+            ADJUSTMENT RULES:
+            1. Mode is ${resolutionMode}. 
+               - If REPLACE: COMPLETELY REMOVE the session for ${eventData.date} from the sessions array because the event replaces it. The user will attend the event instead of this training session.
+               - If REDUCE_LOAD: The agenda session for ${eventData.date} should be REDUCED to a lower intensity/volume (e.g. single session instead of double, or reduce duration/intensity).
+            2. MAINTAIN MAIN GOAL: The user's goal is "${userAgenda.goal}". You MUST adjust the REMAINING sessions in the current week or the NEXT week to compensate for this change, ensuring the 12-week goal remains achievable.
+            3. OUTPUT: Return the ENTIRE updated weeklyData array as a valid JSON string. Do not include any other text.`,
+            prompt: `Current Weekly Data: ${JSON.stringify(updatedWeeklyData)}.
+            Please provide the updated weeklyData reflecting the ${resolutionMode} and the necessary compensations in future sessions to stay on track for the goal: "${userAgenda.goal}".`,
+          });
+
+          // Extract and parse the JSON from AI response
+          const jsonMatch = newWeeklyDataJson.match(/\[[\s\S]*\]/);
+          if (jsonMatch) {
+            const parsedData = JSON.parse(jsonMatch[0]);
+            updatedWeeklyData = parsedData;
+          } else {
+            // Fallback to manual simple if AI fails
+            if (isSameType) {
+              // REPLACE: Remove the session entirely from the array
+              updatedWeeklyData[targetWeekIndex].sessions = updatedWeeklyData[targetWeekIndex].sessions.filter(
+                (s: any, index: number) => index !== targetSessionIndex
+              );
+            } else {
+              // REDUCE_LOAD: Reduce the intensity/volume
+              updatedWeeklyData[targetWeekIndex].sessions[targetSessionIndex].exerciseDetails = `[Reduced] ${conflictingSession.exerciseDetails}`;
+              updatedWeeklyData[targetWeekIndex].sessions[targetSessionIndex].notes = `Load reduced for event: ${eventData.title}`;
+            }
+          }
+
+          // Save updated agenda
+          await db.update(agenda)
+            .set({ weeklyData: updatedWeeklyData, updatedAt: new Date() })
+            .where(eq(agenda.id, userAgenda.id));
+
+        } catch (error) {
+          console.error("AI conflict resolution failed:", error);
+          // Fallback logic could go here if needed
+        }
+      }
+    }
+
+    // Perform the join
     await db.insert(userEvent).values({
       userId,
       eventId,
@@ -156,7 +164,7 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      message: "Successfully joined the event",
+      message: "Successfully joined the event. Your agenda has been automatically adjusted by AI to stay on track!",
     });
   } catch (error) {
     console.error("Error joining event:", error);
