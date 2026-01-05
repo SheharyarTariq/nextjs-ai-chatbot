@@ -5,7 +5,7 @@ import Image from "next/image";
 import logo from "../../../public/assets/logos.png";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { useActionState, useEffect, useState, useTransition, Suspense } from "react";
 import { AuthForm } from "@/components/auth-form";
 import { SubmitButton } from "@/components/submit-button";
 import { toast } from "@/components/toast";
@@ -13,7 +13,7 @@ import { registerSchema } from "@/lib/validations/auth";
 import { validateFormWithYup } from "@/lib/utils";
 import { type RegisterActionState, register } from "../actions";
 
-export default function Page() {
+function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
@@ -133,5 +133,17 @@ export default function Page() {
         </AuthForm>
       </div>
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-dvh w-screen items-center justify-center bg-background">
+        <div className="text-gray-500">Loading...</div>
+      </div>
+    }>
+      <RegisterForm />
+    </Suspense>
   );
 }
