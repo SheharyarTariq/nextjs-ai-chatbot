@@ -1166,3 +1166,44 @@ export async function isUserJoinedToEvent({
   }
 }
 
+export async function getUserJoinedEventsByDateRange({
+  userId,
+  startDate,
+  endDate,
+}: {
+  userId: string;
+  startDate: string;
+  endDate: string;
+}) {
+  try {
+    const joinedEvents = await db
+      .select({
+        id: event.id,
+        title: event.title,
+        date: event.date,
+        time: event.time,
+        duration: event.duration,
+        type: event.type,
+        intensity: event.intensity,
+        location: event.location,
+      })
+      .from(userEvent)
+      .innerJoin(event, eq(userEvent.eventId, event.id))
+      .where(
+        and(
+          eq(userEvent.userId, userId),
+          gte(event.date, startDate),
+          lt(event.date, endDate)
+        )
+      )
+      .orderBy(asc(event.date));
+
+    return joinedEvents;
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get user joined events by date range"
+    );
+  }
+}
+

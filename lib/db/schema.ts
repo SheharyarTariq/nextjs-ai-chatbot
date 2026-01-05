@@ -10,6 +10,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
   varchar,
   vector,
@@ -316,7 +317,10 @@ export const userEvent = pgTable(
       .notNull()
       .references(() => event.id, { onDelete: 'cascade' }),
     joinedAt: timestamp("joinedAt").notNull().defaultNow(),
-  }
+  },
+  (table) => ({
+    uniqueUserEvent: uniqueIndex("unique_user_event_idx").on(table.userId, table.eventId),
+  })
 );
 
 export type UserEvent = InferSelectModel<typeof userEvent>;

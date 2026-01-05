@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import logo from "../../../public/assets/logos.png";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useActionState, useEffect, useState, useTransition } from "react";
 import { AuthForm } from "@/components/auth-form";
@@ -15,6 +15,7 @@ import { type RegisterActionState, register } from "../actions";
 
 export default function Page() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -48,12 +49,29 @@ export default function Page() {
       toast({ type: "success", description: "Account created successfully!" });
 
       setIsSuccessful(true);
-      updateSession();
-      router.push("/profile");
-      router.refresh();
+
+      const performNavigation = async () => {
+        await updateSession();
+
+        const redirectUrl = searchParams.get("redirectUrl");
+        if (redirectUrl) {
+          try {
+            const decodedUrl = decodeURIComponent(redirectUrl);
+            const url = new URL(decodedUrl, window.location.origin);
+            router.push(url.pathname + url.search + url.hash);
+            router.refresh();
+            return;
+          } catch (_error) {
+          }
+        }
+        router.push("/profile");
+        router.refresh();
+      };
+
+      performNavigation();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state]);
+  }, [state, searchParams, router]);
 
   const handleSubmit = async (submittedFormData: FormData) => {
     const data = {

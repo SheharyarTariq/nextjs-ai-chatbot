@@ -204,6 +204,13 @@
       "when": 1767168798463,
       "tag": "0028_round_jubilee",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1767600501364,
+      "tag": "0029_happy_jackal",
+      "breakpoints": true
     }
   ]
 }

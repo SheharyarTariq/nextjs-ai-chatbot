@@ -47,9 +47,9 @@ function PureChatHeader({
       ) : (
         <h1 className="text-primary-green font-bold text-[22px]">For Daily Use.</h1>
       )}
-      <div className="ml-auto">
+      {user && <div className="ml-auto">
         <SidebarUserNav user={user} />
-      </div>
+      </div>}
     </header>
   );
 }
