@@ -23,9 +23,11 @@ import { ProfileFormProps } from "./types";
 import { Country, City } from "country-state-city";
 import { Combobox } from "@/components/ui/combobox";
 import { useMemo } from "react";
+import { useSession } from "next-auth/react";
 
 export function ProfileForm({ user }: ProfileFormProps) {
   const router = useRouter();
+  const { update } = useSession();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -136,7 +138,19 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
     const result = await updateProfile(formDataObj);
 
-    if (result.status === "success") {
+    if (result.status === "success" && result.user) {
+      await update({
+        user: {
+          name: result.user.name,
+          gender: result.user.gender,
+          birthDay: result.user.birthDay,
+          birthMonth: result.user.birthMonth,
+          birthYear: result.user.birthYear,
+          country: result.user.country,
+          city: result.user.city,
+        },
+      });
+
       toast({
         type: "success",
         description: "Profile updated successfully!",

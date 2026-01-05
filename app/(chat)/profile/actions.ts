@@ -12,6 +12,15 @@ export type ProfileUpdateStatus =
 
 export interface ProfileUpdateResult {
   status: ProfileUpdateStatus;
+  user?: {
+    name?: string | null;
+    gender?: string | null;
+    birthDay?: number | null;
+    birthMonth?: number | null;
+    birthYear?: number | null;
+    country?: string | null;
+    city?: string | null;
+  };
 }
 
 export async function updateProfile(
@@ -35,13 +44,17 @@ export async function updateProfile(
     const city = formData.get("city") as string;
     const password = formData.get("password") as string;
 
+    const birthDay = day ? Number(day) : undefined;
+    const birthMonth = month ? Number(month) : undefined;
+    const birthYear = year ? Number(year) : undefined;
+
     await updateUserProfile({
       userId: session.user.id,
       name,
       gender: gender || undefined,
-      birthDay: day ? Number(day) : undefined,
-      birthMonth: month ? Number(month) : undefined,
-      birthYear: year ? Number(year) : undefined,
+      birthDay,
+      birthMonth,
+      birthYear,
       country: country || undefined,
       city: city || undefined,
       password: password || undefined,
@@ -49,6 +62,15 @@ export async function updateProfile(
 
     return {
       status: "success",
+      user: {
+        name,
+        gender: gender || null,
+        birthDay,
+        birthMonth,
+        birthYear,
+        country: country || null,
+        city: city || null,
+      },
     };
   } catch (error) {
     return {

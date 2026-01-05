@@ -20,6 +20,8 @@ declare module "next-auth" {
       birthDay?: number | null;
       birthMonth?: number | null;
       birthYear?: number | null;
+      country?: string | null;
+      city?: string | null;
     } & DefaultSession["user"];
   }
 
@@ -34,6 +36,8 @@ declare module "next-auth" {
     birthDay?: number | null;
     birthMonth?: number | null;
     birthYear?: number | null;
+    country?: string | null;
+    city?: string | null;
   }
 }
 
@@ -47,6 +51,8 @@ declare module "next-auth/jwt" {
     birthDay?: number | null;
     birthMonth?: number | null;
     birthYear?: number | null;
+    country?: string | null;
+    city?: string | null;
   }
 }
 
@@ -103,7 +109,7 @@ export const {
     }),
   ],
   callbacks: {
-    jwt({ token, user }) {
+    jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id as string;
         token.type = user.type;
@@ -113,6 +119,18 @@ export const {
         token.birthDay = user.birthDay;
         token.birthMonth = user.birthMonth;
         token.birthYear = user.birthYear;
+        token.country = user.country;
+        token.city = user.city;
+      }
+
+      if (trigger === "update" && session) {
+        token.name = session.user.name;
+        token.gender = session.user.gender;
+        token.birthDay = session.user.birthDay;
+        token.birthMonth = session.user.birthMonth;
+        token.birthYear = session.user.birthYear;
+        token.country = session.user.country;
+        token.city = session.user.city;
       }
 
       return token;
@@ -127,6 +145,8 @@ export const {
         session.user.birthDay = token.birthDay;
         session.user.birthMonth = token.birthMonth;
         session.user.birthYear = token.birthYear;
+        session.user.country = token.country;
+        session.user.city = token.city;
       }
 
       return session;

@@ -3,9 +3,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import logo from "../../../public/assets/logos.png";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { useActionState, useEffect, useState, useTransition, Suspense } from "react";
 import { AuthForm } from "@/components/auth-form";
 import { SubmitButton } from "@/components/submit-button";
 import { toast } from "@/components/toast";
@@ -13,8 +13,9 @@ import { registerSchema } from "@/lib/validations/auth";
 import { validateFormWithYup } from "@/lib/utils";
 import { type RegisterActionState, register } from "../actions";
 
-export default function Page() {
+function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -48,12 +49,29 @@ export default function Page() {
       toast({ type: "success", description: "Account created successfully!" });
 
       setIsSuccessful(true);
-      updateSession();
-      router.push("/profile");
-      router.refresh();
+
+      const performNavigation = async () => {
+        await updateSession();
+
+        const redirectUrl = searchParams.get("redirectUrl");
+        if (redirectUrl) {
+          try {
+            const decodedUrl = decodeURIComponent(redirectUrl);
+            const url = new URL(decodedUrl, window.location.origin);
+            router.push(url.pathname + url.search + url.hash);
+            router.refresh();
+            return;
+          } catch (_error) {
+          }
+        }
+        router.push("/profile");
+        router.refresh();
+      };
+
+      performNavigation();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state]);
+  }, [state, searchParams, router]);
 
   const handleSubmit = async (submittedFormData: FormData) => {
     const data = {
@@ -115,5 +133,17 @@ export default function Page() {
         </AuthForm>
       </div>
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-dvh w-screen items-center justify-center bg-background">
+        <div className="text-gray-500">Loading...</div>
+      </div>
+    }>
+      <RegisterForm />
+    </Suspense>
   );
 }

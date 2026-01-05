@@ -72,7 +72,7 @@ export function SidebarUserNav({ user }: { user: User }) {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            {user.role === "admin" && (
+            {user?.role === "admin" && (
               <>
                 <DropdownMenuItem asChild data-testid="user-nav-item-admin">
                   <Link href="/admin/books" className="hover:cursor-pointer">
