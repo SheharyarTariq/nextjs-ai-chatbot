@@ -150,18 +150,20 @@ export function EventCard({ event, userRole, showAdminActions = true, onDelete, 
         <div className="flex items-center gap-1 shrink-0">
           <Badge
             variant={event.hasJoined ? "destructive" : "secondary"}
-            className={`whitespace-nowrap cursor-pointer hover:opacity-80 ${isJoining ? "cursor-not-allowed" : ""
+            className={`whitespace-nowrap cursor-pointer hover:opacity-80 ${isJoining || (!isUpcoming && !event.hasJoined) ? "cursor-not-allowed opacity-50" : ""
               } ${event.hasJoined
                 ? "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20"
                 : "bg-primary-green/10 text-primary-green border-primary-green/20 hover:bg-primary-green/20"
               }`}
-            onClick={isJoining ? undefined : handleJoinToggle}
+            onClick={isJoining || (!isUpcoming && !event.hasJoined) ? undefined : handleJoinToggle}
           >
             {isJoining ? (
               <>
                 <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                 {event.hasJoined ? "Leave" : "Join"}
               </>
+            ) : !isUpcoming && !event.hasJoined ? (
+              "Ended"
             ) : (
               <>
                 {event.hasJoined ? "Leave" : "Join"}
