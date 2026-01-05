@@ -29,6 +29,8 @@ export function JoinEventButton({
   const [isLoading, setIsLoading] = useState(false);
   const hasAutoJoined = useRef(false);
 
+  const isEventPast = eventDate ? new Date(eventDate) < new Date() : false;
+
   const handleJoinToggle = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -86,31 +88,33 @@ export function JoinEventButton({
   useEffect(() => {
     const action = searchParams.get("action");
 
-    if (action === "join_event" && isLoggedIn && !isJoined && !isLoading && !hasAutoJoined.current) {
+    if (action === "join_event" && isLoggedIn && !isJoined && !isLoading && !hasAutoJoined.current && !isEventPast) {
       hasAutoJoined.current = true;
 
       router.replace(window.location.pathname, { scroll: false });
 
       handleJoinToggle();
     }
-  }, [searchParams, isLoggedIn, isJoined, isLoading, handleJoinToggle, router]);
+  }, [searchParams, isLoggedIn, isJoined, isLoading, handleJoinToggle, router, isEventPast]);
 
   if (!isLoggedIn) {
     return (
       <div className="flex gap-3 w-full">
         <Button
           onClick={handleLoginRedirect}
-          className="flex-1 h-12 text-lg font-bold transition-all duration-300 bg-primary-green hover:bg-primary-green/90 text-white"
+          disabled={isEventPast}
+          className="flex-1 h-12 text-lg font-bold transition-all duration-300 bg-primary-green hover:bg-primary-green/90 text-white disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <LogIn className="mr-2 h-5 w-5" />
-          Login to Join
+          {isEventPast ? "Event Ended" : "Login to Join"}
         </Button>
         <Button
           onClick={handleSignupRedirect}
-          className="flex-1 h-12 text-lg font-bold transition-all duration-300 bg-primary-green hover:bg-primary-green/90 text-white"
+          disabled={isEventPast}
+          className="flex-1 h-12 text-lg font-bold transition-all duration-300 bg-primary-green hover:bg-primary-green/90 text-white disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <CheckCircle2 className="mr-2 h-5 w-5" />
-          Signup to Join
+          {isEventPast ? "Event Ended" : "Signup to Join"}
         </Button>
       </div>
     );
@@ -119,16 +123,21 @@ export function JoinEventButton({
   return (
     <Button
       onClick={() => handleJoinToggle()}
-      disabled={isLoading}
+      disabled={isLoading || (isEventPast && !isJoined)}
       className={`w-full h-12 text-lg font-bold transition-all duration-300 ${isJoined
         ? "bg-red-500 hover:bg-red-600 text-white"
         : "bg-primary-green hover:bg-primary-green/90 text-white"
-        }`}
+        } disabled:opacity-50 disabled:cursor-not-allowed`}
     >
       {isLoading ? (
         <>
           <Loader2 className="mr-2 h-5 w-5 animate-spin" />
           Please wait...
+        </>
+      ) : isEventPast && !isJoined ? (
+        <>
+          <XCircle className="mr-2 h-5 w-5" />
+          Event Ended
         </>
       ) : isJoined ? (
         <>
