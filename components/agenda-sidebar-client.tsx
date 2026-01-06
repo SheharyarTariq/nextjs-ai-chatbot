@@ -157,6 +157,7 @@ export function AgendaSidebarClient({ initialAgenda, user }: AgendaSidebarClient
   const handleJoinChange = () => {
     fetchEvents();
     fetchJoinedEvents();
+    fetchAgenda();
   };
 
   const handleEditEvent = (event: any) => {

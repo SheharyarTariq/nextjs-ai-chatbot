@@ -210,6 +210,56 @@ export async function DELETE(
       );
     }
 
+    // Get event data before leaving to use in AI prompt
+    const existingEvent = await db
+      .select()
+      .from(event)
+      .where(eq(event.id, eventId))
+      .limit(1);
+
+    const eventData = existingEvent[0];
+
+    // --- AUTOMATIC AI AGENDA READJUSTMENT (RESTORATION) ---
+    const [userAgenda] = await db
+      .select()
+      .from(agenda)
+      .where(eq(agenda.userId, userId))
+      .limit(1);
+
+    if (userAgenda && userAgenda.weeklyData && eventData) {
+      let updatedWeeklyData = JSON.parse(JSON.stringify(userAgenda.weeklyData));
+
+      try {
+        const { text: newWeeklyDataJson } = await generateText({
+          model: myProvider.languageModel("chat-model"),
+          system: `You are an expert athletic coach for 'Athlete Standards'. 
+          The user is LEAVING/CANCELING an event: "${eventData.title}" (${eventData.type}) on ${eventData.date}.
+          Previously, their agenda might have been adjusted (sessions removed or reduced) to accommodate this event.
+          
+          ADJUSTMENT RULES:
+          1. RESTORE/RE-OPTIMIZE: You must now restore a proper training session for ${eventData.date} or re-distribute the training load across the remaining days of the week.
+          2. MAINTAIN MAIN GOAL: The user's goal is "${userAgenda.goal}". Ensure the training plan is back to its optimal state for achieving this goal.
+          3. OUTPUT: Return the ENTIRE updated weeklyData array as a valid JSON string. Do not include any other text.`,
+          prompt: `Current Weekly Data: ${JSON.stringify(updatedWeeklyData)}.
+          Please provide the updated weeklyData reflecting that the user is no longer attending the event on ${eventData.date}.`,
+        });
+
+        const jsonMatch = newWeeklyDataJson.match(/\[[\s\S]*\]/);
+        if (jsonMatch) {
+          const parsedData = JSON.parse(jsonMatch[0]);
+          updatedWeeklyData = parsedData;
+
+          // Save updated agenda
+          await db.update(agenda)
+            .set({ weeklyData: updatedWeeklyData, updatedAt: new Date() })
+            .where(eq(agenda.id, userAgenda.id));
+        }
+      } catch (error) {
+        console.error("AI agenda restoration failed:", error);
+      }
+    }
+
+    // Perform the leave
     await db
       .delete(userEvent)
       .where(
@@ -218,12 +268,6 @@ export async function DELETE(
           eq(userEvent.eventId, eventId)
         )
       );
-
-    const existingEvent = await db
-      .select()
-      .from(event)
-      .where(eq(event.id, eventId))
-      .limit(1);
 
     if (existingEvent.length > 0) {
       const currentCount = existingEvent[0].participantCount || 0;
@@ -238,7 +282,7 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: "Successfully left the event",
+      message: "Successfully left the event. Your agenda has been readjusted to get you back on track!",
     });
   } catch (error) {
     console.error("Error leaving event:", error);
