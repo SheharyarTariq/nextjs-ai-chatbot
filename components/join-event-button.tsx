@@ -60,11 +60,11 @@ export function JoinEventButton({
       if (method === "POST") {
         setIsJoined(true);
         toast.success(data.message || "Successfully joined the event!");
-        // Always refresh agenda after joining as AI might have adjusted it
         window.dispatchEvent(new CustomEvent("agenda-refresh"));
       } else {
         setIsJoined(false);
         toast.success(data.message || "Successfully left the event!");
+        window.dispatchEvent(new CustomEvent("agenda-refresh"));
       }
 
       router.refresh();

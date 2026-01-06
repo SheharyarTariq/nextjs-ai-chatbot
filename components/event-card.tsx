@@ -106,7 +106,6 @@ export function EventCard({ event, userRole, showAdminActions = true, onDelete, 
       setShowJoinModal(false);
       onJoinChange?.();
 
-      // Always refresh agenda after joining as AI might have adjusted it
       window.dispatchEvent(new CustomEvent("agenda-refresh"));
     } catch (error: any) {
       toast.error(error.message || "Failed to join event");
@@ -131,6 +130,8 @@ export function EventCard({ event, userRole, showAdminActions = true, onDelete, 
       toast.success(data.message || "Successfully left the event!");
       setShowLeaveModal(false);
       onJoinChange?.();
+
+      window.dispatchEvent(new CustomEvent("agenda-refresh"));
     } catch (error: any) {
       toast.error(error.message || "Failed to leave event");
     } finally {

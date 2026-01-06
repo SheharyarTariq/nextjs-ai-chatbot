@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Upload, Book, FileText, Edit, Save, X, RefreshCw } from "lucide-react";
+import { Trash2, Upload, Book, FileText, Edit, Save, X } from "lucide-react";
 import { Book as BookType, Prompt as PromptType } from "@/lib/db/schema";
 import { DeleteModal } from "@/components/delete-modal";
 import { promptSchema } from "@/lib/validations/prompt";
@@ -408,25 +408,12 @@ export default function AdminPage() {
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-black text-xl font-semibold">System Prompt Configuration</h2>
-            <div className="flex gap-2">
-              {!isEditingPrompt && systemPrompt && (
-                <>
-                  <Button
-                    onClick={fetchSystemPrompt}
-                    variant="outline"
-                    className="cursor-pointer"
-                    title="Refresh prompt from database"
-                  >
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Refresh
-                  </Button>
-                  <Button onClick={handleEditPrompt} variant="outline" className="cursor-pointer">
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit Prompt
-                  </Button>
-                </>
-              )}
-            </div>
+            {!isEditingPrompt && systemPrompt && (
+              <Button onClick={handleEditPrompt} variant="outline" className="cursor-pointer">
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Prompt
+              </Button>
+            )}
           </div>
 
           {

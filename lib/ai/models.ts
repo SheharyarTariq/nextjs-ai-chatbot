@@ -9,7 +9,7 @@ export type ChatModel = {
 export const chatModels: ChatModel[] = [
   {
     id: "chat-model",
-    name: "GPT-4.1 Mini",
+    name: "GPT-4.1",
     description: "Fast multimodal OpenAI model for day-to-day conversations",
   },
   {
