@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { DeleteModal } from "@/components/delete-modal";
 import { toast } from "./toast";
+import { useAgendaRefresh } from "@/lib/contexts/agenda-refresh-context";
 
 export function ResetAgendaButton() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { refreshAgenda } = useAgendaRefresh();
 
   const handleReset = async () => {
     setIsLoading(true);
@@ -27,11 +29,11 @@ export function ResetAgendaButton() {
 
       toast({
         type: "success",
-        description: "Agenda and conversation reset successfully!"});
+        description: "Agenda and conversation reset successfully!"
+      });
       setIsDialogOpen(false);
 
-      // Dispatch event to refresh agenda components
-      window.dispatchEvent(new CustomEvent("agenda-refresh"));
+      refreshAgenda();
       // Navigate to home without full page reload
       router.push("/");
     } catch (error: any) {

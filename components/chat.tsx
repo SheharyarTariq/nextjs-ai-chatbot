@@ -33,6 +33,7 @@ import { getChatHistoryPaginationKey } from "./sidebar-history";
 import { toast } from "./toast";
 import type { VisibilityType } from "./visibility-selector";
 import type { Session } from "next-auth";
+import { useAgendaRefresh } from "@/lib/contexts/agenda-refresh-context";
 
 export function Chat({
   user,
@@ -61,6 +62,7 @@ export function Chat({
   const { mutate } = useSWRConfig();
   const { setDataStream } = useDataStream();
   const router = useRouter();
+  const { refreshAgenda } = useAgendaRefresh();
 
   const [input, setInput] = useState<string>("");
   const [usage, setUsage] = useState<AppUsage | undefined>(initialLastContext);
@@ -106,8 +108,7 @@ export function Chat({
         setUsage(dataPart.data);
       }
       if (dataPart.type === "data-agendaRefresh") {
-        // Dispatch custom event to refresh agenda without page reload
-        window.dispatchEvent(new CustomEvent("agenda-refresh"));
+        refreshAgenda();
       }
     },
     onFinish: () => {

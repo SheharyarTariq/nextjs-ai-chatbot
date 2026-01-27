@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { DeleteModal } from "@/components/delete-modal";
 import type { EventType, EventIntensity } from "@/lib/db/schema";
 import { typeColors, intensityColors } from "@/components/page/constants";
+import { useAgendaRefresh } from "@/lib/contexts/agenda-refresh-context";
 
 interface EventCardProps {
   event: {
@@ -40,6 +41,7 @@ export function EventCard({ event, userRole, showAdminActions = true, onDelete, 
   const [isJoining, setIsJoining] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const { refreshAgenda } = useAgendaRefresh();
 
   let eventDate: Date | null = null;
   let isUpcoming = false;
@@ -106,7 +108,7 @@ export function EventCard({ event, userRole, showAdminActions = true, onDelete, 
       setShowJoinModal(false);
       onJoinChange?.();
 
-      window.dispatchEvent(new CustomEvent("agenda-refresh"));
+      refreshAgenda();
     } catch (error: any) {
       toast.error(error.message || "Failed to join event");
     } finally {
@@ -131,7 +133,7 @@ export function EventCard({ event, userRole, showAdminActions = true, onDelete, 
       setShowLeaveModal(false);
       onJoinChange?.();
 
-      window.dispatchEvent(new CustomEvent("agenda-refresh"));
+      refreshAgenda();
     } catch (error: any) {
       toast.error(error.message || "Failed to leave event");
     } finally {

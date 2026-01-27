@@ -95,18 +95,16 @@ export function AgendaSidebarClient({ initialAgenda, user }: AgendaSidebarClient
     }
   }, []);
 
+  // Listen for refresh events from parent context
   useEffect(() => {
-    // Listen for agenda refresh events from the window
-    const handleAgendaRefresh = () => {
+    const handleRefresh = () => {
       fetchAgenda();
     };
-
-    window.addEventListener("agenda-refresh", handleAgendaRefresh);
+    window.addEventListener("agenda-context-refresh", handleRefresh);
     return () => {
-      window.removeEventListener("agenda-refresh", handleAgendaRefresh);
+      window.removeEventListener("agenda-context-refresh", handleRefresh);
     };
   }, [fetchAgenda]);
-
   const handleAgendaUpdate = useCallback(() => {
     fetchAgenda();
   }, [fetchAgenda]);

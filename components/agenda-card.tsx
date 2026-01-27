@@ -27,6 +27,7 @@ import { Slider } from "@/components/ui/slider";
 import * as yup from "yup";
 import { toast } from "./toast";
 import { validateFormWithYup } from "@/lib/utils";
+import { useAgendaRefresh } from "@/lib/contexts/agenda-refresh-context";
 
 interface AgendaCardProps {
   day: string;
@@ -83,6 +84,7 @@ export function AgendaCard({
   const [sleep, setSleep] = useState<number[]>([getInitialSleepValue()]);
   const [notes, setNotes] = useState(initialNotes || "");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const { refreshAgenda } = useAgendaRefresh();
 
   const validationSchema = yup.object().shape({
     rating: yup.string().required("Required"),
@@ -171,12 +173,10 @@ export function AgendaCard({
         description: "Status updated successfully",
       });
       setIsDialogOpen(false);
-      // Trigger agenda refresh without page reload
       if (onUpdate) {
         onUpdate();
       } else {
-        // Fallback: dispatch custom event for components that listen to it
-        window.dispatchEvent(new CustomEvent("agenda-refresh"));
+        refreshAgenda();
       }
     } catch (error: any) {
       console.error("Error updating agenda:", error);
