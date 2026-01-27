@@ -8,6 +8,7 @@ import { SidebarInset } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { ChatHeader } from "@/components/chat-header";
 import { TodayAgendaFloatingWrapper } from "@/components/today-agenda-floating-wrapper";
+import { AgendaRefreshProvider } from "@/lib/contexts/agenda-refresh-context";
 
 interface ChatLayoutClientProps {
   agendaSidebar: ReactNode;
@@ -30,43 +31,51 @@ export function ChatLayoutClient({ agendaSidebar, children, user, agenda }: Chat
     }
   };
 
+  const handleAgendaRefresh = () => {
+    // Dispatch a custom event that individual AgendaSidebarClient and TodayAgendaFloatingWrapper can listen to
+    // This allows each component to manage its own fetch logic
+    window.dispatchEvent(new Event("agenda-context-refresh"));
+  };
+
   return (
-    <div className="flex flex-col w-full h-screen max-md:h-dvh overflow-hidden">
-      {/* {user && !(pathname === "/profile" && !user?.gender) && ( */}
+    <AgendaRefreshProvider onRefresh={handleAgendaRefresh}>
+      <div className="flex flex-col w-full h-screen max-md:h-dvh overflow-hidden">
+        {/* {user && !(pathname === "/profile" && !user?.gender) && ( */}
         <div className="sticky top-0 z-50 w-full bg-[#F5F5F5]">
           <ChatHeader user={user} />
         </div>
-      {/* )} */}
+        {/* )} */}
 
-      <div className="flex flex-1 overflow-hidden">
-        <AgendaSidebarClientWrapper isVisible={mobileActiveTab === "agenda"}>
-          {agendaSidebar}
-        </AgendaSidebarClientWrapper>
+        <div className="flex flex-1 overflow-hidden">
+          <AgendaSidebarClientWrapper isVisible={mobileActiveTab === "agenda"}>
+            {agendaSidebar}
+          </AgendaSidebarClientWrapper>
 
-        <SidebarInset
-          className={cn(
-            "flex-1",
-            isAdminPage ? "overflow-y-auto" : "overflow-hidden",
-            isChatPage && mobileActiveTab === "agenda" && "max-md:hidden"
-          )}
-        >
-          {children}
-        </SidebarInset>
-      </div>
+          <SidebarInset
+            className={cn(
+              "flex-1",
+              isAdminPage ? "overflow-y-auto" : "overflow-hidden",
+              isChatPage && mobileActiveTab === "agenda" && "max-md:hidden"
+            )}
+          >
+            {children}
+          </SidebarInset>
+        </div>
 
-      {isChatPage && (
-        <TodayAgendaFloatingWrapper
-          initialAgenda={agenda}
-          isVisible={mobileActiveTab === "chat"}
-          isMinimized={isAgendaMinimized}
-          onMinimize={setIsAgendaMinimized}
+        {isChatPage && (
+          <TodayAgendaFloatingWrapper
+            initialAgenda={agenda}
+            isVisible={mobileActiveTab === "chat"}
+            isMinimized={isAgendaMinimized}
+            onMinimize={setIsAgendaMinimized}
+          />
+        )}
+
+        <MobileBottomNav
+          activeTab={mobileActiveTab}
+          onTabChange={handleTabChange}
         />
-      )}
-
-      <MobileBottomNav
-        activeTab={mobileActiveTab}
-        onTabChange={handleTabChange}
-      />
-    </div>
+      </div>
+    </AgendaRefreshProvider>
   );
 }

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Loader2, LogIn, CheckCircle2, XCircle } from "lucide-react";
+import { useAgendaRefresh } from "@/lib/contexts/agenda-refresh-context";
 
 interface JoinEventButtonProps {
   eventId: string;
@@ -28,6 +29,7 @@ export function JoinEventButton({
   const [isJoined, setIsJoined] = useState(initialJoined);
   const [isLoading, setIsLoading] = useState(false);
   const hasAutoJoined = useRef(false);
+  const { refreshAgenda } = useAgendaRefresh();
 
   const isEventPast = eventDate ? new Date(eventDate) < new Date() : false;
 
@@ -60,11 +62,11 @@ export function JoinEventButton({
       if (method === "POST") {
         setIsJoined(true);
         toast.success(data.message || "Successfully joined the event!");
-        window.dispatchEvent(new CustomEvent("agenda-refresh"));
+        refreshAgenda();
       } else {
         setIsJoined(false);
         toast.success(data.message || "Successfully left the event!");
-        window.dispatchEvent(new CustomEvent("agenda-refresh"));
+        refreshAgenda();
       }
 
       router.refresh();
